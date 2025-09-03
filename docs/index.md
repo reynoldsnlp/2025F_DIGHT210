@@ -1,11 +1,7 @@
-<nav class="navbar" style="display: flex; justify-content: space-between; align-items: center; background-color: #1a237e; padding: 0.75rem 2rem; font-family: 'Segoe UI', 'Helvetica Neue', Arial, 'Liberation Sans', sans-serif; color: #fff;">
-  <div class="navbar-title" style="font-weight: bold; font-size: 1.2rem; letter-spacing: 1px;">DIGHT 210</div>
-  <div class="navbar-links" style="display: flex; gap: 1.5rem;">
-    <a href="/syllabus" style="color: #fff; text-decoration: none; font-size: 1rem; transition: color 0.2s;">Syllabus</a>
-    <a href="/getting-help" style="color: #fff; text-decoration: none; font-size: 1rem; transition: color 0.2s;">Getting help</a>
-    <a href="/resources" style="color: #fff; text-decoration: none; font-size: 1rem; transition: color 0.2s;">Resources</a>
-  </div>
-</nav>
+---
+title: Syllabus
+theme: minima
+---
 
 # Syllabus
 

@@ -1,0 +1,10 @@
+theme: minima
+title: DIGHT 210
+minima:
+  navigation:
+    - title: "Syllabus"
+      url: /index.html
+    - title: "Getting help"
+      url: /getting-help.html
+    - title: "Resources"
+      url: /resources.html
