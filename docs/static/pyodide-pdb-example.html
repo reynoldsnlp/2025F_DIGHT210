@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Interactive Example Demo</title>
+  <link rel="stylesheet" href="pyodide-pdb.css">
+  <script src="pyodide-pdb.js"></script>
+</head>
+<body>
+  <h2>Step Through Example 1</h2>
+  <div class="pyodide-pdb">
+    <pre><code>
+x = 5
+y = x + 2
+message = "Hello"
+x = y
+    </code></pre>
+  </div>
+
+  <h2>Step Through Example 2</h2>
+  <div class="pyodide-pdb">
+    <pre><code>
+a = 10
+b = a * 2
+c = b + 5
+    </code></pre>
+  </div>
+
+  <h2>Step Through Example 3</h2>
+  <div class="pyodide-pdb">
+    <pre><code>
+def sum_range(n):
+    total = 0
+    r = range(n)
+    for i in r:
+        total += i
+    return total
+
+d = 4
+e = sum_range(d)
+print("Sum:", e)
+    </code></pre>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,135 @@
+.pyodide-pdb {
+  display: flex;
+  gap: 2em;
+  margin-bottom: 2em;
+  border: 1px solid #ddd;
+  padding: 1em;
+  border-radius: 8px;
+  background: #f9f9ff;
+}
+
+.pyodide-pdb pre {
+  margin: 0;
+  background: #222;
+  color: #eee;
+  padding: 1em;
+  border-radius: 6px;
+  font-family: 'Fira Mono', 'Consolas', monospace;
+  font-size: 1em;
+  min-width: 300px;
+  line-height: 1.25;
+  min-height: 120px; /* Prevent layout shift during initialization */
+}
+
+.pyodide-pdb pre code,
+.pyodide-pdb .code-line {
+  line-height: 1.25;
+}
+
+.pyodide-pdb pre code {
+  display: block;
+}
+
+.pyodide-pdb .sidebar {
+  min-width: 150px;
+  font-family: Arial, sans-serif;
+  font-size: 0.95em;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 0.5em 1em;
+  margin-left: 1em;
+  min-height: 120px; /* Prevent layout shift during initialization */
+}
+
+.pyodide-pdb .sidebar table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5em;
+  font-size: 0.9em;
+}
+
+.pyodide-pdb .sidebar th,
+.pyodide-pdb .sidebar td {
+  padding: 0.3em 0.5em;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.pyodide-pdb .sidebar th {
+  background: #f5f5f5;
+  font-weight: bold;
+  border-bottom: 2px solid #ddd;
+}
+
+.pyodide-pdb .sidebar td:first-child {
+  font-weight: bold;
+}
+
+.pyodide-pdb .sidebar td:last-child {
+  font-family: 'Fira Mono', 'Consolas', monospace;
+  color: #666;
+}
+
+.pyodide-pdb .controls {
+  margin-top: 1em;
+}
+
+.pyodide-pdb .button-container {
+  display: flex;
+  gap: 0.5em;
+  margin-bottom: 0.5em;
+  align-items: center;
+}
+
+.pyodide-pdb button {
+  padding: 0.4em 0.8em;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 0.85em;
+  min-width: 60px;
+}
+
+.pyodide-pdb button:hover:not(:disabled) {
+  background: #f0f0f0;
+}
+
+.pyodide-pdb button:disabled {
+  background: #e0e0e0;
+  color: #999;
+  cursor: not-allowed;
+}
+
+.completion-message {
+  color: #28a745;
+  font-weight: bold;
+  margin-left: 1em;
+  font-size: 0.9em;
+}
+
+.completion-message p {
+  margin: 0;
+}
+
+.pyodide-pdb-instructions {
+  margin-top: 0.5em;
+  padding: 1em;
+  background: #222;
+  color: #eee;
+  border-radius: 6px;
+  font-family: 'Fira Mono', 'Consolas', monospace;
+  font-size: 0.9em;
+  border: none;
+}
+
+.pyodide-pdb-instructions p {
+  margin: 0;
+}
+
+.code-line.active {
+  background: #334;
+  color: #fff;
+  border-radius: 4px;
+}
