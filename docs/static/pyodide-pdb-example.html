@@ -14,15 +14,19 @@ x = 5
 y = x + 2
 message = "Hello"
 x = y
+z = zip('abc', '123')
+for letter, number in z:
+    print(letter, number)
     </code></pre>
   </div>
 
   <h2>Step Through Example 2</h2>
   <div class="pyodide-pdb">
     <pre><code>
-a = 10
-b = a * 2
-c = b + 5
+a = 'asdf'
+for char in a:
+    print(char)
+print('done!', a)
     </code></pre>
   </div>
 

@@ -16,45 +16,186 @@ async function loadPyodideAndPackages() {
 import sys
 import ast
 from io import StringIO
+import types
+import dis
+import copy
+import traceback
 
 class StepDebugger:
     def __init__(self, code, varnames):
         self.code = code
         self.varnames = varnames
-        self.lines = [line for line in code.splitlines() if line.strip()]
-        self.current_line = 0
+        self.lines = [line.rstrip() for line in code.splitlines()]
+        self.current_line = -1
         self.locals_dict = {}
+        self.scope_info = {}
         self.finished = False
+        self.execution_trace = []
+        self.step_index = 0
+        self.output_lines = []
 
+        # Compile the code
+        try:
+            self.compiled_code = compile(code, '<string>', 'exec')
+            self._prepare_execution_trace()
+        except Exception as e:
+            print(f"Compilation error: {e}")
+            traceback.print_exc()
+            self.finished = True
+
+    def _prepare_execution_trace(self):
+        """Pre-compute the execution trace by running the code with a tracer."""
+        self.execution_trace = []
+        captured_output = StringIO()
+        executed_lines = []
+
+        def trace_function(frame, event, arg):
+            if frame.f_code.co_filename == '<string>':
+                line_no = frame.f_lineno - 1  # Convert to 0-based indexing
+                if event == 'line' and 0 <= line_no < len(self.lines):
+                    if self.lines[line_no].strip():  # Only non-empty lines
+                        # Capture state at this point
+                        all_vars = {}
+                        scope_info = {}
+                        for k, v in frame.f_locals.items():
+                            if k in self.varnames and not k.startswith('_'):
+                                # Convert iterators to readable format
+                                display_value = self._format_value_for_display(v)
+                                all_vars[k] = display_value
+                                scope_info[k] = 'local' if frame.f_locals is not frame.f_globals else 'global'
+
+                        # Also check globals
+                        for k, v in frame.f_globals.items():
+                            if k in self.varnames and not k.startswith('_') and k not in all_vars:
+                                display_value = self._format_value_for_display(v)
+                                all_vars[k] = display_value
+                                scope_info[k] = 'global'
+
+                        self.execution_trace.append({
+                            'line': line_no,
+                            'locals': all_vars,
+                            'scope_info': scope_info,
+                            'output': captured_output.getvalue()
+                        })
+            return trace_function
+
+        # Run the code once with tracing to capture everything
+        temp_globals = {}
+        old_trace = sys.gettrace()
+        original_stdout = sys.stdout
+        sys.stdout = captured_output
+
+        try:
+            sys.settrace(trace_function)
+            exec(self.compiled_code, temp_globals)
+        except Exception as e:
+            print(f"Execution error during trace: {e}")
+            traceback.print_exc()
+        finally:
+            sys.settrace(old_trace)
+            sys.stdout = original_stdout
+
+        # Now execute line by line to capture states and output properly
+        temp_globals = {}
+        current_output = StringIO()
+        sys.stdout = current_output
+
+        try:
+          for line_no in executed_lines:
+              line = self.lines[line_no].strip()
+              if line:
+                  # Execute the line
+                  try:
+                      exec(line, temp_globals)
+                  except Exception as e:
+                      print(f"Error executing line {line_no}: '{line}' - {e}")
+                      traceback.print_exc()
+
+                  # Capture state after execution
+                  all_vars = {}
+                  scope_info = {}
+                  for k, v in temp_globals.items():
+                      if k in self.varnames and not k.startswith('_'):
+                          display_value = self._format_value_for_display(v)
+                          all_vars[k] = display_value
+                          scope_info[k] = 'global'
+
+                  # Capture output up to this point
+                  current_output_str = current_output.getvalue()
+
+                  self.execution_trace.append({
+                      'line': line_no,
+                      'locals': copy.deepcopy(all_vars),
+                      'scope_info': copy.deepcopy(scope_info),
+                      'output': current_output_str
+                  })
+        finally:
+            sys.stdout = original_stdout
     def step(self):
-        if self.finished or self.current_line >= len(self.lines):
+        if self.finished or self.step_index >= len(self.execution_trace):
             self.finished = True
             return
 
-        line = self.lines[self.current_line].strip()
-        if line:
-            try:
-                exec(line, {}, self.locals_dict)
-            except Exception as e:
-                pass
+        # Get the current execution state
+        current_state = self.execution_trace[self.step_index]
+        self.current_line = current_state['line']
+        self.locals_dict = current_state['locals']
+        self.scope_info = current_state['scope_info']
+        self.output_lines = current_state['output'].splitlines()
 
-        self.current_line += 1
-        if self.current_line >= len(self.lines):
+        self.step_index += 1
+        if self.step_index >= len(self.execution_trace):
             self.finished = True
 
     def reset(self):
-        self.current_line = 0
+        self.current_line = -1
         self.locals_dict = {}
+        self.scope_info = {}
+        self.output_lines = []
         self.finished = False
+        self.step_index = 0
+        # Re-prepare execution trace
+        self._prepare_execution_trace()
 
     def get_state(self):
         state = {
             "current_line": self.current_line,
-            "locals": {k: v for k, v in self.locals_dict.items() if k in self.varnames},
+            "locals": self.locals_dict,
+            "scope_info": self.scope_info,
+            "output_lines": self.output_lines,
             "lines": self.lines,
             "finished": self.finished
         }
         return state
+
+    def _format_value_for_display(self, value):
+        """Format values for display, converting iterators to readable format."""
+        import types
+
+        # Handle zip objects and other iterators
+        if hasattr(value, '__iter__') and hasattr(value, '__next__'):
+            try:
+                # For zip objects, try to get the original iterables if possible
+                if type(value).__name__ == 'zip':
+                    # Convert zip to list to see its contents
+                    items = list(value)
+                    return f"zip({items})"
+                elif type(value).__name__ in ['enumerate', 'map', 'filter']:
+                    # Convert other common iterators
+                    items = list(value)
+                    return f"{type(value).__name__}({items})"
+                else:
+                    # Generic iterator handling
+                    try:
+                        items = list(value)
+                        return f"{type(value).__name__}({items})"
+                    except:
+                        return f"<{type(value).__name__} object>"
+            except:
+                return f"<{type(value).__name__} object>"
+
+        # Handle other types normally
+        return copy.deepcopy(value)
 `);
   return pyodide;
 }
@@ -77,6 +218,14 @@ def extract_assigned_variables(code_str):
             elif isinstance(node, ast.AugAssign):
                 if isinstance(node.target, ast.Name):
                     assigned_vars.add(node.target.id)
+            elif isinstance(node, ast.For):
+                # Add loop variables (e.g., 'char' in 'for char in a:')
+                if isinstance(node.target, ast.Name):
+                    assigned_vars.add(node.target.id)
+            elif isinstance(node, ast.FunctionDef):
+                # Add function parameters
+                for arg in node.args.args:
+                    assigned_vars.add(arg.arg)
 
         return list(assigned_vars)
     except SyntaxError:
@@ -104,8 +253,23 @@ class InteractiveExample {
     if (!this.sidebar) {
       this.sidebar = document.createElement('div');
       this.sidebar.className = 'sidebar';
-      this.sidebar.innerHTML = '<strong>Variables</strong><p><em>Loading...</em></p>';
+
+      // Create variables section
+      this.variablesDiv = document.createElement('div');
+      this.variablesDiv.className = 'variables-section';
+      this.variablesDiv.innerHTML = '<strong>Variables</strong><p><em>Loading...</em></p>';
+
+      // Create output section
+      this.outputDiv = document.createElement('div');
+      this.outputDiv.className = 'output-section';
+      this.outputDiv.innerHTML = '<strong>Output</strong><div class="output-content"></div>';
+
+      this.sidebar.appendChild(this.variablesDiv);
+      this.sidebar.appendChild(this.outputDiv);
       container.appendChild(this.sidebar);
+    } else {
+      this.variablesDiv = this.sidebar.querySelector('.variables-section');
+      this.outputDiv = this.sidebar.querySelector('.output-section');
     }
 
     // Inject controls if missing
@@ -120,9 +284,12 @@ class InteractiveExample {
       this.stepBtn = document.createElement('button');
       this.stepBtn.className = 'step-btn';
       this.stepBtn.textContent = 'Step';
+      this.stepBtn.disabled = true; // Disabled until ready
+
       this.resetBtn = document.createElement('button');
       this.resetBtn.className = 'reset-btn';
       this.resetBtn.textContent = 'Reset';
+      this.resetBtn.disabled = true; // Disabled until ready
 
       buttonContainer.appendChild(this.stepBtn);
       buttonContainer.appendChild(this.resetBtn);
@@ -139,6 +306,10 @@ class InteractiveExample {
       this.stepBtn = this.controlsDiv.querySelector('.step-btn');
       this.resetBtn = this.controlsDiv.querySelector('.reset-btn');
       this.completionDiv = this.controlsDiv.querySelector('.completion-message');
+
+      // Disable buttons if they exist
+      if (this.stepBtn) this.stepBtn.disabled = true;
+      if (this.resetBtn) this.resetBtn.disabled = true;
     }
 
     this.state = null;
@@ -165,8 +336,13 @@ class InteractiveExample {
       try {
         await this.reset();
       } catch (error) {
+        console.error('Error during reset:', error);
         throw error;
       }
+
+      // Enable buttons after everything is ready
+      this.stepBtn.disabled = false;
+      this.resetBtn.disabled = false;
 
       this.stepBtn.addEventListener('click', () => {
         this.step();
@@ -175,7 +351,7 @@ class InteractiveExample {
         this.reset();
       });
     } catch (error) {
-      // Silent error handling
+      console.error('Error during initialization:', error);
     }
   }
 
@@ -247,6 +423,7 @@ ${this.instanceId}.reset()
 
       this.render();
     } catch (error) {
+      console.error('Error during reset:', error);
       throw error;
     }
   }
@@ -258,13 +435,17 @@ ${this.instanceId}.reset()
     if (this.state && this.state.finished) {
       return;
     }
-    await this.pyodide.runPythonAsync(`${this.instanceId}.step()`);
-    this.state = await this.getState();
-    this.render();
+    try {
+      await this.pyodide.runPythonAsync(`${this.instanceId}.step()`);
+      this.state = await this.getState();
+      this.render();
 
-    if (this.state.finished) {
-      this.stepBtn.disabled = true;
-      this.completionDiv.style.display = 'block';
+      if (this.state.finished) {
+        this.stepBtn.disabled = true;
+        this.completionDiv.style.display = 'block';
+      }
+    } catch (error) {
+      console.error('Error during step:', error);
     }
   }
 
@@ -273,6 +454,7 @@ ${this.instanceId}.reset()
       const state = await this.pyodide.runPythonAsync(`${this.instanceId}.get_state()`);
       return state;
     } catch (error) {
+      console.error('Error getting state:', error);
       throw error;
     }
   }
@@ -308,27 +490,49 @@ ${this.instanceId}.reset()
 
       this.codeBlock.className = originalClasses;
 
-      // Show variables as a table
-      if (this.sidebar) {
-        const declaredVars = this.varNames
-          .filter(v => this.state.locals.hasOwnProperty(v))
+      // Show variables as a table with scope information (only defined variables)
+      if (this.variablesDiv) {
+        // Filter to only variables that have values and sort them
+        const definedVars = this.varNames
+          .filter(varName => this.state.locals.hasOwnProperty(varName))
           .sort();
 
-        if (declaredVars.length === 0) {
-          this.sidebar.innerHTML = '<strong>Variables</strong><p><em>No variables declared yet</em></p>';
+        if (definedVars.length === 0) {
+          this.variablesDiv.innerHTML = '<strong>Variables</strong><p><em>No variables declared yet</em></p>';
         } else {
-          let html = '<strong>Variables</strong><table><thead><tr><th>Variable</th><th>Value</th></tr></thead><tbody>';
-          for (const v of declaredVars) {
-            const value = this.state.locals[v];
-            const displayValue = this.escapeHtml(JSON.stringify(value));
-            html += `<tr><td><strong>${this.escapeHtml(v)}</strong></td><td>${displayValue}</td></tr>`;
+          let html = '<strong>Variables</strong><table><thead><tr><th>Variable</th><th>Value</th><th>Scope</th></tr></thead><tbody>';
+
+          for (const varName of definedVars) {
+            const value = this.state.locals[varName];
+            const scope = this.state.scope_info[varName] || 'unknown';
+            // Handle pre-formatted iterator strings
+            const displayValue = typeof value === 'string' && value.includes('(') && value.includes(')')
+              ? this.escapeHtml(value)
+              : this.escapeHtml(JSON.stringify(value));
+            const displayScope = this.escapeHtml(scope);
+
+            html += `<tr><td><strong>${this.escapeHtml(varName)}</strong></td><td>${displayValue}</td><td>${displayScope}</td></tr>`;
           }
+
           html += '</tbody></table>';
-          this.sidebar.innerHTML = html;
+          this.variablesDiv.innerHTML = html;
+        }
+      }
+
+      // Show output
+      if (this.outputDiv) {
+        const outputContent = this.outputDiv.querySelector('.output-content');
+        if (this.state.output_lines && this.state.output_lines.length > 0) {
+          const outputHtml = this.state.output_lines
+            .map(line => this.escapeHtml(line))
+            .join('<br>');
+          outputContent.innerHTML = outputHtml;
+        } else {
+          outputContent.innerHTML = '<em>No output yet</em>';
         }
       }
     } catch (error) {
-      // Silent error handling
+      console.error('Error during render:', error);
     }
   }
 
@@ -356,7 +560,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     };
     script.onerror = (error) => {
-      // Silent error handling
+      console.error('Failed to load Pyodide:', error);
     };
     document.head.appendChild(script);
   } else {
