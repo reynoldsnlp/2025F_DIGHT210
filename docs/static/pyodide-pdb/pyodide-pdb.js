@@ -10,12 +10,16 @@ async function ensurePyodide() {
 }
 
 async function loadPyodideAndPackages() {
-  const pyodide = await loadPyodide({ indexURL: "https://cdn.jsdelivr.net/pyodide/v0.28.2/full/" });
-  await pyodide.loadPackage(['micropip']);
-
-  // Load the StepDebugger Python code from separate file
   try {
+    const pyodide = await loadPyodide({ indexURL: "https://cdn.jsdelivr.net/pyodide/v0.28.2/full/" });
+    await pyodide.loadPackage(['micropip']);
+
+    // Load the StepDebugger Python code from separate file
     const response = await fetch('./pyodide_pdb.py');
+    if (!response.ok) {
+      throw new Error(`Failed to fetch pyodide_pdb.py: ${response.status} ${response.statusText}`);
+    }
+
     const pythonCode = await response.text();
     await pyodide.runPythonAsync(pythonCode);
 
@@ -26,13 +30,35 @@ pyodide_pdb = types.ModuleType('pyodide_pdb')
 pyodide_pdb.StepDebugger = StepDebugger
 pyodide_pdb.extract_assigned_variables = extract_assigned_variables
 `);
+
+    return pyodide;
   } catch (error) {
-    console.error('Failed to load pyodide_pdb.py:', error);
+    console.error('Failed to initialize Pyodide:', error);
     throw error;
   }
-
-  return pyodide;
 }
+
+// Separated utility functions for better modularity
+const utils = {
+  // Safe HTML escaping function
+  escapeHtml(text) {
+    if (text === undefined || text === null) return '';
+    const div = document.createElement('div');
+    div.textContent = String(text);
+    return div.innerHTML;
+  },
+
+  // Load external script with proper error handling
+  loadScript(url) {
+    return new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = url;
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error(`Failed to load script: ${url}`));
+      document.head.appendChild(script);
+    });
+  }
+};
 
 async function extractVariableNames(code) {
   const pyodide = await ensurePyodide();
@@ -247,8 +273,10 @@ ${this.instanceId}.reset()
   async getState() {
     try {
       const state = await this.pyodide.runPythonAsync(`${this.instanceId}.get_state()`);
+      // Return the state directly without explicit conversion
       return state;
     } catch (error) {
+      console.error(`Error getting debugger state: ${error}`);
       throw error;
     }
   }
@@ -304,23 +332,41 @@ ${this.instanceId}.reset()
 
     if (definedVars.length === 0) {
       this.variablesDiv.innerHTML = '<strong>Variables</strong><p><em>No variables declared yet</em></p>';
-    } else {
-      let html = '<strong>Variables</strong><table><thead><tr><th>Variable</th><th>Value</th><th>Scope</th></tr></thead><tbody>';
-
-      for (const varName of definedVars) {
-        const value = this.state.locals[varName];
-        const scope = this.state.scope_info[varName] || 'unknown';
-        const displayValue = typeof value === 'string' && value.includes('(') && value.includes(')')
-          ? this.escapeHtml(value)
-          : this.escapeHtml(JSON.stringify(value));
-        const displayScope = this.escapeHtml(scope);
-
-        html += `<tr><td><strong>${this.escapeHtml(varName)}</strong></td><td>${displayValue}</td><td>${displayScope}</td></tr>`;
-      }
-
-      html += '</tbody></table>';
-      this.variablesDiv.innerHTML = html;
+      return;
     }
+
+    // Use template literals for cleaner HTML construction
+    let html = `
+      <strong>Variables</strong>
+      <table>
+        <thead>
+          <tr>
+            <th>Variable</th>
+            <th>Value</th>
+            <th>Scope</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    for (const varName of definedVars) {
+      const value = this.state.locals[varName];
+      const scope = this.state.scope_info[varName] || 'unknown';
+      const displayValue = typeof value === 'string' && value.includes('(') && value.includes(')')
+        ? utils.escapeHtml(value)
+        : utils.escapeHtml(JSON.stringify(value));
+
+      html += `
+        <tr>
+          <td><strong>${utils.escapeHtml(varName)}</strong></td>
+          <td>${displayValue}</td>
+          <td>${utils.escapeHtml(scope)}</td>
+        </tr>
+      `;
+    }
+
+    html += '</tbody></table>';
+    this.variablesDiv.innerHTML = html;
   }
 
   _renderOutput() {
@@ -338,9 +384,7 @@ ${this.instanceId}.reset()
   }
 
   escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
+    return utils.escapeHtml(text);
   }
 }
 

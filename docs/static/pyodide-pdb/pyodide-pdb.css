@@ -1,24 +1,40 @@
+:root {
+  --pdb-border-color: #ddd;
+  --pdb-background: #f9f9ff;
+  --pdb-code-bg: #222;
+  --pdb-code-color: #eee;
+  --pdb-sidebar-width: 400px;
+  --pdb-sidebar-bg: #fff;
+  --pdb-font-mono: 'Fira Mono', 'Consolas', monospace;
+  --pdb-active-line-bg: #334;
+  --pdb-active-line-color: #fff;
+  --pdb-success-color: #28a745;
+}
+
 .pyodide-pdb {
   display: flex;
+  flex-wrap: wrap;
   gap: 2em;
   margin-bottom: 2em;
-  border: 1px solid #ddd;
+  border: 1px solid var(--pdb-border-color);
   padding: 1em;
   border-radius: 8px;
-  background: #f9f9ff;
+  background: var(--pdb-background);
 }
 
 .pyodide-pdb pre {
   margin: 0;
-  background: #222;
-  color: #eee;
+  background: var(--pdb-code-bg);
+  color: var(--pdb-code-color);
   padding: 1em;
   border-radius: 6px;
-  font-family: 'Fira Mono', 'Consolas', monospace;
+  font-family: var(--pdb-font-mono);
   font-size: 1em;
   min-width: 300px;
   line-height: 1.25;
   min-height: 120px; /* Prevent layout shift during initialization */
+  overflow-x: auto; /* Handle long lines of code */
+  flex: 1;
 }
 
 .pyodide-pdb pre code,
@@ -31,22 +47,24 @@
 }
 
 .pyodide-pdb .sidebar {
-  width: 400px;
+  width: var(--pdb-sidebar-width);
   font-family: Arial, sans-serif;
   font-size: 0.95em;
-  background: #fff;
-  border: 1px solid #ccc;
+  background: var(--pdb-sidebar-bg);
+  border: 1px solid var(--pdb-border-color);
   border-radius: 6px;
   padding: 0.5em 1em;
   margin-left: 1em;
   min-height: 120px;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 1em;
+  flex: 1;
 }
 
 .pyodide-pdb .variables-section {
   flex: 1;
+  min-width: 0; /* Allow flexbox to shrink */
 }
 
 .pyodide-pdb .variables-section table {
@@ -96,8 +114,11 @@
 
 .pyodide-pdb .output-section {
   flex: 1;
-  border-top: 1px solid #eee;
-  padding-top: 0.5em;
+  min-width: 0; /* Allow flexbox to shrink */
+  padding-left: 0.5em;
+  border-left: 1px solid #eee;
+  border-top: none;
+  padding-top: 0;
 }
 
 .pyodide-pdb .output-content {
@@ -163,7 +184,31 @@
 }
 
 .code-line.active {
-  background: #334;
-  color: #fff;
+  background: var(--pdb-active-line-bg);
+  color: var(--pdb-active-line-color);
   border-radius: 4px;
+}
+
+/* Add responsive design */
+@media (max-width: 768px) {
+  .pyodide-pdb {
+    flex-direction: column;
+  }
+
+  .pyodide-pdb .sidebar {
+    width: auto;
+    margin-left: 0;
+    flex-direction: column;
+  }
+  
+  .pyodide-pdb .output-section {
+    border-left: none;
+    border-top: 1px solid #eee;
+    padding-left: 0;
+    padding-top: 0.5em;
+  }
+
+  .pyodide-pdb pre {
+    width: 100%;
+  }
 }

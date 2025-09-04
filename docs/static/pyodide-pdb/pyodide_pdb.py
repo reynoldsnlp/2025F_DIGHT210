@@ -231,6 +231,9 @@ class StepDebugger:
         self.scope_analyzer = ScopeAnalyzer(code)
         self.scope_tree = self.scope_analyzer.analyze()
         self.line_to_scope = self.scope_analyzer.line_to_scope
+        
+        # Store variable assignments to help recreate iterators
+        self.variable_assignments = self._extract_variable_assignments()
 
         # Compile the code
         try:
@@ -240,6 +243,24 @@ class StepDebugger:
             print(f"Compilation error: {e}")
             traceback.print_exc()
             self.finished = True
+
+    def _extract_variable_assignments(self):
+        """Extract variable assignments to help recreate iterators"""
+        assignments = {}
+        try:
+            tree = ast.parse(self.code)
+            for node in ast.walk(tree):
+                if isinstance(node, ast.Assign):
+                    for target in node.targets:
+                        if isinstance(target, ast.Name):
+                            # Store the source code for this assignment
+                            if hasattr(node, 'lineno'):
+                                line_idx = node.lineno - 1
+                                if 0 <= line_idx < len(self.lines):
+                                    assignments[target.id] = self.lines[line_idx].strip()
+        except:
+            pass
+        return assignments
 
     def _prepare_execution_trace(self):
         """Pre-compute the execution trace by running the code with a tracer."""
@@ -395,19 +416,35 @@ class StepDebugger:
         return state
 
     def _format_value_for_display(self, value):
-        """Format values for display, converting iterators to readable format."""
+        """
+        Format values for display, converting iterators to readable format.
+
+        Args:
+            value: The Python value to format
+
+        Returns:
+            A representation of the value suitable for display
+        """
         # Handle zip objects and other iterators
         if hasattr(value, '__iter__') and hasattr(value, '__next__'):
+            type_name = type(value).__name__
+            
+            # Try to peek at iterator contents without consuming
             try:
-                # For zip objects and other iterators, don't consume them
-                if type(value).__name__ == 'zip':
-                    return "<zip object>"
-                elif type(value).__name__ in ['enumerate', 'map', 'filter']:
-                    return f"<{type(value).__name__} object>"
+                if type_name == 'zip':
+                    return self._represent_zip_iterator(value)
+                elif type_name == 'enumerate':
+                    return self._represent_enumerate_iterator(value)
+                elif type_name == 'map':
+                    return self._represent_map_iterator(value)
+                elif type_name == 'filter':
+                    return self._represent_filter_iterator(value)
+                elif type_name == 'range':
+                    return self._represent_range_object(value)
                 else:
-                    return f"<{type(value).__name__} object>"
+                    return f"<{type_name} object>"
             except:
-                return f"<{type(value).__name__} object>"
+                return f"<{type_name} object>"
 
         # Handle other types normally
         try:
@@ -415,8 +452,100 @@ class StepDebugger:
         except Exception:
             return str(value)
 
+    def _represent_zip_iterator(self, zip_obj):
+        """Represent a zip iterator by showing its structure"""
+        try:
+            # Try to find the variable name and recreate the zip
+            for var_name, assignment in self.variable_assignments.items():
+                if 'zip(' in assignment:
+                    # Extract the arguments from the zip call
+                    import re
+                    match = re.search(r'zip\((.*?)\)', assignment)
+                    if match:
+                        args_str = match.group(1)
+                        try:
+                            # Create a safe evaluation context
+                            safe_globals = {'__builtins__': {}}
+                            # Try to evaluate just the arguments to show structure
+                            args = eval(f'[{args_str}]', safe_globals, {})
+                            
+                            # Show first few items from each iterable
+                            preview_items = []
+                            for arg in args:
+                                if hasattr(arg, '__iter__') and not isinstance(arg, str):
+                                    items = list(arg)[:3]  # First 3 items
+                                    if len(list(arg)) > 3:
+                                        preview_items.append(f"{items}...")
+                                    else:
+                                        preview_items.append(str(items))
+                                else:
+                                    preview_items.append(str(arg))
+                            
+                            return f"zip({', '.join(preview_items)})"
+                        except:
+                            pass
+            
+            # Fallback: try to peek at the first item
+            import itertools
+            zip_copy = itertools.tee(zip_obj, 1)[0]
+            try:
+                first_item = next(zip_copy)
+                return f"zip(... -> {first_item}, ...)"
+            except StopIteration:
+                return "zip(<empty>)"
+        except:
+            return "<zip object>"
+
+    def _represent_enumerate_iterator(self, enum_obj):
+        """Represent an enumerate iterator"""
+        try:
+            # Try to find the original iterable
+            for var_name, assignment in self.variable_assignments.items():
+                if 'enumerate(' in assignment:
+                    import re
+                    match = re.search(r'enumerate\((.*?)\)', assignment)
+                    if match:
+                        arg_str = match.group(1)
+                        return f"enumerate({arg_str})"
+            return "<enumerate object>"
+        except:
+            return "<enumerate object>"
+
+    def _represent_map_iterator(self, map_obj):
+        """Represent a map iterator"""
+        return "<map object>"
+
+    def _represent_filter_iterator(self, filter_obj):
+        """Represent a filter iterator"""
+        return "<filter object>"
+
+    def _represent_range_object(self, range_obj):
+        """Represent a range object with its parameters"""
+        try:
+            start = range_obj.start
+            stop = range_obj.stop
+            step = range_obj.step
+            
+            if step == 1:
+                if start == 0:
+                    return f"range({stop})"
+                else:
+                    return f"range({start}, {stop})"
+            else:
+                return f"range({start}, {stop}, {step})"
+        except:
+            return "<range object>"
+
 def extract_assigned_variables(code_str):
-    """Extract all variable names that are assigned in the code."""
+    """
+    Extract all variable names that are assigned in the code.
+
+    Args:
+        code_str: The Python code to analyze
+
+    Returns:
+        List of variable names that are assigned values in the code
+    """
     try:
         tree = ast.parse(code_str)
         assigned_vars = set()

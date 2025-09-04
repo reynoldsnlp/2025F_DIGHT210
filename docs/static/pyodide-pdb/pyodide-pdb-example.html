@@ -2,27 +2,35 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Interactive Example Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive Python Debugger Examples</title>
   <link rel="stylesheet" href="pyodide-pdb.css">
   <script src="pyodide-pdb.js"></script>
 </head>
 <body>
-  <h2>Step Through Example 1</h2>
+  <!-- Example 1: Basic variable assignment and iteration -->
+  <h2>Example 1: Variables and Iteration</h2>
   <div class="pyodide-pdb">
     <pre><code>
+# Simple variable assignment and loop example
 x = 5
 y = x + 2
 message = "Hello"
 x = y
 z = zip('abc', '123')
+letters = 'abc'
+numbers = '123'
+zz = zip(letters, numbers)
 for letter, number in z:
     print(letter, number)
     </code></pre>
   </div>
 
-  <h2>Step Through Example 2</h2>
+  <!-- Example 2: List comprehensions -->
+  <h2>Example 2: List Comprehensions</h2>
   <div class="pyodide-pdb">
     <pre><code>
+# List comprehension and loop example
 c = [x
      for x in range(5)
      if x % 2 == 0]
@@ -35,9 +43,11 @@ print('done!', a)
     </code></pre>
   </div>
 
-  <h2>Step Through Example 3</h2>
+  <!-- Example 3: Functions -->
+  <h2>Example 3: Functions</h2>
   <div class="pyodide-pdb">
     <pre><code>
+# Function definition and usage example
 def sum_range(n):
     total = 0
     r = range(n)
