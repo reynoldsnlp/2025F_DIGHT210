@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pyodide Exercise Example</title>
+    <link rel="stylesheet" href="pyodide-exercises.css">
+    <link rel="stylesheet" href="../highlight.js/styles/default.min.css">
+</head>
+<body>
+    <h1>String Methods Exercise</h1>
+
+    <div class="explanation">
+        <p>In this exercise, you'll practice using the <code>.upper()</code> method to convert text to uppercase.
+        This is similar to the previous example, but now you need to apply it to a person's name and create a greeting.</p>
+        <p><strong>Instructions:</strong> Complete the function to create an uppercase greeting message.</p>
+    </div>
+
+    <div class="pyodide-exercise"
+         data-expected-output="HELLO, ALICE!"
+         data-answer="def create_greeting(person_name):
+    uppercase_name = person_name.upper()
+    greeting = &quot;HELLO, &quot; + uppercase_name + &quot;!&quot;
+    return greeting"># Given data
+name = "alice"
+
+def create_greeting(person_name):
+    # TODO: Convert the name to uppercase and create a greeting
+    # The greeting should say "HELLO, [UPPERCASE_NAME]!"
+
+    return greeting
+
+# Test the function
+result = create_greeting(name)
+print(result)</div>
+
+    <script src="../highlight.js/highlight.min.js"></script>
+    <script type="module" src="../codejar/codejar.js"></script>
+    <script src="../pyodide/pyodide.js"></script>
+    <script src="pyodide-exercises.js"></script>
+</body>
+</html>

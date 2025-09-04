@@ -11,7 +11,7 @@ async function ensurePyodide() {
 
 async function loadPyodideAndPackages() {
   try {
-    const pyodide = await loadPyodide({ indexURL: "https://cdn.jsdelivr.net/pyodide/v0.28.2/full/" });
+    const pyodide = await loadPyodide({ indexURL: "../pyodide/" });
     await pyodide.loadPackage(['micropip']);
 
     // Load the StepDebugger Python code from separate file
@@ -194,14 +194,14 @@ class InteractiveExample {
 
     return new Promise((resolve) => {
       const script = document.createElement('script');
-      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js';
+      script.src = '../highlight.js/highlight.min.js';
       script.onerror = () => {
         this.hljsLoaded = false;
         resolve();
       };
       script.onload = () => {
         const pyScript = document.createElement('script');
-        pyScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js';
+        pyScript.src = '../highlight.js/languages/python.min.js';
         pyScript.onerror = () => {
           this.hljsLoaded = false;
           resolve();
@@ -392,12 +392,12 @@ document.addEventListener('DOMContentLoaded', () => {
   // Load highlight.js CSS
   const hljsCss = document.createElement('link');
   hljsCss.rel = 'stylesheet';
-  hljsCss.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css';
+  hljsCss.href = '../highlight.js/styles/github-dark.min.css';
   document.head.appendChild(hljsCss);
 
   if (window.loadPyodide === undefined) {
     const script = document.createElement('script');
-    script.src = "https://cdn.jsdelivr.net/pyodide/v0.28.2/full/pyodide.js";
+    script.src = "../pyodide/pyodide.js";
     script.onload = () => {
       document.querySelectorAll('.pyodide-pdb').forEach(container => {
         new InteractiveExample(container);
