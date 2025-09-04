@@ -2,6 +2,25 @@
 
 let pyodideReadyPromise = null;
 
+// Load all necessary dependencies automatically
+async function loadDependencies() {
+  // Load CSS files
+  loadCSS('./pyodide-pdb.css');
+  loadCSS('../highlight.js/styles/github-dark.min.css');
+
+  // Load Pyodide if not already loaded
+  if (window.loadPyodide === undefined) {
+    await utils.loadScript("../pyodide/pyodide.js");
+  }
+}
+
+function loadCSS(href) {
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = href;
+  document.head.appendChild(link);
+}
+
 async function ensurePyodide() {
   if (!pyodideReadyPromise) {
     pyodideReadyPromise = loadPyodideAndPackages();
@@ -388,26 +407,19 @@ ${this.instanceId}.reset()
   }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  // Load highlight.js CSS
-  const hljsCss = document.createElement('link');
-  hljsCss.rel = 'stylesheet';
-  hljsCss.href = '../highlight.js/styles/github-dark.min.css';
-  document.head.appendChild(hljsCss);
+// Initialize everything when DOM is ready
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    // Load all dependencies first
+    await loadDependencies();
 
-  if (window.loadPyodide === undefined) {
-    const script = document.createElement('script');
-    script.src = "../pyodide/pyodide.js";
-    script.onload = () => {
-      document.querySelectorAll('.pyodide-pdb').forEach(container => {
-        new InteractiveExample(container);
-      });
-    };
-    script.onerror = () => {
-      // Silent error handling - examples will show in disabled state
-    };
-    document.head.appendChild(script);
-  } else {
+    // Initialize all pyodide-pdb containers
+    document.querySelectorAll('.pyodide-pdb').forEach(container => {
+      new InteractiveExample(container);
+    });
+  } catch (error) {
+    console.warn('Failed to load some dependencies:', error);
+    // Still try to initialize examples (they'll show in disabled state)
     document.querySelectorAll('.pyodide-pdb').forEach(container => {
       new InteractiveExample(container);
     });

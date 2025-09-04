@@ -1,3 +1,36 @@
+// Load dependencies function
+function loadDependencies() {
+    const dependencies = [
+        { type: 'css', src: 'pyodide-exercises.css' },
+        { type: 'css', src: '../highlight.js/styles/default.min.css' },
+        { type: 'script', src: '../highlight.js/highlight.min.js' },
+        { type: 'module', src: '../codejar/codejar.js' },
+        { type: 'script', src: '../pyodide/pyodide.js' }
+    ];
+
+    return Promise.all(dependencies.map(dep => {
+        return new Promise((resolve, reject) => {
+            if (dep.type === 'css') {
+                const link = document.createElement('link');
+                link.rel = 'stylesheet';
+                link.href = dep.src;
+                link.onload = resolve;
+                link.onerror = reject;
+                document.head.appendChild(link);
+            } else {
+                const script = document.createElement('script');
+                script.src = dep.src;
+                if (dep.type === 'module') {
+                    script.type = 'module';
+                }
+                script.onload = resolve;
+                script.onerror = reject;
+                document.head.appendChild(script);
+            }
+        });
+    }));
+}
+
 class PyodideExercise {
     constructor(containerElement) {
         this.container = containerElement;
@@ -50,6 +83,9 @@ class PyodideExercise {
     }
 
     async initCodeJar() {
+        // Wait for dependencies to load
+        await this.waitForDependencies();
+
         // Try to get CodeJar from window object or import it
         let CodeJarClass = window.CodeJar;
 
@@ -83,6 +119,19 @@ class PyodideExercise {
 
         // Set initial code
         this.codeJar.updateCode(this.initialCode);
+    }
+
+    waitForDependencies() {
+        return new Promise((resolve) => {
+            const checkDependencies = () => {
+                if (typeof hljs !== 'undefined' && typeof loadPyodide !== 'undefined') {
+                    resolve();
+                } else {
+                    setTimeout(checkDependencies, 100);
+                }
+            };
+            checkDependencies();
+        });
     }
 
     createFallbackEditor() {
@@ -227,12 +276,28 @@ sys.stdout = StringIO()
     }
 }
 
-// Auto-initialize all pyodide exercises on page load
-document.addEventListener('DOMContentLoaded', function() {
-    const exercises = document.querySelectorAll('.pyodide-exercise');
-    exercises.forEach(container => {
-        new PyodideExercise(container);
-    });
+// Initialize dependencies and exercises when DOM is ready
+document.addEventListener('DOMContentLoaded', async function() {
+    try {
+        // Load all dependencies first
+        await loadDependencies();
+
+        // Wait a bit for scripts to initialize
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        // Initialize exercises
+        const exercises = document.querySelectorAll('.pyodide-exercise');
+        exercises.forEach(container => {
+            new PyodideExercise(container);
+        });
+    } catch (error) {
+        console.error('Failed to load dependencies:', error);
+        // Initialize exercises anyway with fallback
+        const exercises = document.querySelectorAll('.pyodide-exercise');
+        exercises.forEach(container => {
+            new PyodideExercise(container);
+        });
+    }
 });
 
 // Export for use in other modules if needed
