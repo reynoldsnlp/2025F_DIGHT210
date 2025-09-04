@@ -16,21 +16,34 @@
 
     <div class="pyodide-exercise"
          data-expected-output="HELLO, ALICE!"
-         data-answer="def create_greeting(person_name):
+         data-answer="
+def create_greeting(person_name):
     uppercase_name = person_name.upper()
     greeting = &quot;HELLO, &quot; + uppercase_name + &quot;!&quot;
-    return greeting"># Given data
-name = "alice"
+    return greeting
 
+name = &quot;alice&quot;
+print(create_greeting(name))">
 def create_greeting(person_name):
     # TODO: Convert the name to uppercase and create a greeting
     # The greeting should say "HELLO, [UPPERCASE_NAME]!"
 
     return greeting
 
-# Test the function
+name = "alice"
 result = create_greeting(name)
-print(result)</div>
+print(result)
+    </div>
+
+    <div class="pyodide-exercise"
+         data-expected-output="0"
+         data-answer="print(1)"># This exercise should fail validation
+    </div>
+
+    <div class="pyodide-exercise"
+         data-expected-output="0"
+         data-answer="print(this_variable_does_not_exist)"># This exercise should fail validation
+    </div>
 
     <script src="pyodide-exercises.js"></script>
 </body>

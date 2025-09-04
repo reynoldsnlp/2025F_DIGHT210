@@ -101,6 +101,26 @@ body {
     cursor: not-allowed;
 }
 
+.reveal-answer-btn {
+    background-color: #f39c12;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-left: 10px;
+}
+
+.reveal-answer-btn:hover {
+    background-color: #d68910;
+}
+
+.reveal-answer-btn:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
 .checkmark {
     display: none;
     color: green;
@@ -118,26 +138,19 @@ body {
     background-color: #ffeaea !important;
 }
 
-.reveal-answer {
-    color: #007cba;
-    cursor: pointer;
-    text-decoration: underline;
-    margin-top: 10px;
-}
-
 .answer {
     margin-top: 10px;
     padding: 10px;
-    background-color: #f0f0f0;
+    background-color: #f8f8f8;
     border-radius: 4px;
     font-family: 'Courier New', monospace;
     white-space: pre-wrap;
     display: none;
+    border: 1px solid #ddd;
 }
 
-.explanation {
-    margin-bottom: 20px;
-    line-height: 1.6;
+.answer.hljs {
+    background-color: #f8f8f8 !important;
 }
 
 /* Syntax highlighting adjustments */

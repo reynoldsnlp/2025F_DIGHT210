@@ -32,11 +32,17 @@ function loadDependencies() {
 }
 
 class PyodideExercise {
+    static idCounter = 0;
+
     constructor(containerElement) {
         this.container = containerElement;
         this.initialCode = (this.container.textContent || '').trim();
         this.expectedOutput = this.container.dataset.expectedOutput || '';
         this.answer = this.container.dataset.answer || '';
+
+        // Generate unique ID for this exercise
+        this.exerciseId = this.container.dataset.exerciseId || this.generateId();
+        this.container.dataset.exerciseId = this.exerciseId;
 
         this.pyodide = null;
         this.isCorrect = false;
@@ -51,16 +57,17 @@ class PyodideExercise {
         this.container.innerHTML = `
             <div class="exercise-container">
                 <div class="editor-section">
-                    <div class="editor" id="editor-${this.generateId()}"></div>
-                    <div class="controls">
-                        <button class="run-btn">Run</button>
-                        <span class="checkmark">✓</span>
-                    </div>
-                    <div class="reveal-answer" style="display: none;">Show Answer</div>
+                    <div class="editor" id="editor-${this.exerciseId}"></div>
                     <div class="answer" style="display: none;"></div>
                 </div>
                 <div class="output-section">
-                    <div class="output">Click "Run" to execute your code...</div>
+                    <div class="output">Output (click "Run" to execute your code!)</div>
+                </div>
+                <br>
+                <div class="controls">
+                    <button class="run-btn">Run</button>
+                    <span class="checkmark">✓</span>
+                    <button class="reveal-answer-btn" style="display: none;">Show Answer</button>
                 </div>
             </div>
         `;
@@ -70,7 +77,7 @@ class PyodideExercise {
         this.output = this.container.querySelector('.output');
         this.runBtn = this.container.querySelector('.run-btn');
         this.checkmark = this.container.querySelector('.checkmark');
-        this.revealAnswer = this.container.querySelector('.reveal-answer');
+        this.revealAnswer = this.container.querySelector('.reveal-answer-btn');
         this.answerDiv = this.container.querySelector('.answer');
 
         // Set up answer content
@@ -110,6 +117,8 @@ class PyodideExercise {
             // Apply syntax highlighting if hljs is available
             if (typeof hljs !== 'undefined') {
                 editor.textContent = editor.textContent;
+                // Reset highlighted state before re-highlighting
+                delete editor.dataset.highlighted;
                 hljs.highlightElement(editor);
             }
 
@@ -173,7 +182,7 @@ class PyodideExercise {
     }
 
     generateId() {
-        return Math.random().toString(36).substr(2, 9);
+        return ++PyodideExercise.idCounter;
     }
 
     async init() {
@@ -183,6 +192,9 @@ class PyodideExercise {
             this.runBtn.disabled = true;
 
             this.pyodide = await loadPyodide({ indexURL: "../pyodide/" });
+
+            // Validate the provided answer once Pyodide is ready
+            await this.validateAnswer();
 
             this.output.textContent = "Click \"Run\" to execute your code...";
             this.runBtn.disabled = false;
@@ -197,6 +209,62 @@ class PyodideExercise {
         }
     }
 
+    async validateAnswer() {
+        if (!this.answer || !this.expectedOutput) {
+            return; // Skip validation if no answer or expected output provided
+        }
+
+        try {
+            // Capture stdout and stderr
+            this.pyodide.runPython(`
+import sys
+from io import StringIO
+import traceback
+sys.stdout = StringIO()
+sys.stderr = StringIO()
+            `);
+
+            // Run the provided answer
+            try {
+                this.pyodide.runPython(this.answer);
+
+                // Get the output
+                const actualOutput = this.pyodide.runPython("sys.stdout.getvalue()");
+
+                // Check if answer produces expected output
+                if (actualOutput.trim() !== this.expectedOutput) {
+                    console.warn(`Exercise validation failed for exercise ID: ${this.exerciseId}
+Expected output: "${this.expectedOutput}"
+Actual output: "${actualOutput.trim()}"
+Answer code: ${this.answer}
+Container element:`, this.container);
+                }
+            } catch (pythonError) {
+                // Get the traceback from stderr
+                const errorOutput = this.pyodide.runPython("sys.stderr.getvalue()");
+                console.warn(`Exercise validation failed with exception for exercise ID: ${this.exerciseId}
+Python exception: ${pythonError.message}
+Traceback: ${errorOutput}
+Answer code: ${this.answer}
+Expected output: "${this.expectedOutput}"
+Container element:`, this.container);
+            }
+
+            // Restore stdout and stderr
+            this.pyodide.runPython(`
+sys.stdout = sys.__stdout__
+sys.stderr = sys.__stderr__
+            `);
+
+        } catch (error) {
+            console.warn(`Exercise validation error for exercise ID: ${this.exerciseId}
+Error: ${error.message}
+Answer code: ${this.answer}
+Expected output: "${this.expectedOutput}"
+Container element:`, this.container);
+        }
+    }
+
     async runCode() {
         if (!this.pyodide) {
             this.output.textContent = "Python environment not ready. Please wait...";
@@ -208,7 +276,19 @@ class PyodideExercise {
         this.resetFeedback();
 
         try {
-            const code = this.codeJar.toString();
+            const code = this.codeJar.toString().trim();
+
+            // Check if code is empty
+            if (!code) {
+                this.output.textContent = "<No code provided>";
+                this.output.classList.add('incorrect');
+                this.output.classList.remove('correct');
+                this.checkmark.style.display = 'none';
+                if (this.answer) {
+                    this.revealAnswer.style.display = 'inline-block';
+                }
+                return;
+            }
 
             // Capture stdout
             this.pyodide.runPython(`
@@ -260,7 +340,9 @@ sys.stdout = StringIO()
         this.output.classList.add('incorrect');
         this.output.classList.remove('correct');
         this.checkmark.style.display = 'none';
-        this.revealAnswer.style.display = 'block';
+        if (this.answer) {
+            this.revealAnswer.style.display = 'inline-block';
+        }
     }
 
     resetFeedback() {
@@ -273,6 +355,14 @@ sys.stdout = StringIO()
     showAnswer() {
         this.answerDiv.style.display = 'block';
         this.revealAnswer.style.display = 'none';
+
+        // Apply syntax highlighting to the answer
+        if (typeof hljs !== 'undefined') {
+            // Reset highlighted state before re-highlighting
+            delete this.answerDiv.dataset.highlighted;
+            this.answerDiv.className = 'answer language-python';
+            hljs.highlightElement(this.answerDiv);
+        }
     }
 }
 
