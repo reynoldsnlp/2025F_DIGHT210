@@ -1,0 +1,462 @@
+import ast
+import copy
+from io import StringIO
+import sys
+import traceback
+
+
+class ScopeNode:
+    """Represents a scope in the code (module, function, class, comprehension, etc.)"""
+    def __init__(self, name, scope_type, lineno=None, end_lineno=None, parent=None):
+        self.name = name
+        self.scope_type = scope_type  # 'module', 'function', 'class', 'comprehension', etc.
+        self.lineno = lineno
+        self.end_lineno = end_lineno
+        self.parent = parent
+        self.children = []
+        self.variables = {}  # name -> (line_defined, source)
+
+    def add_child(self, child):
+        self.children.append(child)
+        child.parent = self
+        return child
+
+    def add_variable(self, name, lineno, source='assignment'):
+        """Record a variable defined in this scope"""
+        self.variables[name] = (lineno, source)
+
+    def contains_line(self, lineno):
+        """Check if the given line number is within this scope"""
+        if self.lineno is None or self.end_lineno is None:
+            return False
+        return self.lineno <= lineno <= self.end_lineno
+
+    def get_scope_path(self):
+        """Get the full path of this scope (e.g., 'module.function.comprehension')"""
+        if self.parent is None:
+            return self.scope_type
+        return f"{self.parent.get_scope_path()}.{self.name}"
+
+
+class ScopeAnalyzer(ast.NodeVisitor):
+    """Analyzes Python code to build a scope tree and track variables"""
+    def __init__(self, code):
+        self.code = code
+        self.lines = code.splitlines()
+        self.root = ScopeNode("module", "module", 1, len(self.lines))
+        self.current_scope = self.root
+        self.node_to_scope = {}  # Maps AST nodes to their containing scope
+        self.line_to_scope = {}  # Maps line numbers to their most specific containing scope
+
+    def analyze(self):
+        """Analyze the code and build the scope tree"""
+        try:
+            tree = ast.parse(self.code)
+            # Add line and column attributes to all nodes
+            tree = ast.fix_missing_locations(tree)
+            self.visit(tree)
+            self._build_line_to_scope_map()
+            return self.root
+        except SyntaxError:
+            # If there's a syntax error, return a basic module scope
+            return self.root
+
+    def _build_line_to_scope_map(self):
+        """Build a mapping from line numbers to their most specific scope"""
+        def traverse_scope(scope):
+            if scope.lineno and scope.end_lineno:
+                for line in range(scope.lineno, scope.end_lineno + 1):
+                    # Only set if not already set or if this scope is more specific
+                    if line not in self.line_to_scope or len(scope.get_scope_path().split('.')) > len(self.line_to_scope[line].get_scope_path().split('.')):
+                        self.line_to_scope[line] = scope
+            for child in scope.children:
+                traverse_scope(child)
+
+        traverse_scope(self.root)
+
+    def visit_FunctionDef(self, node):
+        """Visit a function definition"""
+        func_scope = ScopeNode(node.name, "function", node.lineno, node.end_lineno)
+        self.current_scope.add_child(func_scope)
+        self.node_to_scope[node] = func_scope
+
+        # Add function parameters as variables
+        for arg in node.args.args:
+            func_scope.add_variable(arg.arg, node.lineno, 'parameter')
+
+        # Process function body with the new scope
+        old_scope = self.current_scope
+        self.current_scope = func_scope
+        for stmt in node.body:
+            self.visit(stmt)
+        self.current_scope = old_scope
+
+    def visit_ClassDef(self, node):
+        """Visit a class definition"""
+        class_scope = ScopeNode(node.name, "class", node.lineno, node.end_lineno)
+        self.current_scope.add_child(class_scope)
+        self.node_to_scope[node] = class_scope
+
+        # Process class body with the new scope
+        old_scope = self.current_scope
+        self.current_scope = class_scope
+        for stmt in node.body:
+            self.visit(stmt)
+        self.current_scope = old_scope
+
+    def visit_ListComp(self, node):
+        """Visit a list comprehension"""
+        self._handle_comprehension(node, "list_comp")
+
+    def visit_DictComp(self, node):
+        """Visit a dict comprehension"""
+        self._handle_comprehension(node, "dict_comp")
+
+    def visit_SetComp(self, node):
+        """Visit a set comprehension"""
+        self._handle_comprehension(node, "set_comp")
+
+    def visit_GeneratorExp(self, node):
+        """Visit a generator expression"""
+        self._handle_comprehension(node, "generator")
+
+    def _handle_comprehension(self, node, comp_type):
+        """Handle any type of comprehension"""
+        comp_scope = ScopeNode(comp_type, comp_type, getattr(node, 'lineno', None), getattr(node, 'end_lineno', None))
+        self.current_scope.add_child(comp_scope)
+        self.node_to_scope[node] = comp_scope
+
+        # Record comprehension variables
+        old_scope = self.current_scope
+        self.current_scope = comp_scope
+
+        # Process comprehension components
+        for generator in node.generators:
+            self._extract_target_vars(generator.target, getattr(generator, 'lineno', None))
+            self.visit(generator.iter)
+            for if_clause in generator.ifs:
+                self.visit(if_clause)
+
+        # Visit the element being comprehended
+        if hasattr(node, 'elt'):
+            self.visit(node.elt)
+        elif hasattr(node, 'key') and hasattr(node, 'value'):
+            self.visit(node.key)
+            self.visit(node.value)
+
+        self.current_scope = old_scope
+
+    def _extract_target_vars(self, target, lineno):
+        """Extract variable names from an assignment target"""
+        if isinstance(target, ast.Name):
+            self.current_scope.add_variable(target.id, lineno, 'iteration_var')
+        elif isinstance(target, ast.Tuple) or isinstance(target, ast.List):
+            for elt in target.elts:
+                self._extract_target_vars(elt, lineno)
+
+    def visit_Assign(self, node):
+        """Visit an assignment statement"""
+        # First visit the value to handle any nested expressions
+        self.visit(node.value)
+
+        # Then extract the variable names being assigned
+        for target in node.targets:
+            self._extract_target_vars(target, node.lineno)
+
+    def visit_AugAssign(self, node):
+        """Visit an augmented assignment (e.g., x += 1)"""
+        self.visit(node.value)
+        self._extract_target_vars(node.target, node.lineno)
+
+    def visit_For(self, node):
+        """Visit a for loop"""
+        self.visit(node.iter)
+        self._extract_target_vars(node.target, node.lineno)
+
+        # Visit the loop body
+        for stmt in node.body:
+            self.visit(stmt)
+
+        # Visit the else clause if it exists
+        for stmt in node.orelse:
+            self.visit(stmt)
+
+    def visit_With(self, node):
+        """Visit a with statement, which can introduce new variable bindings"""
+        for item in node.items:
+            self.visit(item.context_expr)
+            if item.optional_vars:
+                self._extract_target_vars(item.optional_vars, node.lineno)
+
+        # Visit the body
+        for stmt in node.body:
+            self.visit(stmt)
+
+    def visit_Lambda(self, node):
+        """Visit a lambda expression, which creates a new scope"""
+        lambda_scope = ScopeNode("lambda", "lambda", getattr(node, 'lineno', None),
+                                getattr(node, 'end_lineno', None))
+        self.current_scope.add_child(lambda_scope)
+        self.node_to_scope[node] = lambda_scope
+
+        # Add lambda parameters as variables
+        for arg in node.args.args:
+            lambda_scope.add_variable(arg.arg, getattr(node, 'lineno', None), 'parameter')
+
+        # Process lambda body with the new scope
+        old_scope = self.current_scope
+        self.current_scope = lambda_scope
+        self.visit(node.body)
+        self.current_scope = old_scope
+
+    def generic_visit(self, node):
+        """Visit a generic node"""
+        super().generic_visit(node)
+
+
+class StepDebugger:
+    def __init__(self, code, varnames):
+        self.code = code
+        self.varnames = varnames
+        self.lines = [line.rstrip() for line in code.splitlines()]
+        self.current_line = -1
+        self.locals_dict = {}
+        self.scope_info = {}
+        self.finished = False
+        self.execution_trace = []
+        self.step_index = 0
+        self.output_lines = []
+
+        # Build scope tree from AST
+        self.scope_analyzer = ScopeAnalyzer(code)
+        self.scope_tree = self.scope_analyzer.analyze()
+        self.line_to_scope = self.scope_analyzer.line_to_scope
+
+        # Compile the code
+        try:
+            self.compiled_code = compile(code, '<string>', 'exec')
+            self._prepare_execution_trace()
+        except Exception as e:
+            print(f"Compilation error: {e}")
+            traceback.print_exc()
+            self.finished = True
+
+    def _prepare_execution_trace(self):
+        """Pre-compute the execution trace by running the code with a tracer."""
+        self.execution_trace = []
+        captured_output = StringIO()
+
+        def trace_function(frame, event, arg):
+            if frame.f_code.co_filename == '<string>':
+                line_no = frame.f_lineno - 1  # Convert to 0-based indexing
+                if event == 'line' and 0 <= line_no < len(self.lines):
+                    if self.lines[line_no].strip():  # Only non-empty lines
+                        # Capture state at this point
+                        all_vars = {}
+                        scope_info = {}
+
+                        # Get the scope for this line (1-based indexing for AST)
+                        current_scope = self.line_to_scope.get(line_no + 1)
+
+                        # Combine locals and globals, prioritizing locals
+                        all_frame_vars = dict(frame.f_globals)
+                        all_frame_vars.update(frame.f_locals)
+
+                        for k, v in all_frame_vars.items():
+                            if k in self.varnames and not k.startswith('_'):
+                                # Convert iterators to readable format
+                                display_value = self._format_value_for_display(v)
+                                all_vars[k] = display_value
+
+                                # Determine scope using AST analysis + runtime info
+                                scope_name = self._determine_variable_scope(k, frame, current_scope)
+                                scope_info[k] = scope_name
+
+                        # Capture current output
+                        current_output = captured_output.getvalue()
+
+                        self.execution_trace.append({
+                            'line': line_no,
+                            'locals': all_vars,
+                            'scope_info': scope_info,
+                            'output': current_output
+                        })
+            return trace_function
+
+        # Run the code once with tracing to capture everything
+        temp_globals = {}
+        old_trace = sys.gettrace()
+        original_stdout = sys.stdout
+        sys.stdout = captured_output
+
+        try:
+            sys.settrace(trace_function)
+            exec(self.compiled_code, temp_globals)
+
+            # After execution completes, capture final state if we have variables
+            if self.execution_trace:
+                # Update the last entry with final output
+                final_output = captured_output.getvalue()
+                self.execution_trace[-1]['output'] = final_output
+
+        except Exception as e:
+            print(f"Execution error during trace: {e}")
+            traceback.print_exc()
+        finally:
+            sys.settrace(old_trace)
+            sys.stdout = original_stdout
+
+            # Capture final output state for the last trace entry if we have any
+            if self.execution_trace:
+                final_output = captured_output.getvalue()
+                self.execution_trace[-1]['output'] = final_output
+
+    def _determine_variable_scope(self, var_name, frame, current_scope):
+        """Determine the scope of a variable using AST analysis and runtime info"""
+        # First check if we're in the global scope
+        if frame.f_locals is frame.f_globals:
+            return 'global'
+
+        # Check if the variable is in the current scope via AST analysis
+        if current_scope:
+            if var_name in current_scope.variables:
+                # Variable is defined in the current scope
+                if current_scope.scope_type == 'module':
+                    return 'global'
+                else:
+                    return f'local ({current_scope.name})'
+
+            # Check if it's defined in any parent scope
+            parent_scope = current_scope.parent
+            while parent_scope:
+                if var_name in parent_scope.variables:
+                    if parent_scope.scope_type == 'module':
+                        return 'global'
+                    else:
+                        return f'outer ({parent_scope.name})'
+                parent_scope = parent_scope.parent
+
+        # If not found in AST analysis, use runtime frame information
+        code_name = frame.f_code.co_name
+        context_map = {
+            '<module>': 'module',
+            '<listcomp>': 'list comprehension',
+            '<dictcomp>': 'dict comprehension',
+            '<setcomp>': 'set comprehension',
+            '<genexpr>': 'generator',
+            '<lambda>': 'lambda'
+        }
+
+        if var_name in frame.f_locals:
+            context = context_map.get(code_name, code_name)
+            # Check if it's a closure variable
+            if hasattr(frame, 'f_locals') and '__closure__' in frame.f_locals:
+                return f'closure ({context})'
+            return f'local ({context})'
+
+        # If all else fails, it must be a global
+        return 'global'
+
+    def step(self):
+        if self.finished or self.step_index >= len(self.execution_trace):
+            self.finished = True
+            return
+
+        # Get the current execution state
+        current_state = self.execution_trace[self.step_index]
+        self.current_line = current_state['line']
+        self.locals_dict = current_state['locals']
+        self.scope_info = current_state['scope_info']
+        self.output_lines = current_state['output'].splitlines()
+
+        self.step_index += 1
+        if self.step_index >= len(self.execution_trace):
+            self.finished = True
+
+    def reset(self):
+        self.current_line = -1
+        self.locals_dict = {}
+        self.scope_info = {}
+        self.output_lines = []
+        self.finished = False
+        self.step_index = 0
+        # Re-prepare execution trace
+        self._prepare_execution_trace()
+
+    def get_state(self):
+        state = {
+            "current_line": self.current_line,
+            "locals": self.locals_dict,
+            "scope_info": self.scope_info,
+            "output_lines": self.output_lines,
+            "lines": self.lines,
+            "finished": self.finished
+        }
+        return state
+
+    def _format_value_for_display(self, value):
+        """Format values for display, converting iterators to readable format."""
+        # Handle zip objects and other iterators
+        if hasattr(value, '__iter__') and hasattr(value, '__next__'):
+            try:
+                # For zip objects and other iterators, don't consume them
+                if type(value).__name__ == 'zip':
+                    return "<zip object>"
+                elif type(value).__name__ in ['enumerate', 'map', 'filter']:
+                    return f"<{type(value).__name__} object>"
+                else:
+                    return f"<{type(value).__name__} object>"
+            except:
+                return f"<{type(value).__name__} object>"
+
+        # Handle other types normally
+        try:
+            return copy.deepcopy(value)
+        except Exception:
+            return str(value)
+
+def extract_assigned_variables(code_str):
+    """Extract all variable names that are assigned in the code."""
+    try:
+        tree = ast.parse(code_str)
+        assigned_vars = set()
+
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Assign):
+                for target in node.targets:
+                    if isinstance(target, ast.Name):
+                        assigned_vars.add(target.id)
+                    elif isinstance(target, ast.Tuple):
+                        # Handle tuple unpacking like: a, b = something
+                        for elt in target.elts:
+                            if isinstance(elt, ast.Name):
+                                assigned_vars.add(elt.id)
+            elif isinstance(node, ast.AugAssign):
+                if isinstance(node.target, ast.Name):
+                    assigned_vars.add(node.target.id)
+            elif isinstance(node, ast.For):
+                # Add loop variables (e.g., 'char' in 'for char in a:')
+                if isinstance(node.target, ast.Name):
+                    assigned_vars.add(node.target.id)
+                elif isinstance(node.target, ast.Tuple):
+                    # Handle tuple unpacking in for loops like: for letter, number in z:
+                    for elt in node.target.elts:
+                        if isinstance(elt, ast.Name):
+                            assigned_vars.add(elt.id)
+            elif isinstance(node, ast.FunctionDef):
+                # Add function parameters
+                for arg in node.args.args:
+                    assigned_vars.add(arg.arg)
+            elif isinstance(node, (ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp)):
+                # Add comprehension variables
+                for generator in node.generators:
+                    if isinstance(generator.target, ast.Name):
+                        assigned_vars.add(generator.target.id)
+                    elif isinstance(generator.target, ast.Tuple):
+                        for elt in generator.target.elts:
+                            if isinstance(elt, ast.Name):
+                                assigned_vars.add(elt.id)
+
+        return list(assigned_vars)
+    except SyntaxError:
+        return []
