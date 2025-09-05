@@ -1,38 +1,106 @@
-// Load dependencies function
-function loadDependencies() {
-    const dependencies = [
-        { type: 'css', src: 'pyodide-exercises.css' },
-        { type: 'css', src: '../highlight.js/styles/default.min.css' },
-        { type: 'script', src: '../highlight.js/highlight.min.js' },
-        { type: 'module', src: '../codejar/codejar.js' },
-        { type: 'script', src: '../pyodide/pyodide.js' }
-    ];
+const PyodideExercisesHelpers = {
+    // Get the base path for this script's directory
+    getScriptBasePath() {
+        const currentScript = document.currentScript ||
+            Array.from(document.getElementsByTagName('script')).find(script =>
+                script.src.includes('pyodide-exercises.js')
+            );
 
-    return Promise.all(dependencies.map(dep => {
-        return new Promise((resolve, reject) => {
-            if (dep.type === 'css') {
-                const link = document.createElement('link');
-                link.rel = 'stylesheet';
-                link.href = dep.src;
-                link.onload = resolve;
-                link.onerror = reject;
-                document.head.appendChild(link);
-            } else {
-                const script = document.createElement('script');
-                script.src = dep.src;
-                if (dep.type === 'module') {
-                    script.type = 'module';
-                }
-                script.onload = resolve;
-                script.onerror = reject;
-                document.head.appendChild(script);
+        if (currentScript && currentScript.src) {
+            const url = new URL(currentScript.src);
+            return url.pathname.substring(0, url.pathname.lastIndexOf('/') + 1);
+        }
+
+        // Fallback: try to detect based on current location
+        const pathSegments = window.location.pathname.split('/');
+        const staticIndex = pathSegments.lastIndexOf('static');
+        if (staticIndex >= 0) {
+            return pathSegments.slice(0, staticIndex + 1).join('/') + '/static/pyodide-exercises/';
+        }
+
+        // Last resort fallback
+        return './static/pyodide-exercises/';
+    },
+
+    // Get the static directory path
+    getStaticPath() {
+        const currentScript = document.currentScript ||
+            Array.from(document.getElementsByTagName('script')).find(script =>
+                script.src.includes('pyodide-exercises.js')
+            );
+
+        if (currentScript && currentScript.src) {
+            const url = new URL(currentScript.src);
+            const pathname = url.pathname;
+            // Find the static directory in the path
+            const staticIndex = pathname.lastIndexOf('/static/');
+            if (staticIndex >= 0) {
+                return pathname.substring(0, staticIndex + 8); // +8 for '/static/'
             }
-        });
-    }));
-}
+        }
+
+        // Fallback: construct relative path to static directory
+        const currentPath = window.location.pathname;
+        const pathSegments = currentPath.split('/').filter(segment => segment);
+
+        // Remove 'materials' and any subdirectories after it to get back to docs root
+        const materialsIndex = pathSegments.indexOf('materials');
+        if (materialsIndex >= 0) {
+            const docsSegments = pathSegments.slice(0, materialsIndex);
+            return '/' + docsSegments.join('/') + '/static/';
+        }
+
+        // If we're already in static or docs, calculate accordingly
+        const staticIndex = pathSegments.indexOf('static');
+        if (staticIndex >= 0) {
+            return '/' + pathSegments.slice(0, staticIndex + 1).join('/') + '/';
+        }
+
+        // Last resort
+        return '/docs/static/';
+    },
+
+    // Load dependencies function
+    loadDependencies() {
+        const basePath = this.getScriptBasePath();
+        const staticPath = this.getStaticPath();
+
+        const dependencies = [
+            { type: 'css', src: basePath + 'pyodide-exercises.css' },
+            { type: 'css', src: staticPath + 'highlight.js/styles/a11y-dark.min.css' },
+            { type: 'script', src: staticPath + 'highlight.js/highlight.min.js' },
+            { type: 'module', src: staticPath + 'codejar/codejar.js' },
+            { type: 'script', src: staticPath + 'pyodide/pyodide.js' }
+        ];
+
+        return Promise.all(dependencies.map(dep => {
+            return new Promise((resolve, reject) => {
+                if (dep.type === 'css') {
+                    const link = document.createElement('link');
+                    link.rel = 'stylesheet';
+                    link.href = dep.src;
+                    link.onload = resolve;
+                    link.onerror = reject;
+                    document.head.appendChild(link);
+                } else {
+                    const script = document.createElement('script');
+                    script.src = dep.src;
+                    if (dep.type === 'module') {
+                        script.type = 'module';
+                    }
+                    script.onload = resolve;
+                    script.onerror = reject;
+                    document.head.appendChild(script);
+                }
+            });
+        }));
+    }
+};
 
 class PyodideExercise {
     static idCounter = 0;
+    static sharedPyodide = null;
+    static pyodidePromise = null;
 
     constructor(containerElement) {
         this.container = containerElement;
@@ -50,6 +118,21 @@ class PyodideExercise {
 
         this.createUI();
         this.init();
+    }
+
+    static async getSharedPyodide() {
+        if (!this.pyodidePromise) {
+            this.pyodidePromise = this.initializeSharedPyodide();
+        }
+        return this.pyodidePromise;
+    }
+
+    static async initializeSharedPyodide() {
+        if (this.sharedPyodide) return this.sharedPyodide;
+
+        const staticPath = PyodideExercisesHelpers.getStaticPath();
+        this.sharedPyodide = await loadPyodide({ indexURL: staticPath + "pyodide/" });
+        return this.sharedPyodide;
     }
 
     createUI() {
@@ -99,7 +182,8 @@ class PyodideExercise {
         if (!CodeJarClass) {
             try {
                 // Try to import CodeJar as a module
-                const module = await import('../codejar/codejar.js');
+                const staticPath = PyodideExercisesHelpers.getStaticPath();
+                const module = await import(staticPath + 'codejar/codejar.js');
                 CodeJarClass = module.CodeJar || module.default;
             } catch (error) {
                 console.warn('Could not import CodeJar as module:', error);
@@ -168,7 +252,7 @@ class PyodideExercise {
     addLineNumbers(editor) {
         const lines = editor.textContent.split('\n');
         const lineNumbersDiv = editor.parentElement.querySelector('.line-numbers') ||
-                              document.createElement('div');
+            document.createElement('div');
 
         if (!editor.parentElement.querySelector('.line-numbers')) {
             lineNumbersDiv.className = 'line-numbers';
@@ -187,22 +271,18 @@ class PyodideExercise {
 
     async init() {
         try {
-            // Initialize Pyodide
             this.output.textContent = "Loading Python environment...";
             this.runBtn.disabled = true;
 
-            this.pyodide = await loadPyodide({ indexURL: "../pyodide/" });
+            // Use shared instance instead of creating new one
+            this.pyodide = await PyodideExercise.getSharedPyodide();
 
-            // Validate the provided answer once Pyodide is ready
             await this.validateAnswer();
-
             this.output.textContent = "Click \"Run\" to execute your code...";
             this.runBtn.disabled = false;
 
-            // Set up event listeners
             this.runBtn.addEventListener('click', () => this.runCode());
             this.revealAnswer.addEventListener('click', () => this.showAnswer());
-
         } catch (error) {
             this.output.textContent = "Error loading Python environment: " + error.message;
             console.error("Pyodide initialization error:", error);
@@ -222,7 +302,7 @@ from io import StringIO
 import traceback
 sys.stdout = StringIO()
 sys.stderr = StringIO()
-            `);
+      `);
 
             // Run the provided answer
             try {
@@ -254,7 +334,7 @@ Container element:`, this.container);
             this.pyodide.runPython(`
 sys.stdout = sys.__stdout__
 sys.stderr = sys.__stderr__
-            `);
+      `);
 
         } catch (error) {
             console.warn(`Exercise validation error for exercise ID: ${this.exerciseId}
@@ -295,7 +375,7 @@ Container element:`, this.container);
 import sys
 from io import StringIO
 sys.stdout = StringIO()
-            `);
+      `);
 
             // Run user code
             this.pyodide.runPython(code);
@@ -367,10 +447,10 @@ sys.stdout = StringIO()
 }
 
 // Initialize dependencies and exercises when DOM is ready
-document.addEventListener('DOMContentLoaded', async function() {
+document.addEventListener('DOMContentLoaded', async function () {
     try {
         // Load all dependencies first
-        await loadDependencies();
+        await PyodideExercisesHelpers.loadDependencies();
 
         // Wait a bit for scripts to initialize
         await new Promise(resolve => setTimeout(resolve, 100));

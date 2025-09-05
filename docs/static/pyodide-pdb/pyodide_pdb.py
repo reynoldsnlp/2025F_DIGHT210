@@ -231,7 +231,7 @@ class StepDebugger:
         self.scope_analyzer = ScopeAnalyzer(code)
         self.scope_tree = self.scope_analyzer.analyze()
         self.line_to_scope = self.scope_analyzer.line_to_scope
-        
+
         # Store variable assignments to help recreate iterators
         self.variable_assignments = self._extract_variable_assignments()
 
@@ -428,7 +428,7 @@ class StepDebugger:
         # Handle zip objects and other iterators
         if hasattr(value, '__iter__') and hasattr(value, '__next__'):
             type_name = type(value).__name__
-            
+
             # Try to peek at iterator contents without consuming
             try:
                 if type_name == 'zip':
@@ -468,7 +468,7 @@ class StepDebugger:
                             safe_globals = {'__builtins__': {}}
                             # Try to evaluate just the arguments to show structure
                             args = eval(f'[{args_str}]', safe_globals, {})
-                            
+
                             # Show first few items from each iterable
                             preview_items = []
                             for arg in args:
@@ -480,11 +480,11 @@ class StepDebugger:
                                         preview_items.append(str(items))
                                 else:
                                     preview_items.append(str(arg))
-                            
+
                             return f"zip({', '.join(preview_items)})"
                         except:
                             pass
-            
+
             # Fallback: try to peek at the first item
             import itertools
             zip_copy = itertools.tee(zip_obj, 1)[0]
@@ -525,7 +525,7 @@ class StepDebugger:
             start = range_obj.start
             stop = range_obj.stop
             step = range_obj.step
-            
+
             if step == 1:
                 if start == 0:
                     return f"range({stop})"

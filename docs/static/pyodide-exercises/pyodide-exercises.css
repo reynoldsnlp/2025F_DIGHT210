@@ -22,12 +22,12 @@ body {
     height: 300px;
     border: 2px solid #ccc;
     border-radius: 4px;
-    background-color: #fff;
     font-family: 'Courier New', monospace;
     font-size: 14px;
     min-height: 300px;
     padding: 10px;
     resize: vertical;
+    max-width: 79ch;
 }
 
 .with-line-numbers {
@@ -56,8 +56,9 @@ body {
     outline: none;
     flex: 1;
     overflow-x: auto;
-    white-space: pre;
+    white-space: pre-wrap;
     line-height: 1.5;
+    overflow-wrap: break-word;
 }
 
 .output-section {
@@ -141,7 +142,6 @@ body {
 .answer {
     margin-top: 10px;
     padding: 10px;
-    background-color: #f8f8f8;
     border-radius: 4px;
     font-family: 'Courier New', monospace;
     white-space: pre-wrap;
@@ -149,9 +149,7 @@ body {
     border: 1px solid #ddd;
 }
 
-.answer.hljs {
-    background-color: #f8f8f8 !important;
-}
+
 
 /* Syntax highlighting adjustments */
 .hljs {

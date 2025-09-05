@@ -1,61 +1,183 @@
 // Interactive Python stepping using pyodide and pdb
 
-let pyodideReadyPromise = null;
+const PyodidePDB = {
+  pyodideInstance: null,
+  pyodideReadyPromise: null,
+  dependenciesLoaded: false,
 
-// Load all necessary dependencies automatically
-async function loadDependencies() {
-  // Load CSS files
-  loadCSS('./pyodide-pdb.css');
-  loadCSS('../highlight.js/styles/github-dark.min.css');
+  // Get the base path for this script's directory
+  getScriptBasePath() {
+    // More specific script detection - look for the exact filename and ensure it's the pdb version
+    const currentScript = document.currentScript ||
+      Array.from(document.getElementsByTagName('script')).find(script =>
+        script.src && script.src.includes('pyodide-pdb.js') && !script.src.includes('pyodide-exercises')
+      );
 
-  // Load Pyodide if not already loaded
-  if (window.loadPyodide === undefined) {
-    await utils.loadScript("../pyodide/pyodide.js");
-  }
-}
+    if (currentScript && currentScript.src) {
+      const url = new URL(currentScript.src);
+      // Ensure we're working with the pyodide-pdb.js script specifically
+      if (!url.pathname.includes('pyodide-pdb.js') || url.pathname.includes('pyodide-exercises')) {
+        // Manual search for the exact pyodide-pdb.js script (not pyodide-exercises.js)
+        const pdbScript = Array.from(document.getElementsByTagName('script')).find(script =>
+          script.src && script.src.includes('pyodide-pdb.js') && !script.src.includes('pyodide-exercises')
+        );
 
-function loadCSS(href) {
-  const link = document.createElement('link');
-  link.rel = 'stylesheet';
-  link.href = href;
-  document.head.appendChild(link);
-}
+        if (pdbScript) {
+          const pdbUrl = new URL(pdbScript.src);
+          const pyodidePdbBasePath = pdbUrl.pathname.substring(0, pdbUrl.pathname.lastIndexOf('/') + 1);
+          return pyodidePdbBasePath;
+        }
+      }
 
-async function ensurePyodide() {
-  if (!pyodideReadyPromise) {
-    pyodideReadyPromise = loadPyodideAndPackages();
-  }
-  return pyodideReadyPromise;
-}
-
-async function loadPyodideAndPackages() {
-  try {
-    const pyodide = await loadPyodide({ indexURL: "../pyodide/" });
-    await pyodide.loadPackage(['micropip']);
-
-    // Load the StepDebugger Python code from separate file
-    const response = await fetch('./pyodide_pdb.py');
-    if (!response.ok) {
-      throw new Error(`Failed to fetch pyodide_pdb.py: ${response.status} ${response.statusText}`);
+      const pyodidePdbBasePath = url.pathname.substring(0, url.pathname.lastIndexOf('/') + 1);
+      return pyodidePdbBasePath;
     }
 
-    const pythonCode = await response.text();
-    await pyodide.runPythonAsync(pythonCode);
+    // Fallback: try to detect based on current location
+    const pathSegments = window.location.pathname.split('/');
+    const staticIndex = pathSegments.lastIndexOf('static');
 
-    // Create a module namespace to access the classes and functions
-    await pyodide.runPythonAsync(`
+    if (staticIndex >= 0) {
+      const fallbackPath = pathSegments.slice(0, staticIndex + 1).join('/') + '/static/pyodide-pdb/';
+      return fallbackPath;
+    }
+
+    // Last resort fallback
+    return './static/pyodide-pdb/';
+  },
+
+  // Get the static directory path
+  getStaticPath() {
+    // Use the same specific script detection logic
+    const currentScript = document.currentScript ||
+      Array.from(document.getElementsByTagName('script')).find(script =>
+        script.src && script.src.includes('pyodide-pdb.js') && !script.src.includes('pyodide-exercises')
+      );
+
+    if (currentScript && currentScript.src) {
+      const url = new URL(currentScript.src);
+      const pathname = url.pathname;
+      // Find the static directory in the path
+      const staticIndex = pathname.lastIndexOf('/static/');
+
+      if (staticIndex >= 0) {
+        const staticPath = pathname.substring(0, staticIndex + 8); // +8 for '/static/'
+        return staticPath;
+      }
+    }
+
+    // Fallback: construct relative path to static directory
+    const currentPath = window.location.pathname;
+    const pathSegments = currentPath.split('/').filter(segment => segment);
+
+    // Remove 'materials' and any subdirectories after it to get back to docs root
+    const materialsIndex = pathSegments.indexOf('materials');
+
+    if (materialsIndex >= 0) {
+      const docsSegments = pathSegments.slice(0, materialsIndex);
+      const staticPath = '/' + docsSegments.join('/') + '/static/';
+      return staticPath;
+    }
+
+    // If we're already in static or docs, calculate accordingly
+    const staticIndex = pathSegments.indexOf('static');
+
+    if (staticIndex >= 0) {
+      const staticPath = '/' + pathSegments.slice(0, staticIndex + 1).join('/') + '/';
+      return staticPath;
+    }
+
+    // Last resort
+    return '/docs/static/';
+  },
+
+  // Load all necessary dependencies automatically
+  async loadDependencies() {
+    if (this.dependenciesLoaded) return;
+    
+    const pyodidePdbBasePath = this.getScriptBasePath();
+    const pyodidePdbStaticPath = this.getStaticPath();
+
+    // Load all CSS files in parallel
+    const cssPromises = [
+      this.loadCSS(pyodidePdbBasePath + 'pyodide-pdb.css'),
+      this.loadCSS(pyodidePdbStaticPath + 'highlight.js/styles/a11y-dark.min.css')
+    ];
+
+    // Load Pyodide only once
+    const pyodidePromise = window.loadPyodide === undefined ? 
+      utils.loadScript(pyodidePdbStaticPath + "pyodide/pyodide.js") : 
+      Promise.resolve();
+
+    await Promise.all([...cssPromises, pyodidePromise]);
+    this.dependenciesLoaded = true;
+  },
+
+  loadCSS(href) {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = href;
+    document.head.appendChild(link);
+  },
+
+  async ensurePyodide() {
+    if (!this.pyodideReadyPromise) {
+      this.pyodideReadyPromise = this.loadPyodideAndPackages();
+    }
+    return this.pyodideReadyPromise;
+  },
+
+  async getSharedPyodide() {
+    if (!this.pyodideInstance) {
+      this.pyodideInstance = await this.ensurePyodide();
+    }
+    return this.pyodideInstance;
+  },
+
+  async loadPyodideAndPackages() {
+    try {
+      const pyodidePdbBasePath = this.getScriptBasePath();
+      const pyodidePdbStaticPath = this.getStaticPath();
+
+      const pyodide = await loadPyodide({ indexURL: pyodidePdbStaticPath + "pyodide/" });
+      // Remove micropip loading since it's causing issues and not needed
+      // await pyodide.loadPackage(['micropip']);
+
+      // Load the StepDebugger Python code from separate file
+      // Use basePath since pyodide_pdb.py is in the same directory as this script
+      const response = await fetch(pyodidePdbBasePath + 'pyodide_pdb.py');
+      if (!response.ok) {
+        throw new Error(`Failed to fetch pyodide_pdb.py: ${response.status} ${response.statusText}`);
+      }
+
+      const pythonCode = await response.text();
+      await pyodide.runPythonAsync(pythonCode);
+
+      // Create a module namespace to access the classes and functions
+      await pyodide.runPythonAsync(`
 import types
 pyodide_pdb = types.ModuleType('pyodide_pdb')
 pyodide_pdb.StepDebugger = StepDebugger
 pyodide_pdb.extract_assigned_variables = extract_assigned_variables
 `);
 
-    return pyodide;
-  } catch (error) {
-    console.error('Failed to initialize Pyodide:', error);
-    throw error;
+      return pyodide;
+    } catch (error) {
+      console.error('Failed to initialize Pyodide:', error);
+      throw error;
+    }
+  },
+
+  async extractVariableNames(code) {
+    const pyodide = await this.ensurePyodide();
+
+    const result = await pyodide.runPythonAsync(`
+pyodide_pdb.extract_assigned_variables("""${code.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}""")
+`);
+
+    return result.toJs();
   }
-}
+};
 
 // Separated utility functions for better modularity
 const utils = {
@@ -79,36 +201,33 @@ const utils = {
   }
 };
 
-async function extractVariableNames(code) {
-  const pyodide = await ensurePyodide();
-
-  const result = await pyodide.runPythonAsync(`
-pyodide_pdb.extract_assigned_variables("""${code.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}""")
-`);
-
-  return result.toJs();
-}
-
 class InteractiveExample {
   constructor(container) {
     this.container = container;
     this.codeBlock = container.querySelector('pre code');
     this.code = this.codeBlock.textContent.trim();
-    this.varNames = [];
-
-    // Create a unique ID for this instance to avoid variable collisions in Pyodide
-    InteractiveExample.instanceCounter = (InteractiveExample.instanceCounter || 0) + 1;
-    this.instanceId = 'dbg_' + InteractiveExample.instanceCounter;
-
-    // Initialize UI components
+    this.initialized = false;
+    
     this._initializeSidebar();
     this._initializeControls();
+    
+    // Use intersection observer for lazy loading
+    this.setupLazyLoading();
+  }
 
-    this.state = null;
-    this.pyodide = null;
-    this.init().catch(() => {
-      // Silent error handling - UI will show disabled state
-    });
+  setupLazyLoading() {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && !this.initialized) {
+          this.init().catch(() => {
+            // Silent error handling
+          });
+          observer.unobserve(this.container);
+        }
+      });
+    }, { rootMargin: '100px' }); // Start loading 100px before visible
+
+    observer.observe(this.container);
   }
 
   _initializeSidebar() {
@@ -181,12 +300,12 @@ class InteractiveExample {
 
   async init() {
     try {
-      this.pyodide = await ensurePyodide();
+      this.pyodide = await PyodidePDB.ensurePyodide();
 
       // Auto-detect variables if not specified
       let varNames = (this.container.dataset.variables || '').split(',').map(v => v.trim()).filter(Boolean);
       if (varNames.length === 0) {
-        const extractedVars = await extractVariableNames(this.code);
+        const extractedVars = await PyodidePDB.extractVariableNames(this.code);
         varNames = Array.isArray(extractedVars) ? extractedVars : Array.from(extractedVars);
       }
       this.varNames = varNames;
@@ -211,16 +330,18 @@ class InteractiveExample {
       return;
     }
 
+    const staticPath = PyodidePDB.getStaticPath();
+
     return new Promise((resolve) => {
       const script = document.createElement('script');
-      script.src = '../highlight.js/highlight.min.js';
+      script.src = staticPath + 'highlight.js/highlight.min.js';
       script.onerror = () => {
         this.hljsLoaded = false;
         resolve();
       };
       script.onload = () => {
         const pyScript = document.createElement('script');
-        pyScript.src = '../highlight.js/languages/python.min.js';
+        pyScript.src = staticPath + 'highlight.js/languages/python.min.js';
         pyScript.onerror = () => {
           this.hljsLoaded = false;
           resolve();
@@ -409,19 +530,11 @@ ${this.instanceId}.reset()
 
 // Initialize everything when DOM is ready
 document.addEventListener('DOMContentLoaded', async () => {
-  try {
-    // Load all dependencies first
-    await loadDependencies();
-
-    // Initialize all pyodide-pdb containers
-    document.querySelectorAll('.pyodide-pdb').forEach(container => {
-      new InteractiveExample(container);
-    });
-  } catch (error) {
-    console.warn('Failed to load some dependencies:', error);
-    // Still try to initialize examples (they'll show in disabled state)
-    document.querySelectorAll('.pyodide-pdb').forEach(container => {
-      new InteractiveExample(container);
-    });
-  }
+  // Load dependencies in background
+  PyodidePDB.loadDependencies().catch(console.warn);
+  
+  // Initialize UI immediately (without Python functionality)
+  document.querySelectorAll('.pyodide-pdb').forEach(container => {
+    new InteractiveExample(container);
+  });
 });

@@ -1,13 +1,11 @@
 :root {
   --pdb-border-color: #ddd;
   --pdb-background: #f9f9ff;
-  --pdb-code-bg: #222;
-  --pdb-code-color: #eee;
   --pdb-sidebar-width: 400px;
   --pdb-sidebar-bg: #fff;
   --pdb-font-mono: 'Fira Mono', 'Consolas', monospace;
-  --pdb-active-line-bg: #334;
-  --pdb-active-line-color: #fff;
+  --pdb-active-line-bg: #49483e;
+  --pdb-active-line-color: #f8f8f2;
   --pdb-success-color: #28a745;
 }
 
@@ -25,7 +23,6 @@
 .pyodide-pdb pre {
   margin: 0;
   background: var(--pdb-code-bg);
-  color: var(--pdb-code-color);
   padding: 1em;
   border-radius: 6px;
   font-family: var(--pdb-font-mono);
@@ -35,11 +32,15 @@
   min-height: 120px; /* Prevent layout shift during initialization */
   overflow-x: auto; /* Handle long lines of code */
   flex: 1;
+  max-width: 79ch;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
 }
 
 .pyodide-pdb pre code,
 .pyodide-pdb .code-line {
   line-height: 1.25;
+  background: var(--pdb-code-bg);
 }
 
 .pyodide-pdb pre code {
@@ -200,7 +201,7 @@
     margin-left: 0;
     flex-direction: column;
   }
-  
+
   .pyodide-pdb .output-section {
     border-left: none;
     border-top: 1px solid #eee;
