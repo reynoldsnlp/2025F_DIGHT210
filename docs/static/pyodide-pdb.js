@@ -1,0 +1,308 @@
+// Interactive Python stepping using pyodide and pdb
+
+const PyodidePDB = {
+  // Remove individual dependency management - use shared manager
+  async extractVariableNames(code) {
+    const pyodide = await SharedPyodideManager.loadPDBModule();
+
+    const result = await pyodide.runPythonAsync(`
+pyodide_pdb.extract_assigned_variables("""${code.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}""")
+`);
+
+    return result.toJs();
+  }
+};
+
+class InteractiveExample {
+  constructor(container) {
+    this.container = container;
+    this.codeBlock = container.querySelector('pre code');
+    this.code = this.codeBlock.textContent.trim();
+    this.initialized = false;
+    this.instanceId = `debugger_${Math.random().toString(36).substr(2, 9)}`;
+
+    this._initializeSidebar();
+    this._initializeControls();
+
+    // Use intersection observer for lazy loading
+    this.setupLazyLoading();
+  }
+
+  setupLazyLoading() {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && !this.initialized) {
+          this.init().catch(() => {
+            // Silent error handling
+          });
+          observer.unobserve(this.container);
+        }
+      });
+    }, { rootMargin: '100px' }); // Start loading 100px before visible
+
+    observer.observe(this.container);
+  }
+
+  _initializeSidebar() {
+    // Inject sidebar if missing
+    this.sidebar = this.container.querySelector('.sidebar');
+    if (!this.sidebar) {
+      this.sidebar = document.createElement('div');
+      this.sidebar.className = 'sidebar';
+
+      // Create variables section
+      this.variablesDiv = document.createElement('div');
+      this.variablesDiv.className = 'variables-section';
+      this.variablesDiv.innerHTML = '<strong>Variables</strong><p><em>Loading...</em></p>';
+
+      // Create output section
+      this.outputDiv = document.createElement('div');
+      this.outputDiv.className = 'output-section';
+      this.outputDiv.innerHTML = '<strong>Output</strong><div class="output-content"></div>';
+
+      this.sidebar.appendChild(this.variablesDiv);
+      this.sidebar.appendChild(this.outputDiv);
+      this.container.appendChild(this.sidebar);
+    } else {
+      this.variablesDiv = this.sidebar.querySelector('.variables-section');
+      this.outputDiv = this.sidebar.querySelector('.output-section');
+    }
+  }
+
+  _initializeControls() {
+    // Inject controls if missing
+    this.controlsDiv = this.container.querySelector('.controls');
+    if (!this.controlsDiv) {
+      this.controlsDiv = document.createElement('div');
+      this.controlsDiv.className = 'controls';
+
+      const buttonContainer = document.createElement('div');
+      buttonContainer.className = 'button-container';
+
+      this.stepBtn = document.createElement('button');
+      this.stepBtn.className = 'step-btn';
+      this.stepBtn.textContent = 'Step';
+      this.stepBtn.disabled = true;
+
+      this.resetBtn = document.createElement('button');
+      this.resetBtn.className = 'reset-btn';
+      this.resetBtn.textContent = 'Reset';
+      this.resetBtn.disabled = true;
+
+      buttonContainer.appendChild(this.stepBtn);
+      buttonContainer.appendChild(this.resetBtn);
+
+      this.completionDiv = document.createElement('div');
+      this.completionDiv.className = 'completion-message';
+      this.completionDiv.style.display = 'none';
+      this.completionDiv.innerHTML = '<strong>Done!</strong>';
+      buttonContainer.appendChild(this.completionDiv);
+
+      this.controlsDiv.appendChild(buttonContainer);
+      this.codeBlock.parentNode.appendChild(this.controlsDiv);
+    } else {
+      this.stepBtn = this.controlsDiv.querySelector('.step-btn');
+      this.resetBtn = this.controlsDiv.querySelector('.reset-btn');
+      this.completionDiv = this.controlsDiv.querySelector('.completion-message');
+
+      // Disable buttons if they exist
+      if (this.stepBtn) this.stepBtn.disabled = true;
+      if (this.resetBtn) this.resetBtn.disabled = true;
+    }
+  }
+
+  async init() {
+    try {
+      this.pyodide = await SharedPyodideManager.loadPDBModule();
+
+      // Auto-detect variables if not specified
+      let varNames = (this.container.dataset.variables || '').split(',').map(v => v.trim()).filter(Boolean);
+      if (varNames.length === 0) {
+        const extractedVars = await PyodidePDB.extractVariableNames(this.code);
+        varNames = Array.isArray(extractedVars) ? extractedVars : Array.from(extractedVars);
+      }
+      this.varNames = varNames;
+
+      await this.reset();
+
+      // Enable buttons after everything is ready
+      this.stepBtn.disabled = false;
+      this.resetBtn.disabled = false;
+
+      this.stepBtn.addEventListener('click', () => this.step());
+      this.resetBtn.addEventListener('click', () => this.reset());
+    } catch (error) {
+      // Silent error handling - buttons remain disabled
+    }
+  }
+
+  async reset() {
+    if (!this.pyodide) {
+      return;
+    }
+    try {
+      await this.pyodide.runPythonAsync(`
+${this.instanceId} = pyodide_pdb.StepDebugger("""${this.code.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}""", ${JSON.stringify(this.varNames)})
+${this.instanceId}.reset()
+`);
+
+      this.state = await this.getState();
+
+      // Reset UI state
+      this.stepBtn.disabled = false;
+      this.stepBtn.textContent = 'Step';
+      this.completionDiv.style.display = 'none';
+
+      if (!this.codeBlock.className.includes('language-python')) {
+        this.codeBlock.className += ' language-python';
+      }
+
+      this.render();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async step() {
+    if (!this.pyodide || (this.state && this.state.finished)) {
+      return;
+    }
+
+    try {
+      await this.pyodide.runPythonAsync(`${this.instanceId}.step()`);
+      this.state = await this.getState();
+      this.render();
+
+      if (this.state.finished) {
+        this.stepBtn.disabled = true;
+        this.completionDiv.style.display = 'block';
+      }
+    } catch (error) {
+      // Silent error handling
+    }
+  }
+
+  async getState() {
+    try {
+      const state = await this.pyodide.runPythonAsync(`${this.instanceId}.get_state()`);
+      // Return the state directly without explicit conversion
+      return state;
+    } catch (error) {
+      console.error(`Error getting debugger state: ${error}`);
+      throw error;
+    }
+  }
+
+  render() {
+    if (!this.state) {
+      return;
+    }
+
+    try {
+      this._renderCode();
+      this._renderVariables();
+      this._renderOutput();
+    } catch (error) {
+      // Silent error handling
+    }
+  }
+
+  _renderCode() {
+    const originalClasses = this.codeBlock.className;
+
+    if (window.Prism) {
+      const tempCode = document.createElement('code');
+      tempCode.className = 'language-python';
+      tempCode.textContent = this.state.lines.join('\n');
+      SharedPyodideManager.highlightCode(tempCode);
+
+      const highlightedLines = tempCode.innerHTML.split('\n');
+
+      const html = this.state.lines.map((line, idx) => {
+        const highlightedLine = highlightedLines[idx] || SharedPyodideManager.escapeHtml(line);
+        return `<div class="code-line${idx === this.state.current_line ? ' active' : ''}" data-line="${idx}">${highlightedLine}</div>`;
+      }).join('');
+
+      this.codeBlock.innerHTML = html;
+    } else {
+      const html = this.state.lines.map((line, idx) => {
+        return `<div class="code-line${idx === this.state.current_line ? ' active' : ''}" data-line="${idx}">${SharedPyodideManager.escapeHtml(line)}</div>`;
+      }).join('');
+      this.codeBlock.innerHTML = html;
+    }
+
+    this.codeBlock.className = originalClasses;
+  }
+
+  _renderVariables() {
+    if (!this.variablesDiv) return;
+
+    // Filter to only variables that have values and sort them
+    const definedVars = this.varNames
+      .filter(varName => this.state.locals.hasOwnProperty(varName))
+      .sort();
+
+    if (definedVars.length === 0) {
+      this.variablesDiv.innerHTML = '<strong>Variables</strong><p><em>No variables declared yet</em></p>';
+      return;
+    }
+
+    // Use template literals for cleaner HTML construction
+    let html = `
+      <strong>Variables</strong>
+      <table>
+        <thead>
+          <tr>
+            <th>Variable</th>
+            <th>Value</th>
+            <th>Scope</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    for (const varName of definedVars) {
+      const value = this.state.locals[varName];
+      const scope = this.state.scope_info[varName] || 'unknown';
+      const displayValue = typeof value === 'string' && value.includes('(') && value.includes(')')
+        ? SharedPyodideManager.escapeHtml(value)
+        : SharedPyodideManager.escapeHtml(JSON.stringify(value));
+
+      html += `
+        <tr>
+          <td><strong>${SharedPyodideManager.escapeHtml(varName)}</strong></td>
+          <td>${displayValue}</td>
+          <td>${SharedPyodideManager.escapeHtml(scope)}</td>
+        </tr>
+      `;
+    }
+
+    html += '</tbody></table>';
+    this.variablesDiv.innerHTML = html;
+  }
+
+  _renderOutput() {
+    if (!this.outputDiv) return;
+
+    const outputContent = this.outputDiv.querySelector('.output-content');
+    if (this.state.output_lines && this.state.output_lines.length > 0) {
+      const outputHtml = this.state.output_lines
+        .map(line => SharedPyodideManager.escapeHtml(line))
+        .join('<br>');
+      outputContent.innerHTML = outputHtml;
+    } else {
+      outputContent.innerHTML = '<em>No output yet</em>';
+    }
+  }
+}
+
+// Initialize everything when DOM is ready
+document.addEventListener('DOMContentLoaded', async () => {
+  // Load UI dependencies first (CSS, Prism) for immediate styling
+  SharedPyodideManager.loadUIDependencies().catch(console.warn);
+
+  // Initialize UI immediately (without Python functionality)
+  document.querySelectorAll('.pyodide-pdb').forEach(container => {
+    new InteractiveExample(container);
+  });
+});
