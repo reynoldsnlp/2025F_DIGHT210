@@ -1,3 +1,14 @@
+:root {
+    --reading-bg-light: #f5f5f5;
+    --reading-bg-blue: #e6f3ff;
+    --reading-border-blue: #0066cc;
+    --reading-code-bg: #e8e8e8;
+    --reading-text-dark: #333;
+    --reading-font-mono: 'Courier New', monospace;
+    --reading-border-radius: 5px;
+    --reading-padding-std: 15px;
+}
+
 body {
     font-family: Arial, sans-serif;
     max-width: 1200px;
@@ -5,23 +16,22 @@ body {
     padding: 20px;
     line-height: 1.6;
 }
+
 .explanation {
-    background-color: #f5f5f5;
-    padding: 15px;
+    background-color: var(--reading-bg-light);
+    padding: var(--reading-padding-std);
     margin: 10px 0;
-    border-radius: 5px;
+    border-radius: var(--reading-border-radius);
 }
-code {
-    background-color: #e8e8e8;
-    padding: 2px 4px;
-    border-radius: 3px;
-    font-family: 'Courier New', monospace;
+
+h1, h2, h3 {
+    color: var(--reading-text-dark);
 }
-h1, h2, h3 { color: #333; }
+
 .bring-together {
-    background-color: #e6f3ff;
-    border-left: 4px solid #0066cc;
-    padding: 15px;
+    background-color: var(--reading-bg-blue);
+    border-left: 4px solid var(--reading-border-blue);
+    padding: var(--reading-padding-std);
     margin: 20px 0;
 }
 

@@ -10,17 +10,31 @@ class PyodideExercise {
         this.initialCode = (this.container.textContent || '').trim();
         this.expectedOutput = this.container.dataset.expectedOutput || '';
         this.answer = this.container.dataset.answer || '';
+        this.exerciseId = this._generateExerciseId();
 
-        // Generate unique ID for this exercise
-        this.exerciseId = this.container.dataset.exerciseId || this.generateId();
+        this._initializeExercise();
+    }
+
+    _generateExerciseId() {
+        return this.container.dataset.exerciseId || this.generateId();
+    }
+
+    _initializeExercise() {
         this.container.dataset.exerciseId = this.exerciseId;
-
         this.pyodide = null;
         this.isCorrect = false;
         this.codeJar = null;
 
         this.createUI();
-        this.init();
+        this._safeInit();
+    }
+
+    async _safeInit() {
+        try {
+            await this.init();
+        } catch (error) {
+            console.error('Exercise initialization failed:', error);
+        }
     }
 
     createUI() {
@@ -28,7 +42,7 @@ class PyodideExercise {
         this.container.innerHTML = `
             <div class="exercise-container">
                 <div class="editor-section">
-                    <div class="editor" id="editor-${this.exerciseId}"></div>
+                    <pre class="editor" id="editor-${this.exerciseId}"><code class="language-python"></code></pre>
                     <div class="answer" style="display: none;"></div>
                 </div>
                 <div class="output-section">
@@ -70,19 +84,29 @@ class PyodideExercise {
         }
 
         try {
+            // Add language class to editor for Prism
+            this.editorDiv.classList.add('language-python');
+            const codeElement = this.editorDiv.querySelector('code');
+
             // CodeJar with syntax highlighting using Prism
-            this.codeJar = window.CodeJar(this.editorDiv, (editor) => {
+            this.codeJar = window.CodeJar(codeElement, (editor) => {
                 // Apply syntax highlighting if Prism is available
                 if (window.Prism) {
+                    // Ensure the editor has the language class
+                    editor.parentElement.classList.add('language-python');
+                    // Apply Prism highlighting
                     SharedPyodideManager.highlightCode(editor);
                 }
-
-                // Add line numbers
-                this.addLineNumbers(editor);
             });
 
             // Set initial code
             this.codeJar.updateCode(this.initialCode);
+
+            // Force initial highlighting
+            if (window.Prism) {
+                this.editorDiv.classList.add('language-python');
+                SharedPyodideManager.highlightCode(codeElement);
+            }
         } catch (error) {
             console.error('CodeJar initialization failed:', error);
             throw error;
@@ -110,113 +134,136 @@ class PyodideExercise {
     }
 
     async validateAnswer() {
-        if (!this.answer || !this.expectedOutput) {
-            return; // Skip validation if no answer or expected output provided
-        }
+        if (!this._hasValidationData()) return;
 
         try {
-            // Capture stdout and stderr
-            this.pyodide.runPython(`
+            await this._setupPythonEnvironment();
+            const actualOutput = await this._executeAnswer();
+            this._checkValidationResult(actualOutput);
+        } catch (error) {
+            this._logValidationError(error);
+        } finally {
+            await this._restorePythonEnvironment();
+        }
+    }
+
+    _hasValidationData() {
+        return this.answer && this.expectedOutput;
+    }
+
+    async _setupPythonEnvironment() {
+        this.pyodide.runPython(`
 import sys
 from io import StringIO
-import traceback
 sys.stdout = StringIO()
 sys.stderr = StringIO()
-      `);
+        `);
+    }
 
-            // Run the provided answer
-            try {
-                this.pyodide.runPython(this.answer);
+    async _executeAnswer() {
+        this.pyodide.runPython(this.answer);
+        return this.pyodide.runPython("sys.stdout.getvalue()");
+    }
 
-                // Get the output
-                const actualOutput = this.pyodide.runPython("sys.stdout.getvalue()");
+    _checkValidationResult(actualOutput) {
+        if (actualOutput.trim() !== this.expectedOutput) {
+            this._logValidationMismatch(actualOutput);
+        }
+    }
 
-                // Check if answer produces expected output
-                if (actualOutput.trim() !== this.expectedOutput) {
-                    console.warn(`Exercise validation failed for exercise ID: ${this.exerciseId}
-Expected output: "${this.expectedOutput}"
-Actual output: "${actualOutput.trim()}"
-Answer code: ${this.answer}
-Container element:`, this.container);
-                }
-            } catch (pythonError) {
-                // Get the traceback from stderr
-                const errorOutput = this.pyodide.runPython("sys.stderr.getvalue()");
-                console.warn(`Exercise validation failed with exception for exercise ID: ${this.exerciseId}
-Python exception: ${pythonError.message}
+    _logValidationMismatch(actualOutput) {
+        console.warn(`Exercise validation failed for ID: ${this.exerciseId}
+Expected: "${this.expectedOutput}"
+Actual: "${actualOutput.trim()}"
+Answer: ${this.answer}`);
+    }
+
+    _logValidationError(error) {
+        const errorOutput = this.pyodide.runPython("sys.stderr.getvalue()");
+        console.warn(`Exercise validation error for ID: ${this.exerciseId}
+Error: ${error.message}
 Traceback: ${errorOutput}
 Answer code: ${this.answer}
 Expected output: "${this.expectedOutput}"
 Container element:`, this.container);
             }
 
-            // Restore stdout and stderr
-            this.pyodide.runPython(`
+    async _restorePythonEnvironment() {
+        this.pyodide.runPython(`
 sys.stdout = sys.__stdout__
 sys.stderr = sys.__stderr__
-      `);
-
-        } catch (error) {
-            console.warn(`Exercise validation error for exercise ID: ${this.exerciseId}
-Error: ${error.message}
-Answer code: ${this.answer}
-Expected output: "${this.expectedOutput}"
-Container element:`, this.container);
-        }
+        `);
     }
 
     async runCode() {
         if (!this.pyodide) {
-            this.output.textContent = "Python environment not ready. Please wait...";
+            this._showNotReadyMessage();
             return;
         }
 
-        this.runBtn.disabled = true;
-        this.output.textContent = "Running...";
-        this.resetFeedback();
+        this._prepareForExecution();
 
         try {
-            const code = this.codeJar.toString().trim();
-
-            // Check if code is empty
+            const code = this._getUserCode();
             if (!code) {
-                this.output.textContent = "<No code provided>";
-                this.output.classList.add('incorrect');
-                this.output.classList.remove('correct');
-                this.checkmark.style.display = 'none';
-                if (this.answer) {
-                    this.revealAnswer.style.display = 'inline-block';
-                }
+                this._handleEmptyCode();
                 return;
             }
 
-            // Capture stdout
-            this.pyodide.runPython(`
-import sys
-from io import StringIO
-sys.stdout = StringIO()
-      `);
-
-            // Run user code
-            this.pyodide.runPython(code);
-
-            // Get the output
-            const result = this.pyodide.runPython("sys.stdout.getvalue()");
-
-            // Restore stdout
-            this.pyodide.runPython("sys.stdout = sys.__stdout__");
-
-            this.output.textContent = result || "(no output)";
-
-            // Check if the answer is correct
+            const result = await this._executeUserCode(code);
+            this._displayResult(result);
             this.checkAnswer(result.trim());
-
         } catch (error) {
-            this.output.textContent = "Error: " + error.message;
-            this.markIncorrect();
+            this._handleExecutionError(error);
         } finally {
             this.runBtn.disabled = false;
         }
+    }
+
+    _prepareForExecution() {
+        this.runBtn.disabled = true;
+        this.output.textContent = "Running...";
+        this.resetFeedback();
+    }
+
+    _getUserCode() {
+        return this.codeJar.toString().trim();
+    }
+
+    _handleEmptyCode() {
+        this.output.textContent = "<No code provided>";
+        this.markIncorrect();
+    }
+
+    async _executeUserCode(code) {
+        // Setup output capture
+        this.pyodide.runPython(`
+import sys
+from io import StringIO
+sys.stdout = StringIO()
+        `);
+
+        // Execute user code
+        this.pyodide.runPython(code);
+
+        // Get result and restore stdout
+        const result = this.pyodide.runPython("sys.stdout.getvalue()");
+        this.pyodide.runPython("sys.stdout = sys.__stdout__");
+
+        return result;
+    }
+
+    _displayResult(result) {
+        this.output.textContent = result || "(no output)";
+    }
+
+    _handleExecutionError(error) {
+        this.output.textContent = "Error: " + error.message;
+        this.markIncorrect();
+    }
+
+    _showNotReadyMessage() {
+        this.output.textContent = "Python environment not ready. Please wait...";
     }
 
     checkAnswer(actualOutput) {
@@ -256,27 +303,23 @@ sys.stdout = StringIO()
         this.answerDiv.style.display = 'block';
         this.revealAnswer.style.display = 'none';
 
+        // First add the show-solution class
+        this.answerDiv.classList.add('show-solution');
+
         // Apply syntax highlighting to the answer using Prism
         if (window.Prism) {
-            this.answerDiv.className = 'answer language-python';
+            // Ensure all necessary classes are present
+            this.answerDiv.classList.add('answer', 'language-python', 'show-solution');
             SharedPyodideManager.highlightCode(this.answerDiv);
+        } else {
+            // Fallback if Prism is not available
+            this.answerDiv.className = 'answer show-solution';
         }
     }
 
     addLineNumbers(editor) {
-        const lines = editor.textContent.split('\n');
-        const lineNumbersDiv = editor.parentElement.querySelector('.line-numbers') ||
-            document.createElement('div');
-
-        if (!editor.parentElement.querySelector('.line-numbers')) {
-            lineNumbersDiv.className = 'line-numbers';
-            editor.parentElement.insertBefore(lineNumbersDiv, editor);
-            editor.parentElement.classList.add('with-line-numbers');
-        }
-
-        lineNumbersDiv.innerHTML = lines.map((_, i) =>
-            `<span>${i + 1}</span>`
-        ).join('');
+        // This is now handled by Prism's line-number plugin if enabled.
+        // This function can be removed or left empty.
     }
 }
 

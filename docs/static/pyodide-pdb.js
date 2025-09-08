@@ -18,29 +18,58 @@ class InteractiveExample {
     this.container = container;
     this.codeBlock = container.querySelector('pre code');
     this.code = this.codeBlock.textContent.trim();
+    this.originalCode = this.code;
     this.initialized = false;
     this.instanceId = `debugger_${Math.random().toString(36).substr(2, 9)}`;
 
-    this._initializeSidebar();
-    this._initializeControls();
-
-    // Use intersection observer for lazy loading
-    this.setupLazyLoading();
+    this._initializeUI();
+    this._applySyntaxHighlighting();
+    this._setupLazyLoading();
   }
 
-  setupLazyLoading() {
+  _initializeUI() {
+    this._initializeSidebar();
+    this._initializeControls();
+  }
+
+  _applySyntaxHighlighting() {
+    // Apply syntax highlighting immediately if Prism is available
+    if (window.Prism && this.codeBlock) {
+      this._ensureLanguageClass();
+      SharedPyodideManager.highlightCode(this.codeBlock, 'python');
+    }
+  }
+
+  _ensureLanguageClass() {
+    // Ensure the code block has the correct language class
+    if (!this.codeBlock.className.includes('language-python')) {
+      this.codeBlock.className += ' language-python';
+    }
+    // Also apply to parent pre for prism themes
+    if (this.codeBlock.parentElement && !this.codeBlock.parentElement.className.includes('language-python')) {
+      this.codeBlock.parentElement.className += ' language-python';
+    }
+  }
+
+  _setupLazyLoading() {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting && !this.initialized) {
-          this.init().catch(() => {
-            // Silent error handling
-          });
+          this._safeInit();
           observer.unobserve(this.container);
         }
       });
     }, { rootMargin: '100px' }); // Start loading 100px before visible
 
     observer.observe(this.container);
+  }
+
+  async _safeInit() {
+    try {
+      await this.init();
+    } catch (error) {
+      console.warn('Failed to initialize interactive example:', error);
+    }
   }
 
   _initializeSidebar() {
@@ -81,7 +110,7 @@ class InteractiveExample {
 
       this.stepBtn = document.createElement('button');
       this.stepBtn.className = 'step-btn';
-      this.stepBtn.textContent = 'Step';
+      this.stepBtn.textContent = 'Execute highlighted line';
       this.stepBtn.disabled = true;
 
       this.resetBtn = document.createElement('button');
@@ -115,25 +144,42 @@ class InteractiveExample {
     try {
       this.pyodide = await SharedPyodideManager.loadPDBModule();
 
-      // Auto-detect variables if not specified
-      let varNames = (this.container.dataset.variables || '').split(',').map(v => v.trim()).filter(Boolean);
-      if (varNames.length === 0) {
-        const extractedVars = await PyodidePDB.extractVariableNames(this.code);
-        varNames = Array.isArray(extractedVars) ? extractedVars : Array.from(extractedVars);
-      }
-      this.varNames = varNames;
-
+      await this._autoDetectVariables();
       await this.reset();
 
-      // Enable buttons after everything is ready
-      this.stepBtn.disabled = false;
-      this.resetBtn.disabled = false;
-
-      this.stepBtn.addEventListener('click', () => this.step());
-      this.resetBtn.addEventListener('click', () => this.reset());
+      this._enableControls();
+      this._attachEventListeners();
     } catch (error) {
-      // Silent error handling - buttons remain disabled
+      console.warn('Initialization failed:', error);
     }
+  }
+
+  async _autoDetectVariables() {
+    // Auto-detect variables if not specified
+    let varNames = this._getDatasetVariables();
+    if (varNames.length === 0) {
+      const extractedVars = await PyodidePDB.extractVariableNames(this.code);
+      varNames = Array.isArray(extractedVars) ? extractedVars : Array.from(extractedVars);
+    }
+    this.varNames = varNames;
+  }
+
+  _getDatasetVariables() {
+    return (this.container.dataset.variables || '')
+      .split(',')
+      .map(v => v.trim())
+      .filter(Boolean);
+  }
+
+  _enableControls() {
+    // Enable buttons after everything is ready
+    this.stepBtn.disabled = false;
+    this.resetBtn.disabled = false;
+  }
+
+  _attachEventListeners() {
+    this.stepBtn.addEventListener('click', () => this.step());
+    this.resetBtn.addEventListener('click', () => this.reset());
   }
 
   async reset() {
@@ -150,12 +196,14 @@ ${this.instanceId}.reset()
 
       // Reset UI state
       this.stepBtn.disabled = false;
-      this.stepBtn.textContent = 'Step';
+      this.stepBtn.textContent = 'Execute highlighted line';
       this.completionDiv.style.display = 'none';
 
-      if (!this.codeBlock.className.includes('language-python')) {
-        this.codeBlock.className += ' language-python';
-      }
+      // Restore original code content
+      this.codeBlock.textContent = this.originalCode;
+
+      // Re-apply syntax highlighting after resetting content
+      this._applySyntaxHighlighting();
 
       this.render();
     } catch (error) {
@@ -208,30 +256,50 @@ ${this.instanceId}.reset()
   }
 
   _renderCode() {
-    const originalClasses = this.codeBlock.className;
+    const lines = this.originalCode.split(/\r\n|\r|\n/);
 
-    if (window.Prism) {
-      const tempCode = document.createElement('code');
-      tempCode.className = 'language-python';
-      tempCode.textContent = this.state.lines.join('\n');
-      SharedPyodideManager.highlightCode(tempCode);
+    const html = this._generateLineHTML(lines);
+    this.codeBlock.innerHTML = html;
+    this._scrollToActiveLine();
+  }
 
-      const highlightedLines = tempCode.innerHTML.split('\n');
-
-      const html = this.state.lines.map((line, idx) => {
-        const highlightedLine = highlightedLines[idx] || SharedPyodideManager.escapeHtml(line);
-        return `<div class="code-line${idx === this.state.current_line ? ' active' : ''}" data-line="${idx}">${highlightedLine}</div>`;
-      }).join('');
-
-      this.codeBlock.innerHTML = html;
-    } else {
-      const html = this.state.lines.map((line, idx) => {
-        return `<div class="code-line${idx === this.state.current_line ? ' active' : ''}" data-line="${idx}">${SharedPyodideManager.escapeHtml(line)}</div>`;
-      }).join('');
-      this.codeBlock.innerHTML = html;
+  _generateLineHTML(lines) {
+    if (window.Prism && this.codeBlock.innerHTML.includes('<span')) {
+      return this._generateHighlightedHTML(lines);
     }
+    return this._generatePlainHTML(lines);
+  }
 
-    this.codeBlock.className = originalClasses;
+  _generateHighlightedHTML(lines) {
+    const highlightedLines = this.codeBlock.innerHTML.split(/\r\n|\r|\n/);
+    return highlightedLines.map((line, idx) => {
+      const lineContent = line.trim() === '' ? '&nbsp;' : line;
+      const isActive = this._isActiveLine(idx);
+      const activeClass = isActive ? ' active' : '';
+      return `<div class="code-line${activeClass}" data-line="${idx}">${lineContent}</div>`;
+    }).join('');
+  }
+
+  _generatePlainHTML(lines) {
+    return lines.map((line, idx) => {
+      const lineContent = line.trim() === '' ? '&nbsp;' : SharedPyodideManager.escapeHtml(line);
+      const isActive = this._isActiveLine(idx);
+      const activeClass = isActive ? ' active' : '';
+      return `<div class="code-line${activeClass}" data-line="${idx}">${lineContent}</div>`;
+    }).join('');
+  }
+
+  _isActiveLine(idx) {
+    return idx === this.state.current_line && !this.state.finished;
+  }
+
+  _scrollToActiveLine() {
+    if (this._isActiveLine(this.state.current_line)) {
+      setTimeout(() => {
+        const activeElement = this.codeBlock.querySelector(`[data-line="${this.state.current_line}"]`);
+        activeElement?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 0);
+    }
   }
 
   _renderVariables() {
@@ -255,6 +323,7 @@ ${this.instanceId}.reset()
           <tr>
             <th>Variable</th>
             <th>Value</th>
+            <th>Type</th>
             <th>Scope</th>
           </tr>
         </thead>
@@ -264,6 +333,7 @@ ${this.instanceId}.reset()
     for (const varName of definedVars) {
       const value = this.state.locals[varName];
       const scope = this.state.scope_info[varName] || 'unknown';
+      const type = this.state.type_info && this.state.type_info[varName] || 'unknown';
       const displayValue = typeof value === 'string' && value.includes('(') && value.includes(')')
         ? SharedPyodideManager.escapeHtml(value)
         : SharedPyodideManager.escapeHtml(JSON.stringify(value));
@@ -272,6 +342,7 @@ ${this.instanceId}.reset()
         <tr>
           <td><strong>${SharedPyodideManager.escapeHtml(varName)}</strong></td>
           <td>${displayValue}</td>
+          <td>${SharedPyodideManager.escapeHtml(type)}</td>
           <td>${SharedPyodideManager.escapeHtml(scope)}</td>
         </tr>
       `;
@@ -299,9 +370,9 @@ ${this.instanceId}.reset()
 // Initialize everything when DOM is ready
 document.addEventListener('DOMContentLoaded', async () => {
   // Load UI dependencies first (CSS, Prism) for immediate styling
-  SharedPyodideManager.loadUIDependencies().catch(console.warn);
+  await SharedPyodideManager.loadUIDependencies();
 
-  // Initialize UI immediately (without Python functionality)
+  // Initialize UI immediately (with immediate syntax highlighting)
   document.querySelectorAll('.pyodide-pdb').forEach(container => {
     new InteractiveExample(container);
   });

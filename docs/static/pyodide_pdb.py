@@ -40,39 +40,55 @@ class ScopeNode:
 
 class ScopeAnalyzer(ast.NodeVisitor):
     """Analyzes Python code to build a scope tree and track variables"""
+
     def __init__(self, code):
         self.code = code
         self.lines = code.splitlines()
         self.root = ScopeNode("module", "module", 1, len(self.lines))
         self.current_scope = self.root
-        self.node_to_scope = {}  # Maps AST nodes to their containing scope
-        self.line_to_scope = {}  # Maps line numbers to their most specific containing scope
+        self.node_to_scope = {}
+        self.line_to_scope = {}
 
     def analyze(self):
         """Analyze the code and build the scope tree"""
         try:
             tree = ast.parse(self.code)
-            # Add line and column attributes to all nodes
             tree = ast.fix_missing_locations(tree)
             self.visit(tree)
             self._build_line_to_scope_map()
             return self.root
         except SyntaxError:
-            # If there's a syntax error, return a basic module scope
             return self.root
 
     def _build_line_to_scope_map(self):
         """Build a mapping from line numbers to their most specific scope"""
-        def traverse_scope(scope):
-            if scope.lineno and scope.end_lineno:
-                for line in range(scope.lineno, scope.end_lineno + 1):
-                    # Only set if not already set or if this scope is more specific
-                    if line not in self.line_to_scope or len(scope.get_scope_path().split('.')) > len(self.line_to_scope[line].get_scope_path().split('.')):
-                        self.line_to_scope[line] = scope
-            for child in scope.children:
-                traverse_scope(child)
+        self._traverse_scope_tree(self.root)
 
-        traverse_scope(self.root)
+    def _traverse_scope_tree(self, scope):
+        """Recursively traverse scope tree to build line mapping"""
+        if self._has_valid_line_range(scope):
+            self._map_lines_to_scope(scope)
+
+        for child in scope.children:
+            self._traverse_scope_tree(child)
+
+    def _has_valid_line_range(self, scope):
+        return scope.lineno and scope.end_lineno
+
+    def _map_lines_to_scope(self, scope):
+        """Map each line in scope's range to the most specific scope"""
+        for line in range(scope.lineno, scope.end_lineno + 1):
+            if self._is_more_specific_scope(scope, line):
+                self.line_to_scope[line] = scope
+
+    def _is_more_specific_scope(self, scope, line):
+        """Check if this scope is more specific than existing mapping"""
+        if line not in self.line_to_scope:
+            return True
+
+        current_depth = len(self.line_to_scope[line].get_scope_path().split('.'))
+        new_depth = len(scope.get_scope_path().split('.'))
+        return new_depth > current_depth
 
     def visit_FunctionDef(self, node):
         """Visit a function definition"""
@@ -121,38 +137,56 @@ class ScopeAnalyzer(ast.NodeVisitor):
         self._handle_comprehension(node, "generator")
 
     def _handle_comprehension(self, node, comp_type):
-        """Handle any type of comprehension"""
-        comp_scope = ScopeNode(comp_type, comp_type, getattr(node, 'lineno', None), getattr(node, 'end_lineno', None))
+        """Handle any type of comprehension with simplified logic"""
+        comp_scope = self._create_comprehension_scope(node, comp_type)
+
+        with self._temporary_scope(comp_scope):
+            self._process_comprehension_components(node)
+
+    def _create_comprehension_scope(self, node, comp_type):
+        """Create and register a comprehension scope"""
+        comp_scope = ScopeNode(comp_type, comp_type,
+                              getattr(node, 'lineno', None),
+                              getattr(node, 'end_lineno', None))
         self.current_scope.add_child(comp_scope)
         self.node_to_scope[node] = comp_scope
+        return comp_scope
 
-        # Record comprehension variables
-        old_scope = self.current_scope
-        self.current_scope = comp_scope
+    def _temporary_scope(self, new_scope):
+        """Context manager for temporary scope switching"""
+        class ScopeContext:
+            def __init__(self, analyzer, scope):
+                self.analyzer = analyzer
+                self.new_scope = scope
+                self.old_scope = None
 
-        # Process comprehension components
+            def __enter__(self):
+                self.old_scope = self.analyzer.current_scope
+                self.analyzer.current_scope = self.new_scope
+                return self.new_scope
+
+            def __exit__(self, *args):
+                self.analyzer.current_scope = self.old_scope
+
+        return ScopeContext(self, new_scope)
+
+    def _process_comprehension_components(self, node):
+        """Process the components of a comprehension"""
         for generator in node.generators:
             self._extract_target_vars(generator.target, getattr(generator, 'lineno', None))
             self.visit(generator.iter)
             for if_clause in generator.ifs:
                 self.visit(if_clause)
 
-        # Visit the element being comprehended
+        self._visit_comprehension_element(node)
+
+    def _visit_comprehension_element(self, node):
+        """Visit the element being comprehended"""
         if hasattr(node, 'elt'):
             self.visit(node.elt)
         elif hasattr(node, 'key') and hasattr(node, 'value'):
             self.visit(node.key)
             self.visit(node.value)
-
-        self.current_scope = old_scope
-
-    def _extract_target_vars(self, target, lineno):
-        """Extract variable names from an assignment target"""
-        if isinstance(target, ast.Name):
-            self.current_scope.add_variable(target.id, lineno, 'iteration_var')
-        elif isinstance(target, ast.Tuple) or isinstance(target, ast.List):
-            for elt in target.elts:
-                self._extract_target_vars(elt, lineno)
 
     def visit_Assign(self, node):
         """Visit an assignment statement"""
@@ -208,6 +242,26 @@ class ScopeAnalyzer(ast.NodeVisitor):
         self.current_scope = lambda_scope
         self.visit(node.body)
         self.current_scope = old_scope
+
+    def _extract_target_vars(self, target, lineno):
+        """Extract variable names from assignment targets"""
+        if isinstance(target, ast.Name):
+            self.current_scope.add_variable(target.id, lineno, 'assignment')
+        elif isinstance(target, ast.Tuple) or isinstance(target, ast.List):
+            # Handle tuple/list unpacking like: a, b = something or [x, y] = something
+            for elt in target.elts:
+                self._extract_target_vars(elt, lineno)
+        elif isinstance(target, ast.Starred):
+            # Handle starred expressions like: *args = something
+            self._extract_target_vars(target.value, lineno)
+        elif isinstance(target, ast.Subscript):
+            # Handle subscript assignment like: arr[0] = something
+            # We don't track these as new variables, just visit the expression
+            pass
+        elif isinstance(target, ast.Attribute):
+            # Handle attribute assignment like: obj.attr = something
+            # We don't track these as new variables, just visit the expression
+            pass
 
     def generic_visit(self, node):
         """Visit a generic node"""
@@ -275,6 +329,7 @@ class StepDebugger:
                         # Capture state at this point
                         all_vars = {}
                         scope_info = {}
+                        type_info = {}
 
                         # Get the scope for this line (1-based indexing for AST)
                         current_scope = self.line_to_scope.get(line_no + 1)
@@ -289,6 +344,9 @@ class StepDebugger:
                                 display_value = self._format_value_for_display(v)
                                 all_vars[k] = display_value
 
+                                # Capture variable type
+                                type_info[k] = self._get_variable_type(v)
+
                                 # Determine scope using AST analysis + runtime info
                                 scope_name = self._determine_variable_scope(k, frame, current_scope)
                                 scope_info[k] = scope_name
@@ -300,6 +358,7 @@ class StepDebugger:
                             'line': line_no,
                             'locals': all_vars,
                             'scope_info': scope_info,
+                            'type_info': type_info,
                             'output': current_output
                         })
             return trace_function
@@ -333,31 +392,51 @@ class StepDebugger:
                 self.execution_trace[-1]['output'] = final_output
 
     def _determine_variable_scope(self, var_name, frame, current_scope):
-        """Determine the scope of a variable using AST analysis and runtime info"""
-        # First check if we're in the global scope
+        """Determine the scope of a variable using simplified logic"""
+        # Check if in global scope
         if frame.f_locals is frame.f_globals:
             return 'global'
 
-        # Check if the variable is in the current scope via AST analysis
-        if current_scope:
-            if var_name in current_scope.variables:
-                # Variable is defined in the current scope
-                if current_scope.scope_type == 'module':
-                    return 'global'
-                else:
-                    return f'local ({current_scope.name})'
+        # Use AST analysis first
+        scope_from_ast = self._get_scope_from_ast(var_name, current_scope)
+        if scope_from_ast:
+            return scope_from_ast
 
-            # Check if it's defined in any parent scope
-            parent_scope = current_scope.parent
-            while parent_scope:
-                if var_name in parent_scope.variables:
-                    if parent_scope.scope_type == 'module':
-                        return 'global'
-                    else:
-                        return f'outer ({parent_scope.name})'
-                parent_scope = parent_scope.parent
+        # Fall back to runtime analysis
+        return self._get_scope_from_runtime(var_name, frame)
 
-        # If not found in AST analysis, use runtime frame information
+    def _get_scope_from_ast(self, var_name, current_scope):
+        """Get scope information from AST analysis"""
+        if not current_scope:
+            return None
+
+        # Check current scope
+        if var_name in current_scope.variables:
+            return self._format_scope_name(current_scope)
+
+        # Check parent scopes
+        parent_scope = current_scope.parent
+        while parent_scope:
+            if var_name in parent_scope.variables:
+                return self._format_parent_scope_name(parent_scope)
+            parent_scope = parent_scope.parent
+
+        return None
+
+    def _format_scope_name(self, scope):
+        """Format scope name for display"""
+        if scope.scope_type == 'module':
+            return 'global'
+        return f'local ({scope.name})'
+
+    def _format_parent_scope_name(self, scope):
+        """Format parent scope name for display"""
+        if scope.scope_type == 'module':
+            return 'global'
+        return f'outer ({scope.name})'
+
+    def _get_scope_from_runtime(self, var_name, frame):
+        """Get scope information from runtime frame analysis"""
         code_name = frame.f_code.co_name
         context_map = {
             '<module>': 'module',
@@ -370,13 +449,16 @@ class StepDebugger:
 
         if var_name in frame.f_locals:
             context = context_map.get(code_name, code_name)
-            # Check if it's a closure variable
-            if hasattr(frame, 'f_locals') and '__closure__' in frame.f_locals:
-                return f'closure ({context})'
             return f'local ({context})'
 
-        # If all else fails, it must be a global
         return 'global'
+
+    def _get_variable_type(self, value):
+        type_name = type(value).__name__
+        if hasattr(value, '__iter__') and hasattr(value, '__next__'):
+            return f'{type_name} (iter)'
+        else:
+            return type_name
 
     def step(self):
         if self.finished or self.step_index >= len(self.execution_trace):
@@ -388,6 +470,7 @@ class StepDebugger:
         self.current_line = current_state['line']
         self.locals_dict = current_state['locals']
         self.scope_info = current_state['scope_info']
+        self.type_info = current_state.get('type_info', {})
         self.output_lines = current_state['output'].splitlines()
 
         self.step_index += 1
@@ -398,6 +481,7 @@ class StepDebugger:
         self.current_line = -1
         self.locals_dict = {}
         self.scope_info = {}
+        self.type_info = {}
         self.output_lines = []
         self.finished = False
         self.step_index = 0
@@ -409,6 +493,7 @@ class StepDebugger:
             "current_line": self.current_line,
             "locals": self.locals_dict,
             "scope_info": self.scope_info,
+            "type_info": self.type_info,
             "output_lines": self.output_lines,
             "lines": self.lines,
             "finished": self.finished

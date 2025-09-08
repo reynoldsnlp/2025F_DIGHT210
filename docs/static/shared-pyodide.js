@@ -8,53 +8,49 @@ window.SharedPyodideManager = {
 
     // Get the static directory path
     getStaticPath() {
-        // Get the current page's location
         const currentPath = window.location.pathname;
 
-        // Handle the case where we're serving from file:// protocol
+        // Handle file:// protocol
         if (window.location.protocol === 'file:') {
-            // For local file serving, determine relative path based on current location
-            const pathSegments = currentPath.split('/').filter(segment => segment);
-
-            // If we're in materials/unit_X, need to go back to docs/static
-            if (pathSegments.includes('materials')) {
-                return '../../static/';
-            }
-            // If we're in docs root, static is ./static/
-            if (pathSegments.includes('docs') || pathSegments.length === 0) {
-                return './static/';
-            }
-            return './static/';
+            return this._getFileProtocolPath(currentPath);
         }
 
-        // For HTTP serving, use absolute or relative paths
-        // Split path into segments, removing empty ones
+        // Handle HTTP(S) protocols
+        return this._getHttpProtocolPath(currentPath);
+    },
+
+    _getFileProtocolPath(currentPath) {
         const pathSegments = currentPath.split('/').filter(segment => segment);
 
-        // If we're already in static directory, return current directory
+        if (pathSegments.includes('materials')) {
+            return '../../static/';
+        }
+        return './static/';
+    },
+
+    _getHttpProtocolPath(currentPath) {
+        const pathSegments = currentPath.split('/').filter(segment => segment);
+
+        // If already in static directory
         if (pathSegments.includes('static')) {
             const staticIndex = pathSegments.indexOf('static');
             return '/' + pathSegments.slice(0, staticIndex + 1).join('/') + '/';
         }
 
-        // If we're in materials directory, calculate relative path back to static
+        // If in materials directory
         const materialsIndex = pathSegments.findIndex(segment => segment === 'materials');
         if (materialsIndex >= 0) {
-            // Count how deep we are after materials (unit_X folders)
             const depthAfterMaterials = pathSegments.length - materialsIndex - 1;
-            // Go back that many levels plus one more to get to docs, then into static
-            const backSteps = '../'.repeat(depthAfterMaterials + 1);
-            return backSteps + 'static/';
+            return '../'.repeat(depthAfterMaterials + 1) + 'static/';
         }
 
-        // If we're in docs directory, add static
+        // If in docs directory
         const docsIndex = pathSegments.findIndex(segment => segment === 'docs');
         if (docsIndex >= 0) {
             const docsSegments = pathSegments.slice(0, docsIndex + 1);
             return '/' + docsSegments.join('/') + '/static/';
         }
 
-        // Default fallback: try relative paths that should work in most cases
         return './static/';
     },
 
@@ -106,22 +102,15 @@ window.SharedPyodideManager = {
         if (this.uiDependenciesLoaded) return;
 
         const staticPath = this.getStaticPath();
+        const dependencies = [
+            this.loadCSS(staticPath + 'vendor/prism/themes/a11y-light-on-light-dark-on-dark.css'),
+            this._loadPrismIfNeeded(staticPath),
+            this._loadCodeJar(staticPath)
+        ];
 
         try {
-            // Load all UI dependencies in parallel, but don't fail if some are missing
-            await Promise.allSettled([
-                // Prism CSS and JavaScript
-                this.loadCSS(staticPath + 'vendor/prism/themes/a11y-light-on-light-dark-on-dark.min.css'),
-                window.Prism ? Promise.resolve() : this.loadScript(staticPath + 'vendor/prism/prism.js').catch(() => console.warn('Prism not available')),
-
-                // CodeJar for exercises - try multiple versions
-                this.loadCodeJar(staticPath).catch(() => console.warn('CodeJar not available'))
-            ]);
-
-            // Wait for Prism to be ready
-            if (!window.Prism) {
-                await new Promise(resolve => setTimeout(resolve, 100));
-            }
+            await Promise.allSettled(dependencies);
+            this._waitForPrism();
         } catch (error) {
             console.warn('Some UI dependencies failed to load:', error);
         }
@@ -129,23 +118,30 @@ window.SharedPyodideManager = {
         this.uiDependenciesLoaded = true;
     },
 
-    // Load CodeJar as a module
-    async loadCodeJar(staticPath) {
-        // Load CodeJar as a module
-        const codejarPath = staticPath + 'vendor/codejar/codejar.js';
+    async _loadPrismIfNeeded(staticPath) {
+        if (window.Prism) return Promise.resolve();
 
         try {
-            // Import CodeJar as a module
-            const module = await import(codejarPath);
-            // CodeJar should be the default export
-            window.CodeJar = module.default || module.CodeJar;
-
-            if (!window.CodeJar) {
-                throw new Error('CodeJar not available after loading');
-            }
+            return await this.loadScript(staticPath + 'vendor/prism/prism.js');
         } catch (error) {
-            console.error(`Failed to load CodeJar from ${codejarPath}:`, error);
-            throw error;
+            console.warn('Prism not available');
+            return Promise.resolve();
+        }
+    },
+
+    async _loadCodeJar(staticPath) {
+        try {
+            const codejarPath = staticPath + 'vendor/codejar/codejar.js';
+            const module = await import(codejarPath);
+            window.CodeJar = module.default || module.CodeJar;
+        } catch (error) {
+            console.warn('CodeJar failed to load:', error);
+        }
+    },
+
+    async _waitForPrism() {
+        if (!window.Prism) {
+            await new Promise(resolve => setTimeout(resolve, 100));
         }
     },
 

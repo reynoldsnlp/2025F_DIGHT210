@@ -7,31 +7,43 @@
   --pdb-active-line-bg: #49483e;
   --pdb-active-line-color: #f8f8f2;
   --pdb-success-color: #28a745;
-  --pdb-code-bg: #2d2d2d; /* Dark background for code */
+  --pdb-code-bg: #2d2d2d;
+  --pdb-border-radius: 6px;
+  --pdb-border-radius-sm: 4px;
+  --pdb-padding-std: 1em;
+  --pdb-padding-sm: 0.5em;
+  --pdb-gap-std: 1em;
+  --pdb-gap-lg: 2em;
+  --pdb-font-size-std: 0.95em;
+  --pdb-font-size-sm: 0.85em;
+  --pdb-font-size-xs: 0.8em;
+  --pdb-light-border: #eee;
+  --pdb-table-header-bg: #f5f5f5;
+  --pdb-output-bg: #f8f8f8;
+  --pdb-text-muted: #888;
+  --pdb-text-secondary: #666;
 }
 
 .pyodide-pdb {
   display: flex;
   flex-wrap: wrap;
-  gap: 2em;
-  margin-bottom: 2em;
+  gap: var(--pdb-gap-lg);
+  margin-bottom: var(--pdb-gap-lg);
   border: 1px solid var(--pdb-border-color);
-  padding: 1em;
+  padding: var(--pdb-padding-std);
   border-radius: 8px;
   background: var(--pdb-background);
 }
 
 .pyodide-pdb pre {
   margin: 0;
-  background: var(--pdb-code-bg);
-  padding: 1em;
-  border-radius: 6px;
+  padding: var(--pdb-padding-std);
+  border-radius: var(--pdb-border-radius);
   font-family: var(--pdb-font-mono);
   font-size: 1em;
   min-width: 300px;
-  line-height: 1.25;
-  min-height: 120px; /* Prevent layout shift during initialization */
-  overflow-x: auto; /* Handle long lines of code */
+  min-height: 120px;
+  overflow-x: auto;
   flex: 1;
   max-width: 79ch;
   white-space: pre-wrap;
@@ -40,156 +52,163 @@
 
 .pyodide-pdb pre code,
 .pyodide-pdb .code-line {
-  line-height: 1.25;
-  background: var(--pdb-code-bg);
+  /* line-height and background are removed to let Prism theme control them */
+  display: block; /* Ensures each line is a block */
+  position: relative; /* Enable positioning for borders */
 }
 
 .pyodide-pdb pre code {
   display: block;
 }
 
-/* Prism integration */
-.pyodide-pdb pre code .token.comment,
-.pyodide-pdb pre code .token.prolog,
-.pyodide-pdb pre code .token.doctype,
-.pyodide-pdb pre code .token.cdata {
-    color: #708090;
+/* Remove custom Prism integration styles - let Prism handle its own colors */
+
+.code-line.active {
+  border-left: 3px solid #4a90e2 !important;
+  border-right: 1px solid #4a90e2 !important;
+  background-color: rgba(74, 144, 226, 0.08) !important;
+  padding-left: calc(1em - 3px) !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
 }
 
-.pyodide-pdb pre code .token.string {
-    color: #a3be8c;
+/* Ensure active line highlighting works with Prism tokens */
+.code-line.active * {
+  background-color: transparent !important;
 }
 
-.pyodide-pdb pre code .token.keyword {
-    color: #81a1c1;
+/* Force active class to override any other styling */
+.pyodide-pdb .code-line.active {
+  background-color: rgba(255, 204, 0, 0.6) !important;
 }
 
-.pyodide-pdb pre code .token.number {
-    color: #b48ead;
-}
-
-.pyodide-pdb pre code .token.function {
-    color: #88c0d0;
-}
-
-/* Ensure Prism doesn't override our active line styling */
-.code-line.active .token {
-    color: inherit !important;
+/* Make sure the active line stands out even in dark themes */
+.code-line.active {
+  border-left: 6px solid #ff6600 !important;
+  border-right: 6px solid #ff6600 !important;
 }
 
 .pyodide-pdb .sidebar {
   width: var(--pdb-sidebar-width);
   font-family: Arial, sans-serif;
-  font-size: 0.95em;
+  font-size: var(--pdb-font-size-std);
   background: var(--pdb-sidebar-bg);
   border: 1px solid var(--pdb-border-color);
-  border-radius: 6px;
-  padding: 0.5em 1em;
-  margin-left: 1em;
+  border-radius: var(--pdb-border-radius);
+  padding: var(--pdb-padding-sm) var(--pdb-padding-std);
+  margin-left: var(--pdb-padding-std);
   min-height: 120px;
   display: flex;
   flex-direction: row;
-  gap: 1em;
+  gap: var(--pdb-gap-std);
   flex: 1;
 }
 
 .pyodide-pdb .variables-section {
   flex: 1;
-  min-width: 0; /* Allow flexbox to shrink */
+  min-width: 0;
 }
 
 .pyodide-pdb .variables-section table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 0.5em;
-  font-size: 0.85em;
+  margin-top: var(--pdb-padding-sm);
+  font-size: var(--pdb-font-size-sm);
 }
 
 .pyodide-pdb .variables-section th,
 .pyodide-pdb .variables-section td {
   padding: 0.25em 0.4em;
   text-align: left;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--pdb-light-border);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .pyodide-pdb .variables-section th {
-  background: #f5f5f5;
+  background: var(--pdb-table-header-bg);
   font-weight: bold;
-  border-bottom: 2px solid #ddd;
-  font-size: 0.8em;
+  border-bottom: 2px solid var(--pdb-border-color);
+  font-size: var(--pdb-font-size-xs);
 }
 
 .pyodide-pdb .variables-section th:first-child,
 .pyodide-pdb .variables-section td:first-child {
-  width: 25%;
+  width: 20%;
   font-weight: bold;
 }
 
 .pyodide-pdb .variables-section th:nth-child(2),
 .pyodide-pdb .variables-section td:nth-child(2) {
-  width: 50%;
-  font-family: 'Fira Mono', 'Consolas', monospace;
-  color: #666;
-  font-size: 0.8em;
+  width: 35%;
+  font-family: var(--pdb-font-mono);
+  color: var(--pdb-text-secondary);
+  font-size: var(--pdb-font-size-xs);
+}
+
+.pyodide-pdb .variables-section th:nth-child(3),
+.pyodide-pdb .variables-section td:nth-child(3) {
+  width: 20%;
+  font-size: var(--pdb-font-size-xs);
+  color: var(--pdb-text-secondary);
+  font-style: italic;
 }
 
 .pyodide-pdb .variables-section th:last-child,
 .pyodide-pdb .variables-section td:last-child {
   width: 25%;
   font-size: 0.75em;
-  color: #888;
+  color: var(--pdb-text-muted);
 }
 
 .pyodide-pdb .output-section {
   flex: 1;
-  min-width: 0; /* Allow flexbox to shrink */
-  padding-left: 0.5em;
-  border-left: 1px solid #eee;
+  min-width: 0;
+  padding-left: var(--pdb-padding-sm);
+  border-left: 1px solid var(--pdb-light-border);
   border-top: none;
   padding-top: 0;
 }
 
 .pyodide-pdb .output-content {
-  background: #f8f8f8;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  padding: 0.5em;
-  margin-top: 0.5em;
-  font-family: 'Fira Mono', 'Consolas', monospace;
-  font-size: 0.8em;
+  background: var(--pdb-output-bg);
+  border: 1px solid var(--pdb-border-color);
+  border-radius: var(--pdb-border-radius-sm);
+  padding: var(--pdb-padding-sm);
+  margin-top: var(--pdb-padding-sm);
+  font-family: var(--pdb-font-mono);
+  font-size: var(--pdb-font-size-xs);
   min-height: 80px;
   max-height: 120px;
   overflow-y: auto;
-  color: #333;
+  color: var(--pdb-text-dark);
   white-space: pre-wrap;
 }
 
 .pyodide-pdb .output-content em {
-  color: #888;
+  color: var(--pdb-text-muted);
   font-style: italic;
 }
 
 .pyodide-pdb .controls {
-  margin-top: 1em;
+  margin-top: var(--pdb-padding-std);
 }
 
 .pyodide-pdb .button-container {
   display: flex;
-  gap: 0.5em;
-  margin-bottom: 0.5em;
+  gap: var(--pdb-padding-sm);
+  margin-bottom: var(--pdb-padding-sm);
   align-items: center;
 }
 
 .pyodide-pdb button {
   padding: 0.4em 0.8em;
   border: 1px solid #ccc;
-  border-radius: 4px;
-  background: #fff;
+  border-radius: var(--pdb-border-radius-sm);
+  background: var(--pdb-sidebar-bg);
   cursor: pointer;
-  font-size: 0.85em;
+  font-size: var(--pdb-font-size-sm);
   min-width: 60px;
 }
 
@@ -204,9 +223,9 @@
 }
 
 .completion-message {
-  color: #28a745;
+  color: var(--pdb-success-color);
   font-weight: bold;
-  margin-left: 1em;
+  margin-left: var(--pdb-padding-std);
   font-size: 0.9em;
 }
 
@@ -214,13 +233,7 @@
   margin: 0;
 }
 
-.code-line.active {
-  background: var(--pdb-active-line-bg);
-  color: var(--pdb-active-line-color);
-  border-radius: 4px;
-}
-
-/* Add responsive design */
+/* Responsive design */
 @media (max-width: 768px) {
   .pyodide-pdb {
     flex-direction: column;
@@ -234,9 +247,9 @@
 
   .pyodide-pdb .output-section {
     border-left: none;
-    border-top: 1px solid #eee;
+    border-top: 1px solid var(--pdb-light-border);
     padding-left: 0;
-    padding-top: 0.5em;
+    padding-top: var(--pdb-padding-sm);
   }
 
   .pyodide-pdb pre {
