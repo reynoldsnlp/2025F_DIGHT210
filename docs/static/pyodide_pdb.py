@@ -320,13 +320,16 @@ class StepDebugger:
         """Pre-compute the execution trace by running the code with a tracer."""
         self.execution_trace = []
         captured_output = StringIO()
+        previous_line = None
 
         def trace_function(frame, event, arg):
+            nonlocal previous_line
             if frame.f_code.co_filename == '<string>':
                 line_no = frame.f_lineno - 1  # Convert to 0-based indexing
                 if event == 'line' and 0 <= line_no < len(self.lines):
-                    if self.lines[line_no].strip():  # Only non-empty lines
-                        # Capture state at this point
+                    # Only add if this is a different line and it's not empty
+                    if line_no != previous_line and self.lines[line_no].strip():
+                        # Capture state BEFORE executing this line
                         all_vars = {}
                         scope_info = {}
                         type_info = {}
@@ -351,7 +354,7 @@ class StepDebugger:
                                 scope_name = self._determine_variable_scope(k, frame, current_scope)
                                 scope_info[k] = scope_name
 
-                        # Capture current output
+                        # Capture current output (before executing this line)
                         current_output = captured_output.getvalue()
 
                         self.execution_trace.append({
@@ -359,8 +362,11 @@ class StepDebugger:
                             'locals': all_vars,
                             'scope_info': scope_info,
                             'type_info': type_info,
-                            'output': current_output
+                            'output': current_output,
+                            'pre_execution': True  # This state is BEFORE line execution
                         })
+
+                        previous_line = line_no
             return trace_function
 
         # Run the code once with tracing to capture everything
@@ -372,13 +378,6 @@ class StepDebugger:
         try:
             sys.settrace(trace_function)
             exec(self.compiled_code, temp_globals)
-
-            # After execution completes, capture final state if we have variables
-            if self.execution_trace:
-                # Update the last entry with final output
-                final_output = captured_output.getvalue()
-                self.execution_trace[-1]['output'] = final_output
-
         except Exception as e:
             print(f"Execution error during trace: {e}")
             traceback.print_exc()
@@ -386,10 +385,41 @@ class StepDebugger:
             sys.settrace(old_trace)
             sys.stdout = original_stdout
 
-            # Capture final output state for the last trace entry if we have any
+            # Capture final state after all execution is complete
             if self.execution_trace:
-                final_output = captured_output.getvalue()
-                self.execution_trace[-1]['output'] = final_output
+                # Get the final variables state by re-executing up to the end
+                final_globals = {}
+                sys.stdout = StringIO()  # Capture final output
+                try:
+                    exec(self.compiled_code, final_globals)
+                    final_output = sys.stdout.getvalue()
+
+                    # Create final state entry showing completed execution
+                    final_vars = {}
+                    final_scope_info = {}
+                    final_type_info = {}
+
+                    for k, v in final_globals.items():
+                        if k in self.varnames and not k.startswith('_'):
+                            display_value = self._format_value_for_display(v)
+                            final_vars[k] = display_value
+                            final_type_info[k] = self._get_variable_type(v)
+                            final_scope_info[k] = 'global'  # After execution, most vars are global
+
+                    # Add final state (after last line execution)
+                    self.execution_trace.append({
+                        'line': len(self.lines) - 1,  # Last line
+                        'locals': final_vars,
+                        'scope_info': final_scope_info,
+                        'type_info': final_type_info,
+                        'output': final_output,
+                        'pre_execution': False,  # This state is AFTER execution
+                        'final_state': True
+                    })
+                except:
+                    pass
+                finally:
+                    sys.stdout = original_stdout
 
     def _determine_variable_scope(self, var_name, frame, current_scope):
         """Determine the scope of a variable using simplified logic"""
@@ -473,8 +503,12 @@ class StepDebugger:
         self.type_info = current_state.get('type_info', {})
         self.output_lines = current_state['output'].splitlines()
 
+        # Advance to next step
         self.step_index += 1
-        if self.step_index >= len(self.execution_trace):
+
+        # Check if we've reached the end or hit the final state
+        if (self.step_index >= len(self.execution_trace) or
+            current_state.get('final_state', False)):
             self.finished = True
 
     def reset(self):

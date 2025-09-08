@@ -192,13 +192,12 @@ ${this.instanceId} = pyodide_pdb.StepDebugger("""${this.code.replace(/\\/g, '\\\
 ${this.instanceId}.reset()
 `);
 
-      // Automatically step to the first executable line to highlight it
-      await this.pyodide.runPythonAsync(`${this.instanceId}.step()`);
+      // Get initial state - this should show the first line ready to execute
       this.state = await this.getState();
 
       // Reset UI state
       this.stepBtn.disabled = false;
-      this.stepBtn.textContent = 'Execute highlighted line';
+      this.stepBtn.textContent = this.state.current_line >= 0 ? 'Execute highlighted line' : 'Start execution';
       this.completionDiv.style.display = 'none';
 
       // Restore original code content
@@ -223,9 +222,13 @@ ${this.instanceId}.reset()
       this.state = await this.getState();
       this.render();
 
+      // Update button text and check if finished
       if (this.state.finished) {
         this.stepBtn.disabled = true;
         this.completionDiv.style.display = 'block';
+        this.stepBtn.textContent = 'Finished';
+      } else {
+        this.stepBtn.textContent = 'Execute highlighted line';
       }
     } catch (error) {
       // Silent error handling
@@ -277,7 +280,7 @@ ${this.instanceId}.reset()
       const activeClass = isActive ? ' active' : '';
       return `<div class="code-line${activeClass}" data-line="${idx}">${lineContent}</div>`;
     }).join('');
-    
+
     // Apply syntax highlighting to the entire structure after creating it
     setTimeout(() => {
       if (window.Prism) {
@@ -294,12 +297,15 @@ ${this.instanceId}.reset()
         });
       }
     }, 0);
-    
+
     return html;
   }
 
   _isActiveLine(idx) {
-    return idx === this.state.current_line && !this.state.finished;
+    // Show active line only if not finished, current_line is valid, and we're in a pre-execution state
+    return (idx === this.state.current_line &&
+            !this.state.finished &&
+            this.state.current_line >= 0);
   }
 
   _scrollToActiveLine() {
