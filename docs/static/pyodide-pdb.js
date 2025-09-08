@@ -200,7 +200,7 @@ ${this.instanceId}.reset()
       this.stepBtn.textContent = this.state.current_line >= 0 ? 'Execute highlighted line' : 'Start execution';
       this.completionDiv.style.display = 'none';
 
-      // Restore original code content
+      // Restore original code content and clear any existing overlay structure
       this.codeBlock.textContent = this.originalCode;
 
       // Re-apply syntax highlighting after resetting content
@@ -263,40 +263,81 @@ ${this.instanceId}.reset()
   _renderCode() {
     const lines = this.originalCode.split(/\r\n|\r|\n/);
 
-    const html = this._generateLineHTML(lines);
-    this.codeBlock.innerHTML = html;
+    // Create overlay container if it doesn't exist
+    if (!this.codeBlock.querySelector('.code-overlay-container')) {
+      this._createOverlayStructure();
+    }
+
+    // Update both layers
+    this._updateSteppingLayer(lines);
+    this._updatePrismLayer(lines);
     this._scrollToActiveLine();
   }
 
-  _generateLineHTML(lines) {
-    // Always use original code to avoid nested structures
-    return this._generatePlainHTML(lines);
+  _createOverlayStructure() {
+    // Clear existing content
+    this.codeBlock.innerHTML = '';
+
+    // Create container
+    const container = document.createElement('div');
+    container.className = 'code-overlay-container';
+
+    // Create stepping layer (background)
+    const steppingLayer = document.createElement('div');
+    steppingLayer.className = 'code-stepping-layer';
+
+    // Create prism layer (foreground)
+    const prismLayer = document.createElement('div');
+    prismLayer.className = 'code-prism-layer language-python';
+
+    // Assemble structure
+    container.appendChild(steppingLayer);
+    container.appendChild(prismLayer);
+    this.codeBlock.appendChild(container);
+
+    // Store references
+    this.steppingLayer = steppingLayer;
+    this.prismLayer = prismLayer;
   }
 
-  _generatePlainHTML(lines) {
-    const html = lines.map((line, idx) => {
+  _updateSteppingLayer(lines) {
+    // Generate stepping markup (with active line highlighting)
+    const steppingHTML = lines.map((line, idx) => {
       const lineContent = line.trim() === '' ? '&nbsp;' : SharedPyodideManager.escapeHtml(line);
       const isActive = this._isActiveLine(idx);
       const activeClass = isActive ? ' active' : '';
       return `<div class="code-line${activeClass}" data-line="${idx}">${lineContent}</div>`;
     }).join('');
 
-    // Apply syntax highlighting to the entire structure after creating it
-    setTimeout(() => {
-      if (window.Prism) {
-        this._ensureLanguageClass();
-        // Re-highlight the individual line contents
-        this.codeBlock.querySelectorAll('.code-line').forEach(lineDiv => {
-          const tempCode = document.createElement('code');
-          tempCode.className = 'language-python';
-          tempCode.textContent = lineDiv.textContent;
-          SharedPyodideManager.highlightCode(tempCode, 'python');
-          if (tempCode.innerHTML !== tempCode.textContent) {
-            lineDiv.innerHTML = tempCode.innerHTML;
-          }
-        });
-      }
-    }, 0);
+    this.steppingLayer.innerHTML = steppingHTML;
+  }
+
+  _updatePrismLayer(lines) {
+    // Set the original code for Prism highlighting
+    this.prismLayer.textContent = this.originalCode;
+
+    // Apply Prism highlighting
+    if (window.Prism) {
+      this.prismLayer.className = 'code-prism-layer language-python';
+      // Reset highlighted state
+      delete this.prismLayer.dataset.highlighted;
+      SharedPyodideManager.highlightCode(this.prismLayer, 'python');
+    }
+  }
+
+  _generateLineHTML(lines) {
+    // This method is no longer used - we use the overlay approach instead
+    return this._generatePlainHTML(lines);
+  }
+
+  _generatePlainHTML(lines) {
+    // Fallback for when overlay structure isn't available
+    const html = lines.map((line, idx) => {
+      const lineContent = line.trim() === '' ? '&nbsp;' : SharedPyodideManager.escapeHtml(line);
+      const isActive = this._isActiveLine(idx);
+      const activeClass = isActive ? ' active' : '';
+      return `<div class="code-line${activeClass}" data-line="${idx}">${lineContent}</div>`;
+    }).join('');
 
     return html;
   }
@@ -311,7 +352,14 @@ ${this.instanceId}.reset()
   _scrollToActiveLine() {
     if (this._isActiveLine(this.state.current_line)) {
       setTimeout(() => {
-        const activeElement = this.codeBlock.querySelector(`[data-line="${this.state.current_line}"]`);
+        // Try to find active element in stepping layer first
+        let activeElement = this.steppingLayer?.querySelector(`[data-line="${this.state.current_line}"]`);
+
+        // Fallback to main code block if stepping layer not available
+        if (!activeElement) {
+          activeElement = this.codeBlock.querySelector(`[data-line="${this.state.current_line}"]`);
+        }
+
         activeElement?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       }, 0);
     }

@@ -48,35 +48,112 @@
   max-width: 79ch;
   white-space: pre-wrap;
   overflow-wrap: break-word;
+  position: relative; /* Enable positioning for overlay */
+}
+
+/* Container for overlapping code layers */
+.code-overlay-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  /* Establish consistent font properties that both layers inherit */
+  font-family: var(--pdb-font-mono);
+  font-size: inherit;
+  line-height: inherit;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  text-wrap-mode: wrap;
+  tab-size: 2;
+  word-break: normal;
+  word-spacing: 0px;
+}
+
+/* Background layer - handles stepping/active line highlighting */
+.code-stepping-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  /* Inherit all layout properties from container */
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  white-space: inherit;
+  overflow-wrap: inherit;
+  text-wrap-mode: inherit;
+  tab-size: inherit;
+  word-break: inherit;
+  word-spacing: inherit;
+  padding: 0;
+  margin: 0;
+  color: transparent; /* Hide text, only show backgrounds */
+}
+
+/* Foreground layer - handles Prism syntax highlighting */
+.code-prism-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  /* Force identical layout properties to stepping layer */
+  font-family: inherit !important;
+  font-size: inherit !important;
+  line-height: inherit !important;
+  white-space: inherit !important;
+  overflow-wrap: inherit !important;
+  text-wrap-mode: inherit !important;
+  tab-size: inherit !important;
+  word-break: inherit !important;
+  word-spacing: inherit !important;
+  padding: 0;
+  margin: 0;
+  background: transparent !important;
+  pointer-events: none; /* Allow clicks to pass through */
+}
+
+/* Override any Prism theme properties that might interfere with alignment */
+.code-prism-layer * {
+  font-family: inherit !important;
+  line-height: inherit !important;
+  white-space: inherit !important;
+  overflow-wrap: inherit !important;
+  text-wrap-mode: inherit !important;
+}
+
+/* Ensure Prism tokens have transparent backgrounds */
+.code-prism-layer .token {
+  background: transparent !important;
 }
 
 .pyodide-pdb pre code,
 .pyodide-pdb .code-line {
-  /* line-height and background are removed to let Prism theme control them */
-  display: block; /* Ensures each line is a block */
-  position: relative; /* Enable positioning for borders */
+  display: block;
+  position: relative;
 }
 
 .pyodide-pdb pre code {
   display: block;
+  padding: 0;
+  margin: 0;
 }
 
-/* Remove custom Prism integration styles - let Prism handle its own colors */
-
+/* Active line highlighting in stepping layer */
 .code-line.active {
-  background-color: rgba(74, 144, 226, 0.08) !important;
+  background-color: rgba(255, 204, 0, 0.6) !important;
   margin: 0 !important;
   box-sizing: border-box !important;
 }
 
-/* Ensure active line highlighting works with Prism tokens */
-.code-line.active * {
-  background-color: transparent !important;
-}
-
-/* Force active class to override any other styling */
-.pyodide-pdb .code-line.active {
-  background-color: rgba(255, 204, 0, 0.6) !important;
+/* Ensure consistent line heights between layers */
+.code-stepping-layer .code-line,
+.code-prism-layer .code-line {
+  line-height: 1.5;
+  min-height: 1.5em;
+  display: block;
 }
 
 .pyodide-pdb .sidebar {
