@@ -192,6 +192,8 @@ ${this.instanceId} = pyodide_pdb.StepDebugger("""${this.code.replace(/\\/g, '\\\
 ${this.instanceId}.reset()
 `);
 
+      // Automatically step to the first executable line to highlight it
+      await this.pyodide.runPythonAsync(`${this.instanceId}.step()`);
       this.state = await this.getState();
 
       // Reset UI state
@@ -264,29 +266,36 @@ ${this.instanceId}.reset()
   }
 
   _generateLineHTML(lines) {
-    if (window.Prism && this.codeBlock.innerHTML.includes('<span')) {
-      return this._generateHighlightedHTML(lines);
-    }
+    // Always use original code to avoid nested structures
     return this._generatePlainHTML(lines);
   }
 
-  _generateHighlightedHTML(lines) {
-    const highlightedLines = this.codeBlock.innerHTML.split(/\r\n|\r|\n/);
-    return highlightedLines.map((line, idx) => {
-      const lineContent = line.trim() === '' ? '&nbsp;' : line;
-      const isActive = this._isActiveLine(idx);
-      const activeClass = isActive ? ' active' : '';
-      return `<div class="code-line${activeClass}" data-line="${idx}">${lineContent}</div>`;
-    }).join('');
-  }
-
   _generatePlainHTML(lines) {
-    return lines.map((line, idx) => {
+    const html = lines.map((line, idx) => {
       const lineContent = line.trim() === '' ? '&nbsp;' : SharedPyodideManager.escapeHtml(line);
       const isActive = this._isActiveLine(idx);
       const activeClass = isActive ? ' active' : '';
       return `<div class="code-line${activeClass}" data-line="${idx}">${lineContent}</div>`;
     }).join('');
+    
+    // Apply syntax highlighting to the entire structure after creating it
+    setTimeout(() => {
+      if (window.Prism) {
+        this._ensureLanguageClass();
+        // Re-highlight the individual line contents
+        this.codeBlock.querySelectorAll('.code-line').forEach(lineDiv => {
+          const tempCode = document.createElement('code');
+          tempCode.className = 'language-python';
+          tempCode.textContent = lineDiv.textContent;
+          SharedPyodideManager.highlightCode(tempCode, 'python');
+          if (tempCode.innerHTML !== tempCode.textContent) {
+            lineDiv.innerHTML = tempCode.innerHTML;
+          }
+        });
+      }
+    }, 0);
+    
+    return html;
   }
 
   _isActiveLine(idx) {
@@ -311,7 +320,7 @@ ${this.instanceId}.reset()
       .sort();
 
     if (definedVars.length === 0) {
-      this.variablesDiv.innerHTML = '<strong>Variables</strong><p><em>No variables declared yet</em></p>';
+      this.variablesDiv.innerHTML = '<strong>Variables</strong><p><em>No variables defined yet</em></p>';
       return;
     }
 
