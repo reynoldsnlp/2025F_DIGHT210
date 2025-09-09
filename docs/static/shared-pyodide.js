@@ -152,39 +152,55 @@ window.SharedPyodideManager = {
         // First ensure UI dependencies are loaded
         await this.loadUIDependencies();
 
-        const staticPath = this.getStaticPath();
-
         // Load Pyodide if not already loaded
         if (typeof window.loadPyodide === 'undefined') {
-            try {
-                await this.loadScript(staticPath + "vendor/pyodide/pyodide.js");
-            } catch (error) {
-                // Try alternative paths if the main path fails
-                const alternatePaths = [
-                    "./vendor/pyodide/pyodide.js",
-                    "../vendor/pyodide/pyodide.js",
-                    "../../vendor/pyodide/pyodide.js",
-                    "/vendor/pyodide/pyodide.js"
-                ];
-
-                let loaded = false;
-                for (const altPath of alternatePaths) {
-                    try {
-                        await this.loadScript(altPath);
-                        loaded = true;
-                        break;
-                    } catch (e) {
-                        console.warn(`Failed to load Pyodide from ${altPath}`);
-                    }
-                }
-
-                if (!loaded) {
-                    throw new Error('Failed to load Pyodide from any path');
-                }
-            }
+            await this._loadPyodideFromCDNOrVendor();
         }
 
         this.dependenciesLoaded = true;
+    },
+
+    async _loadPyodideFromCDNOrVendor() {
+        // Try CDN first
+        try {
+            console.log('Attempting to load Pyodide from CDN...');
+            await this.loadScript('https://cdn.jsdelivr.net/pyodide/v0.28.2/full/pyodide.js');
+            console.log('Successfully loaded Pyodide from CDN');
+            return;
+        } catch (cdnError) {
+            console.warn('Failed to load Pyodide from CDN, falling back to vendor copy:', cdnError);
+        }
+
+        // Fallback to vendor copy
+        const staticPath = this.getStaticPath();
+        try {
+            await this.loadScript(staticPath + "vendor/pyodide/pyodide.js");
+            console.log('Successfully loaded Pyodide from vendor copy');
+        } catch (error) {
+            // Try alternative paths if the main path fails
+            const alternatePaths = [
+                "./vendor/pyodide/pyodide.js",
+                "../vendor/pyodide/pyodide.js",
+                "../../vendor/pyodide/pyodide.js",
+                "/vendor/pyodide/pyodide.js"
+            ];
+
+            let loaded = false;
+            for (const altPath of alternatePaths) {
+                try {
+                    await this.loadScript(altPath);
+                    loaded = true;
+                    console.log(`Successfully loaded Pyodide from ${altPath}`);
+                    break;
+                } catch (e) {
+                    console.warn(`Failed to load Pyodide from ${altPath}`);
+                }
+            }
+
+            if (!loaded) {
+                throw new Error('Failed to load Pyodide from CDN and any vendor path');
+            }
+        }
     },
 
     // Get or create shared Pyodide instance
@@ -213,10 +229,23 @@ window.SharedPyodideManager = {
             throw new Error('loadPyodide is not available after loading dependencies');
         }
 
-        const staticPath = this.getStaticPath();
-        this.pyodideInstance = await loadPyodide({ indexURL: staticPath + "vendor/pyodide/" });
+        // Determine the indexURL based on how Pyodide was loaded
+        const indexURL = this._getPyodideIndexURL();
+        this.pyodideInstance = await loadPyodide({ indexURL });
 
         return this.pyodideInstance;
+    },
+
+    _getPyodideIndexURL() {
+        // Check if we loaded from CDN by looking for CDN script tag
+        const cdnScript = document.querySelector('script[src*="cdn.jsdelivr.net/pyodide"]');
+        if (cdnScript) {
+            return 'https://cdn.jsdelivr.net/pyodide/v0.28.2/full/';
+        }
+
+        // Otherwise use vendor path
+        const staticPath = this.getStaticPath();
+        return staticPath + "vendor/pyodide/";
     },
 
     // Load pyodide_pdb.py for PDB functionality
