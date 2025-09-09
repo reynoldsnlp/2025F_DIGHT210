@@ -20,9 +20,6 @@ This document provides links to all available Python programming lectures in thi
 ### Lesson 1d: Math Operations
 - [Math Operations - Calculating with Python](1d_math.html) - Mathematical operators, order of operations, and assignment shortcuts
 
-## Unit 1 Combined Reading
-- [Unit 1a: Python Basics](unit_1/1a_reading.html) - Comprehensive overview of comments, print, variables, and math operations
-
 ---
 
 ## How to Use These Lectures
