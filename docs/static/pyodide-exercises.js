@@ -101,16 +101,20 @@ class PyodideExercise {
                     // Apply Prism highlighting
                     SharedPyodideManager.highlightCode(editor);
                 }
+                
+                // Auto-resize editor based on content
+                this._autoResizeEditor(editor);
             });
 
             // Set initial code
             this.codeJar.updateCode(this.initialCode);
 
-            // Force initial highlighting
+            // Force initial highlighting and sizing
             if (window.Prism) {
                 this.editorDiv.classList.add('language-python');
                 SharedPyodideManager.highlightCode(codeElement);
             }
+            this._autoResizeEditor(codeElement);
 
             // Apply syntax highlighting to answer code if available
             if (this.answer && window.Prism && this.answerCodeElement) {
@@ -120,6 +124,21 @@ class PyodideExercise {
             console.error('CodeJar initialization failed:', error);
             throw error;
         }
+    }
+
+    _autoResizeEditor(editor) {
+        // Auto-resize editor based on content lines
+        const lines = editor.textContent.split('\n').length;
+        const lineHeight = parseFloat(getComputedStyle(editor).lineHeight) || 20;
+        const padding = parseFloat(getComputedStyle(this.editorDiv).paddingTop) * 2 || 20;
+        
+        // Calculate height based on content, with min/max constraints
+        const contentHeight = (lines * lineHeight) + padding;
+        const minHeight = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--exercise-height-editor-min')) || 120;
+        const maxHeight = parseInt(getComputedStyle(this.editorDiv).maxHeight) || 400;
+        
+        const newHeight = Math.min(Math.max(contentHeight, minHeight), maxHeight);
+        this.editorDiv.style.height = `${newHeight}px`;
     }
 
     async init() {
@@ -279,6 +298,23 @@ sys.stdout = StringIO()
 
     _displayResult(result) {
         this.output.textContent = result || "(no output)";
+        // Auto-resize output based on content
+        this._autoResizeOutput();
+    }
+
+    _autoResizeOutput() {
+        // Auto-resize output based on content
+        const lines = this.output.textContent.split('\n').length;
+        const lineHeight = parseFloat(getComputedStyle(this.output).lineHeight) || 20;
+        const padding = parseFloat(getComputedStyle(this.output).paddingTop) * 2 || 20;
+        
+        // Calculate height based on content, with min/max constraints
+        const contentHeight = (lines * lineHeight) + padding;
+        const minHeight = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--exercise-height-editor-min')) || 120;
+        const maxHeight = parseInt(getComputedStyle(this.output).maxHeight) || 300;
+        
+        const newHeight = Math.min(Math.max(contentHeight, minHeight), maxHeight);
+        this.output.style.height = `${newHeight}px`;
     }
 
     _handleExecutionError(error) {

@@ -388,9 +388,9 @@ ${this.instanceId}.reset()
       const value = this.state.locals[varName];
       const scope = this.state.scope_info[varName] || 'unknown';
       const type = this.state.type_info && this.state.type_info[varName] || 'unknown';
-      
+
       // Use the value directly since Python backend now formats it properly
-      const displayValue = typeof value === 'string' 
+      const displayValue = typeof value === 'string'
         ? SharedPyodideManager.escapeHtml(value)
         : SharedPyodideManager.escapeHtml(String(value));
 
@@ -417,8 +417,10 @@ ${this.instanceId}.reset()
         .map(line => SharedPyodideManager.escapeHtml(line))
         .join('<br>');
       outputContent.innerHTML = outputHtml;
+      outputContent.style.minHeight = 'auto'; /* Remove fixed min-height when there's content */
     } else {
-      outputContent.innerHTML = '<em>No output yet</em>';
+      outputContent.innerHTML = '<em style="color: var(--pdb-text-muted);">No output yet</em>';
+      outputContent.style.minHeight = '30px'; /* Minimal height when empty */
     }
   }
 }

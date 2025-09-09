@@ -27,6 +27,7 @@
 .pyodide-pdb {
   display: flex;
   flex-wrap: wrap;
+  align-items: flex-start;
   gap: var(--pdb-gap-lg);
   margin-bottom: var(--pdb-gap-lg);
   border: 1px solid var(--pdb-border-color);
@@ -44,7 +45,7 @@
   font-family: var(--pdb-font-mono);
   font-size: 1em;
   min-width: 300px;
-  min-height: 120px;
+  min-height: 80px; /* Reduced from 120px */
   overflow-x: auto;
   flex: 1;
   white-space: pre-wrap;
@@ -168,7 +169,7 @@
   border-radius: var(--pdb-border-radius);
   padding: var(--pdb-padding-sm) var(--pdb-padding-std);
   margin-left: var(--pdb-padding-std);
-  min-height: 120px;
+  min-height: auto; /* Changed from 120px to auto */
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
@@ -192,7 +193,7 @@
 
 .pyodide-pdb .variables-section th,
 .pyodide-pdb .variables-section td {
-  padding: 0.25em 0.4em;
+  padding: 0.2em 0.3em; /* Reduced padding */
   text-align: left;
   border-bottom: 1px solid var(--pdb-light-border);
   overflow: hidden;
@@ -253,7 +254,7 @@
   margin-top: var(--pdb-padding-sm);
   font-family: var(--pdb-font-mono);
   font-size: var(--pdb-font-size-xs);
-  min-height: 80px;
+  min-height: 40px;
   max-height: 120px;
   overflow-y: auto;
   color: var(--pdb-text-dark);
@@ -300,18 +301,32 @@
 @media (max-width: 768px) {
   .pyodide-pdb {
     flex-direction: column;
+    align-items: flex-start; /* Maintain flex-start on mobile */
     width: 100%;
+    gap: var(--pdb-padding-std); /* Reduced gap on mobile */
+  }
+
+  .pyodide-pdb pre {
+    min-width: 0;
+    min-height: 60px; /* Further reduced for mobile */
   }
 
   .pyodide-pdb .sidebar {
     width: 100%;
     margin-left: 0;
     flex-direction: column;
+    min-height: auto;
   }
 
   .pyodide-pdb .variables-section {
-    min-width: 0;
+    min-width: 0; /* Remove minimum width constraint */
     width: 100%;
+    flex: none; /* Don't allow flex growth on mobile */
+  }
+
+  .pyodide-pdb .variables-section th,
+  .pyodide-pdb .variables-section td {
+    padding: 0.15em 0.25em; /* Even smaller padding on mobile */
   }
 
   .pyodide-pdb .output-section {
@@ -321,16 +336,21 @@
     border-top: 1px solid var(--pdb-light-border);
     padding-left: 0;
     padding-top: var(--pdb-padding-sm);
+    flex: none; /* Don't allow flex growth on mobile */
   }
 
-  .pyodide-pdb pre {
-    width: 100%;
-    min-width: 0;
+  .pyodide-pdb .output-content {
+    min-height: 30px; /* Minimal height on mobile */
+    max-height: 100px; /* Reduced max height on mobile */
   }
 }
 
 /* Medium screen adjustments for sidebar wrapping */
 @media (max-width: 1200px) and (min-width: 769px) {
+  .pyodide-pdb {
+    align-items: flex-start; /* Explicitly maintain flex-start for medium screens */
+  }
+
   .pyodide-pdb .sidebar {
     flex-direction: column;
     width: 100%;
@@ -339,6 +359,7 @@
   .pyodide-pdb .variables-section {
     min-width: 0;
     width: 100%;
+    flex: none; /* Don't allow flex growth on medium screens */
   }
 
   .pyodide-pdb .output-section {
@@ -348,5 +369,10 @@
     border-top: 1px solid var(--pdb-light-border);
     padding-left: 0;
     padding-top: var(--pdb-padding-sm);
+    flex: none; /* Don't allow flex growth on medium screens */
+  }
+
+  .pyodide-pdb .output-content {
+    min-height: 35px; /* Reduced for medium screens */
   }
 }

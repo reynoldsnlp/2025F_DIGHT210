@@ -24,9 +24,9 @@
     --exercise-font-size: 14px;
     --exercise-font-size-lg: 16px;
     --exercise-font-size-xl: 24px;
-    --exercise-height-editor: 300px;
-    --exercise-line-height: 1.5;
-    --exercise-min-width-line-numbers: 40px;
+    --exercise-height-editor: 250px; /* Reduced from 300px */
+    --exercise-line-height: 1.4; /* Slightly reduced */
+    --exercise-min-width-line-numbers: 35px; /* Reduced from 40px */
 }
 
 body {
@@ -197,7 +197,7 @@ body {
 
 .answer {
     margin-top: var(--exercise-padding-std);
-    padding: var(--exercise-padding-std);
+    padding: var(--exercise-padding-sm); /* Reduced padding */
     border-radius: var(--exercise-border-radius);
     font-family: var(--exercise-font-mono);
     white-space: pre-wrap;
@@ -244,4 +244,67 @@ body {
     font-size: var(--exercise-font-size-lg);
 }
 
-/* Remove all custom Prism token color overrides */
+/* Mobile-specific optimizations */
+@media (max-width: 768px) {
+    :root {
+        --exercise-height-editor: 200px; /* Further reduced for mobile */
+        --exercise-gap: 15px; /* Reduced gap */
+        --exercise-padding-std: 8px; /* Reduced padding */
+        --exercise-padding-lg: 15px; /* Reduced large padding */
+    }
+
+    .exercise-container {
+        padding: var(--exercise-padding-std);
+        margin-bottom: var(--exercise-gap);
+    }
+
+    .editor, .output {
+        height: var(--exercise-height-editor);
+        min-height: var(--exercise-height-editor);
+        padding: var(--exercise-padding-std);
+    }
+
+    .controls {
+        margin: var(--exercise-padding-sm) 0; /* Reduced margin */
+    }
+
+    .run-btn, .reveal-answer-btn {
+        padding: var(--exercise-padding-sm) var(--exercise-padding-std); /* Smaller buttons */
+        font-size: var(--exercise-font-size); /* Smaller text */
+    }
+
+    .answer {
+        padding: var(--exercise-padding-sm);
+        margin-top: var(--exercise-padding-sm);
+    }
+}
+
+/* Very small screens */
+@media (max-width: 480px) {
+    :root {
+        --exercise-height-editor: 180px; /* Even smaller for very small screens */
+        --exercise-gap: 10px;
+        --exercise-padding-std: 6px;
+    }
+
+    .exercise-container {
+        padding: var(--exercise-padding-sm);
+    }
+
+    .run-btn, .reveal-answer-btn {
+        width: 100%; /* Full width buttons on very small screens */
+        margin: var(--exercise-padding-sm) 0;
+    }
+
+    .controls {
+        display: flex;
+        flex-direction: column;
+        gap: var(--exercise-padding-sm);
+    }
+
+    .checkmark {
+        align-self: flex-start;
+        margin-left: 0;
+        margin-top: var(--exercise-padding-sm);
+    }
+}
