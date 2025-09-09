@@ -291,17 +291,6 @@
   cursor: not-allowed;
 }
 
-.completion-message {
-  color: var(--pdb-success-color);
-  font-weight: bold;
-  margin-left: var(--pdb-padding-std);
-  font-size: 0.9em;
-}
-
-.completion-message p {
-  margin: 0;
-}
-
 /* Responsive design */
 @media (max-width: 768px) {
   .pyodide-pdb {

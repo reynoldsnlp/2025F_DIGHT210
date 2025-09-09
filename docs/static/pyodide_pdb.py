@@ -565,11 +565,14 @@ class StepDebugger:
             except:
                 return f"<{type_name} object>"
 
-        # Handle other types normally
+        # Handle other types using Python's repr for proper formatting
         try:
-            return copy.deepcopy(value)
-        except Exception:
-            return str(value)
+            return repr(copy.deepcopy(value))
+        except:
+            try:
+                return repr(value)
+            except:
+                return str(value)
 
     def _represent_zip_iterator(self, zip_obj):
         """Represent a zip iterator by showing its structure"""

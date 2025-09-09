@@ -121,18 +121,11 @@ class InteractiveExample {
       buttonContainer.appendChild(this.stepBtn);
       buttonContainer.appendChild(this.resetBtn);
 
-      this.completionDiv = document.createElement('div');
-      this.completionDiv.className = 'completion-message';
-      this.completionDiv.style.display = 'none';
-      this.completionDiv.innerHTML = '<strong>Done!</strong>';
-      buttonContainer.appendChild(this.completionDiv);
-
       this.controlsDiv.appendChild(buttonContainer);
       this.codeBlock.parentNode.appendChild(this.controlsDiv);
     } else {
       this.stepBtn = this.controlsDiv.querySelector('.step-btn');
       this.resetBtn = this.controlsDiv.querySelector('.reset-btn');
-      this.completionDiv = this.controlsDiv.querySelector('.completion-message');
 
       // Disable buttons if they exist
       if (this.stepBtn) this.stepBtn.disabled = true;
@@ -198,7 +191,6 @@ ${this.instanceId}.reset()
       // Reset UI state
       this.stepBtn.disabled = false;
       this.stepBtn.textContent = this.state.current_line >= 0 ? 'Execute highlighted line' : 'Start execution';
-      this.completionDiv.style.display = 'none';
 
       // Restore original code content and clear any existing overlay structure
       this.codeBlock.textContent = this.originalCode;
@@ -225,7 +217,6 @@ ${this.instanceId}.reset()
       // Update button text and check if finished
       if (this.state.finished) {
         this.stepBtn.disabled = true;
-        this.completionDiv.style.display = 'block';
         this.stepBtn.textContent = 'Finished';
       } else {
         this.stepBtn.textContent = 'Execute highlighted line';
@@ -397,9 +388,11 @@ ${this.instanceId}.reset()
       const value = this.state.locals[varName];
       const scope = this.state.scope_info[varName] || 'unknown';
       const type = this.state.type_info && this.state.type_info[varName] || 'unknown';
-      const displayValue = typeof value === 'string' && value.includes('(') && value.includes(')')
+      
+      // Use the value directly since Python backend now formats it properly
+      const displayValue = typeof value === 'string' 
         ? SharedPyodideManager.escapeHtml(value)
-        : SharedPyodideManager.escapeHtml(JSON.stringify(value));
+        : SharedPyodideManager.escapeHtml(String(value));
 
       html += `
         <tr>

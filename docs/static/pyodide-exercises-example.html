@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pyodide Exercise Example</title>
+    <!-- Load CSS first for immediate styling -->
+    <link rel="stylesheet" href="../../static/pyodide-exercises.css">
+    <!-- Load shared utilities first -->
+    <script src="../../static/shared-pyodide.js"></script>
+    <!-- Load specific functionality -->
+    <script src="../../static/pyodide-exercises.js"></script>
 </head>
 <body>
     <h1>String Methods Exercise</h1>
@@ -45,6 +51,5 @@ print(result)
          data-answer="print(this_variable_does_not_exist)"># This exercise should fail validation
     </div>
 
-    <script src="pyodide-exercises.js"></script>
 </body>
 </html>

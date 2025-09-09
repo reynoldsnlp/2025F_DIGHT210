@@ -170,8 +170,14 @@ sys.stderr = StringIO()
     }
 
     async _executeAnswer() {
-        this.pyodide.runPython(this.answer);
-        return this.pyodide.runPython("sys.stdout.getvalue()");
+        try {
+            this.pyodide.runPython(this.answer);
+            return this.pyodide.runPython("sys.stdout.getvalue()");
+        } catch (error) {
+            // If there's a Python error during validation, capture it
+            const errorOutput = this.pyodide.runPython("sys.stderr.getvalue()");
+            throw new Error(`Python execution error: ${error.message}. Stderr: ${errorOutput}`);
+        }
     }
 
     _checkValidationResult(actualOutput) {
@@ -188,14 +194,23 @@ Answer: ${this.answer}`);
     }
 
     _logValidationError(error) {
-        const errorOutput = this.pyodide.runPython("sys.stderr.getvalue()");
+        // Don't try to access stderr if there was a Python execution error
+        let errorDetails = error.message;
+        try {
+            const errorOutput = this.pyodide.runPython("sys.stderr.getvalue()");
+            if (errorOutput) {
+                errorDetails += `\nStderr: ${errorOutput}`;
+            }
+        } catch (stderrError) {
+            // If we can't get stderr, just use the original error
+        }
+
         console.warn(`Exercise validation error for ID: ${this.exerciseId}
-Error: ${error.message}
-Traceback: ${errorOutput}
+Error: ${errorDetails}
 Answer code: ${this.answer}
 Expected output: "${this.expectedOutput}"
 Container element:`, this.container);
-            }
+    }
 
     async _restorePythonEnvironment() {
         this.pyodide.runPython(`
