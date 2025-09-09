@@ -112,6 +112,7 @@ body {
     font-size: var(--exercise-font-size);
     overflow-y: auto;
     white-space: pre-wrap;
+    margin-left: 10px;
 }
 
 .controls {
@@ -185,12 +186,28 @@ body {
     position: relative;
 }
 
+.answer pre {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    border: none;
+    font-family: inherit;
+    font-size: inherit;
+}
+
+.answer code {
+    font-family: inherit;
+    font-size: inherit;
+    background: transparent;
+    padding: 0;
+}
+
 .answer.language-python {
     background: var(--exercise-bg-answer);
 }
 
 .answer.show-solution {
-    border: 2px solid #28a745 !important;
+    border: 2px solid var(--exercise-secondary-color) !important;
     background: #f8fff8 !important;
     width: 100%;
     max-width: 79ch;
@@ -202,7 +219,7 @@ body {
     content: "Solution:";
     display: block;
     font-weight: bold;
-    color: #28a745;
+    color: var(--exercise-secondary-color);
     margin-bottom: var(--exercise-padding-sm);
     font-family: var(--exercise-font-family);
     font-size: var(--exercise-font-size-lg);

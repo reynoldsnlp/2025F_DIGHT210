@@ -43,17 +43,19 @@ class PyodideExercise {
             <div class="exercise-container">
                 <div class="editor-section">
                     <pre class="editor" id="editor-${this.exerciseId}"><code class="language-python"></code></pre>
-                    <div class="answer" style="display: none;"></div>
+                    <div class="controls">
+                        <button class="run-btn">Run</button>
+                        <span class="checkmark">✓</span>
+                        <button class="reveal-answer-btn" style="display: none;">Show Answer</button>
+                    </div>
+                    <div class="answer" style="display: none;">
+                        <pre><code class="language-python"></code></pre>
+                    </div>
                 </div>
                 <div class="output-section">
                     <div class="output">Output (click "Run" to execute your code!)</div>
                 </div>
                 <br>
-                <div class="controls">
-                    <button class="run-btn">Run</button>
-                    <span class="checkmark">✓</span>
-                    <button class="reveal-answer-btn" style="display: none;">Show Answer</button>
-                </div>
             </div>
         `;
 
@@ -62,12 +64,14 @@ class PyodideExercise {
         this.output = this.container.querySelector('.output');
         this.runBtn = this.container.querySelector('.run-btn');
         this.checkmark = this.container.querySelector('.checkmark');
-        this.revealAnswer = this.container.querySelector('.reveal-answer-btn');
+        this.revealAnswerBtn = this.container.querySelector('.reveal-answer-btn');
         this.answerDiv = this.container.querySelector('.answer');
+        this.answerCodeElement = this.answerDiv.querySelector('code');
 
         // Set up answer content
         if (this.answer) {
-            this.answerDiv.textContent = this.answer;
+            this.answerCodeElement.textContent = this.answer;
+            this.answerDiv.classList.add('answer');
         }
 
         // Initialize CodeJar with syntax highlighting - make this async
@@ -107,6 +111,11 @@ class PyodideExercise {
                 this.editorDiv.classList.add('language-python');
                 SharedPyodideManager.highlightCode(codeElement);
             }
+
+            // Apply syntax highlighting to answer code if available
+            if (this.answer && window.Prism && this.answerCodeElement) {
+                SharedPyodideManager.highlightCode(this.answerCodeElement);
+            }
         } catch (error) {
             console.error('CodeJar initialization failed:', error);
             throw error;
@@ -126,7 +135,7 @@ class PyodideExercise {
             this.runBtn.disabled = false;
 
             this.runBtn.addEventListener('click', () => this.runCode());
-            this.revealAnswer.addEventListener('click', () => this.showAnswer());
+            this.revealAnswerBtn.addEventListener('click', () => this.showAnswer());
         } catch (error) {
             this.output.textContent = "Error loading Python environment: " + error.message;
             console.error("Pyodide initialization error:", error);
@@ -279,7 +288,7 @@ sys.stdout = StringIO()
         this.output.classList.add('correct');
         this.output.classList.remove('incorrect');
         this.checkmark.style.display = 'inline';
-        this.revealAnswer.style.display = 'none';
+        this.revealAnswerBtn.style.display = 'none';
     }
 
     markIncorrect() {
@@ -288,33 +297,25 @@ sys.stdout = StringIO()
         this.output.classList.remove('correct');
         this.checkmark.style.display = 'none';
         if (this.answer) {
-            this.revealAnswer.style.display = 'inline-block';
+            this.revealAnswerBtn.style.display = 'inline-block';
         }
     }
 
     resetFeedback() {
         this.output.classList.remove('correct', 'incorrect');
         this.checkmark.style.display = 'none';
-        this.revealAnswer.style.display = 'none';
+        this.revealAnswerBtn.style.display = 'none';
         this.answerDiv.style.display = 'none';
+        this.answerDiv.classList.remove('show-solution');
+        // Preserve the 'answer' and 'language-python' classes
     }
 
     showAnswer() {
-        this.answerDiv.style.display = 'block';
-        this.revealAnswer.style.display = 'none';
-
-        // First add the show-solution class
+        // Simply add the show-solution class and make visible
         this.answerDiv.classList.add('show-solution');
-
-        // Apply syntax highlighting to the answer using Prism
-        if (window.Prism) {
-            // Ensure all necessary classes are present
-            this.answerDiv.classList.add('answer', 'language-python', 'show-solution');
-            SharedPyodideManager.highlightCode(this.answerDiv);
-        } else {
-            // Fallback if Prism is not available
-            this.answerDiv.className = 'answer show-solution';
-        }
+        this.answerDiv.style.display = 'block';
+        this.revealAnswerBtn.style.display = 'none';
+        // No need to call highlightCode again since it was already applied
     }
 
     addLineNumbers(editor) {
