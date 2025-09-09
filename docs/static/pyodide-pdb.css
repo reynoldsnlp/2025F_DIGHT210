@@ -168,13 +168,14 @@
   min-height: 120px;
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
   gap: var(--pdb-gap-std);
   flex: 1;
 }
 
 .pyodide-pdb .variables-section {
-  flex: 1;
-  min-width: 0;
+  flex: 1 1 250px;
+  min-width: 250px;
 }
 
 .pyodide-pdb .variables-section table {
@@ -231,8 +232,8 @@
 }
 
 .pyodide-pdb .output-section {
-  flex: 1;
-  min-width: 0;
+  flex: 1 1 200px;
+  min-width: 200px;
   padding-left: var(--pdb-padding-sm);
   border-left: 1px solid var(--pdb-light-border);
   border-top: none;
@@ -313,7 +314,12 @@
     flex-direction: column;
   }
 
+  .pyodide-pdb .variables-section {
+    min-width: 0;
+  }
+
   .pyodide-pdb .output-section {
+    min-width: 0;
     border-left: none;
     border-top: 1px solid var(--pdb-light-border);
     padding-left: 0;
@@ -322,5 +328,24 @@
 
   .pyodide-pdb pre {
     width: 100%;
+  }
+}
+
+/* Medium screen adjustments for sidebar wrapping */
+@media (max-width: 1200px) and (min-width: 769px) {
+  .pyodide-pdb .sidebar {
+    flex-direction: column;
+  }
+
+  .pyodide-pdb .variables-section {
+    min-width: 0;
+  }
+
+  .pyodide-pdb .output-section {
+    min-width: 0;
+    border-left: none;
+    border-top: 1px solid var(--pdb-light-border);
+    padding-left: 0;
+    padding-top: var(--pdb-padding-sm);
   }
 }
