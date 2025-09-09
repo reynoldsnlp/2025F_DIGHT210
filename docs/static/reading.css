@@ -15,6 +15,7 @@ body {
     margin: 0 auto;
     padding: 20px;
     line-height: 1.6;
+    box-sizing: border-box;
 }
 
 .explanation {
@@ -22,6 +23,8 @@ body {
     padding: var(--reading-padding-std);
     margin: 10px 0;
     border-radius: var(--reading-border-radius);
+    width: 100%;
+    box-sizing: border-box;
 }
 
 h1, h2, h3 {
@@ -33,6 +36,8 @@ h1, h2, h3 {
     border-left: 4px solid var(--reading-border-blue);
     padding: var(--reading-padding-std);
     margin: 20px 0;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 /* Mobile responsiveness */
@@ -40,9 +45,12 @@ h1, h2, h3 {
     body {
         padding: 10px;
         font-size: 16px;
+        width: 100%;
     }
-    .explanation {
+    .explanation, .bring-together {
         padding: 10px;
+        margin: 10px 0;
+        width: 100%;
     }
     h1 {
         font-size: 1.5em;

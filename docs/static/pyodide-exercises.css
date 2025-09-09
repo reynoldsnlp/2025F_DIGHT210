@@ -37,14 +37,30 @@ body {
 }
 
 .exercise-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--exercise-gap);
+    border: 1px solid var(--exercise-border-color);
+    border-radius: var(--exercise-border-radius);
+    background: #f9f9ff;
+    padding: var(--exercise-padding-std);
     margin-bottom: var(--exercise-gap);
+    display: flex;
+    flex-direction: column;
+    gap: var(--exercise-gap);
+    width: 100%;
+    box-sizing: border-box;
+}
+
+@media (min-width: 769px) {
+    .exercise-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--exercise-gap);
+    }
 }
 
 .editor-section {
     position: relative;
+    width: 100%;
+    min-width: 0; /* Allow flex children to shrink */
 }
 
 .editor {
@@ -58,10 +74,10 @@ body {
     min-height: var(--exercise-height-editor);
     padding: var(--exercise-padding-std);
     resize: vertical;
-    max-width: 79ch;
-    /* background removed to let Prism theme control it */
     margin: 0;
     overflow: auto;
+    box-sizing: border-box;
+    max-width: 100%;
 }
 
 .with-line-numbers {
@@ -91,14 +107,17 @@ body {
     flex: 1;
     overflow-x: auto;
     white-space: pre-wrap;
-    /* line-height removed to let Prism theme control it */
     overflow-wrap: break-word;
     display: block;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .output-section {
     display: flex;
     flex-direction: column;
+    width: 100%;
+    min-width: 0;
 }
 
 .output {
@@ -112,7 +131,8 @@ body {
     font-size: var(--exercise-font-size);
     overflow-y: auto;
     white-space: pre-wrap;
-    margin-left: 10px;
+    box-sizing: border-box;
+    margin: 0;
 }
 
 .controls {
@@ -210,7 +230,6 @@ body {
     border: 2px solid var(--exercise-secondary-color) !important;
     background: #f8fff8 !important;
     width: 100%;
-    max-width: 79ch;
     box-sizing: border-box;
     display: block !important;
 }
