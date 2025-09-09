@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 1a: The Print Function</title>
+    <!-- Load CSS files -->
+    <link rel="stylesheet" href="../static/reading.css">
+    <link rel="stylesheet" href="../static/pyodide-exercises.css">
+    <link rel="stylesheet" href="../static/pyodide-pdb.css">
+    <!-- Load JavaScript files -->
+    <script src="../static/shared-pyodide.js"></script>
+    <script src="../static/pyodide-pdb.js"></script>
+    <script src="../static/pyodide-exercises.js"></script>
+</head>
+<body>
+    <h1>Lesson 1a: The Print Function - Your First Communication with Python</h1>
+
+    <div class="explanation">
+        <p>Welcome to your first Python lesson! The <code>print()</code> function is like a bridge between you and the computer - it's how your program can "speak" and show you information. Think of it as the computer's voice.</p>
+        <p>In this lesson, you'll learn:</p>
+        <ul>
+            <li>How to print text (strings) and numbers</li>
+            <li>The difference between text and numbers in Python</li>
+            <li>How to print multiple things at once</li>
+            <li>Common mistakes to avoid</li>
+        </ul>
+    </div>
+
+    <h2>1. Your First Print Statement</h2>
+
+    <div class="explanation">
+        <p>Let's start with the most basic use of <code>print()</code>. Every print statement follows this pattern:</p>
+        <p><strong>print(what_you_want_to_show)</strong></p>
+        <p>Notice the parentheses - they're required! Let's see it in action:</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code>print("Hello, World!")
+print("Welcome to Python programming!")</code></pre>
+    </div>
+
+    <div class="explanation">
+        <p>Notice how each <code>print()</code> statement creates a new line. This is the default behavior - each print starts on a fresh line.</p>
+    </div>
+
+    <h3>Exercise: Your First Print</h3>
+    <div class="explanation">
+        <p>Try writing your first print statement. Print the message "Python is awesome!" exactly as shown.</p>
+    </div>
+
+    <div class="pyodide-exercise"
+         data-expected-output="Python is awesome!"
+         data-answer='print("Python is awesome!")'>
+# TODO: Print the message "Python is awesome!"
+    </div>
+
+    <h2>2. Printing Text (Strings) vs Numbers</h2>
+
+    <div class="explanation">
+        <p>Python treats text and numbers differently:</p>
+        <ul>
+            <li><strong>Strings (text):</strong> Must be surrounded by quotes - either "double" or 'single'</li>
+            <li><strong>Numbers:</strong> No quotes needed - just write the number</li>
+        </ul>
+        <p>This difference is important! Let's explore what happens with each type:</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Printing strings (text) - notice the quotes
+print("This is text")
+print('Single quotes work too')
+print("The number 42 as text")
+
+# Printing numbers - no quotes needed
+print(42)
+print(3.14)
+print(-17)
+
+# What's the difference?
+print("42")    # This is text that looks like a number
+print(42)      # This is actually the number 42</code></pre>
+    </div>
+
+    <h3>Exercise: Strings and Numbers</h3>
+    <div class="explanation">
+        <p>Practice printing both strings and numbers. Print the string "Age:" and then print the number 25 on the next line.</p>
+    </div>
+
+    <div class="pyodide-exercise"
+         data-expected-output="Age:
+25"
+         data-answer='print("Age:")
+print(25)'>
+# TODO: Print the string "Age:"
+# TODO: Print the number 25
+    </div>
+
+    <h2>3. Printing Multiple Things at Once</h2>
+
+    <div class="explanation">
+        <p>One of the most useful features of <code>print()</code> is that you can print multiple things in a single statement by separating them with commas. Python automatically adds spaces between the items.</p>
+        <p>Pattern: <strong>print(item1, item2, item3, ...)</strong></p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Printing multiple items with commas
+print("My name is", "Alice")
+print("I am", 25, "years old")
+print("Temperature:", 72, "degrees")
+
+# Mixing strings and numbers
+print("The answer is", 42)
+print("Pi equals approximately", 3.14159)
+print("Score:", 100, "out of", 150)</code></pre>
+    </div>
+
+    <div class="explanation">
+        <p>Notice how Python automatically puts a space between each item when you use commas. This makes it easy to build messages that combine text and numbers.</p>
+    </div>
+
+    <h3>Exercise: Multiple Items</h3>
+    <div class="explanation">
+        <p>Print the phrase "I have 3 cats and 2 dogs" using multiple arguments to print(). Break it into separate strings and numbers.</p>
+    </div>
+
+    <div class="pyodide-exercise"
+         data-expected-output="I have 3 cats and 2 dogs"
+         data-answer='print("I have", 3, "cats and", 2, "dogs")'>
+# TODO: Print "I have", the number 3, "cats and", the number 2, "dogs"
+# Use commas to separate the different parts
+    </div>
+
+    <h2>4. More Complex Examples</h2>
+
+    <div class="explanation">
+        <p>Let's see more examples of how to combine strings and numbers effectively. This is a skill you'll use constantly in Python programming.</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Creating informative messages
+print("Today's date:", "January", 15, 2024)
+print("Items in cart:", 7)
+print("Total cost: $", 23.45)
+
+# Multiple calculations shown
+print("Length:", 10, "Width:", 5, "Area:", 10 * 5)
+print("First number:", 8, "Second number:", 3, "Sum:", 8 + 3)
+
+# Fun with formatting
+print("=" * 20)  # This prints 20 equal signs
+print("Welcome to our store!")
+print("=" * 20)</code></pre>
+    </div>
+
+    <h3>Exercise: Restaurant Bill</h3>
+    <div class="explanation">
+        <p>Create a restaurant bill printout. Print the meal cost ($18.50), tax ($2.22), and total ($20.72) using the format shown in the expected output.</p>
+    </div>
+
+    <div class="pyodide-exercise"
+         data-expected-output="Meal cost: $ 18.5
+Tax: $ 2.22
+Total: $ 20.72"
+         data-answer='print("Meal cost: $", 18.50)
+print("Tax: $", 2.22)
+print("Total: $", 20.72)'>
+# TODO: Print "Meal cost: $" followed by 18.50
+# TODO: Print "Tax: $" followed by 2.22
+# TODO: Print "Total: $" followed by 20.72
+    </div>
+
+    <h2>5. Common Mistakes and How to Avoid Them</h2>
+
+    <div class="explanation">
+        <p>Let's look at some common mistakes beginners make with the print function, so you can avoid them:</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Common mistakes (these will cause errors):
+
+# 1. Forgetting parentheses
+# print "Hello"  # This would cause an error
+
+# 2. Forgetting quotes around text
+# print(Hello)   # This would cause an error
+
+# 3. Mixing quote types incorrectly
+# print("Hello')  # This would cause an error
+
+# Correct versions:
+print("Hello")           # Correct: quotes and parentheses
+print("Mixed quotes work", 'when done right')
+print('You can use single quotes throughout')
+
+# 4. Numbers don't need quotes
+print(42)               # Correct: number without quotes
+print("42")             # Also correct: number as text
+
+# The difference:
+print(10 + 5)           # This prints 15 (math)
+print("10 + 5")         # This prints "10 + 5" (text)</code></pre>
+    </div>
+
+    <h3>Exercise: Fix the Mistakes</h3>
+    <div class="explanation">
+        <p>The code below has the right idea but some syntax errors. Fix it so it prints correctly. The goal is to print "Score: 95 out of 100".</p>
+    </div>
+
+    <div class="pyodide-exercise"
+         data-expected-output="Score: 95 out of 100"
+         data-answer='print("Score:", 95, "out of", 100)'>
+# This code has errors - fix them:
+# print(Score:, 95, out of, 100)
+# TODO: Add quotes around the text parts and fix any other issues
+    </div>
+
+    <h2>6. Building Longer Messages</h2>
+
+    <div class="explanation">
+        <p>As your programs get more complex, you'll often need to print longer, more detailed messages. Here's how to handle that:</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Creating detailed output
+print("Welcome to the Grade Calculator!")
+print("Student:", "Sarah Johnson")
+print("Course:", "Introduction to Python")
+print("Assignments completed:", 8, "out of", 10)
+print("Average score:", 87.5, "percent")
+print("Letter grade:", "B+")
+print("Congratulations on your progress!")</code></pre>
+    </div>
+
+    <div class="explanation">
+        <p>Notice how we use multiple print statements to create organized, readable output. Each print creates a new line, making the information easy to read.</p>
+    </div>
+
+    <h3>Exercise: Personal Introduction</h3>
+    <div class="explanation">
+        <p>Create a personal introduction that prints information about a fictional character. Include their name, age, favorite number, and a hobby. Use multiple print statements with mixed strings and numbers.</p>
+    </div>
+
+    <div class="pyodide-exercise"
+         data-expected-output="Name: Alex Rodriguez
+Age: 22
+Favorite number: 7
+Hobby: photography
+Fun fact: I have visited 15 countries!"
+         data-answer='print("Name: Alex Rodriguez")
+print("Age:", 22)
+print("Favorite number:", 7)
+print("Hobby: photography")
+print("Fun fact: I have visited", 15, "countries!")'>
+# TODO: Print "Name: Alex Rodriguez"
+# TODO: Print "Age:" followed by the number 22
+# TODO: Print "Favorite number:" followed by the number 7
+# TODO: Print "Hobby: photography"
+# TODO: Print "Fun fact: I have visited" followed by 15 followed by "countries!"
+    </div>
+
+    <div class="bring-together">
+        <h2>🎯 Bring It All Together: A Complete Report</h2>
+        <p>Let's combine everything you've learned to create a comprehensive example that shows off all the print function capabilities.</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Complete Weather Report Example
+print("=" * 30)
+print("DAILY WEATHER REPORT")
+print("=" * 30)
+print("Date:", "March", 15, 2024)
+print("Location:", "Denver, Colorado")
+print()  # Empty print creates a blank line
+
+print("CURRENT CONDITIONS:")
+print("Temperature:", 68, "degrees Fahrenheit")
+print("Humidity:", 45, "percent")
+print("Wind speed:", 12, "mph")
+print("Sky condition:", "Partly cloudy")
+
+print()  # Another blank line
+
+print("FORECAST:")
+print("High temperature:", 75, "degrees")
+print("Low temperature:", 52, "degrees")
+print("Chance of rain:", 20, "percent")
+
+print()
+print("Have a great day!")</code></pre>
+    </div>
+
+    <h3>Final Exercise: Create Your Own Report</h3>
+    <div class="explanation">
+        <p>Create a book report using everything you've learned. Include the title, author, page count, rating (out of 5), and a recommendation message.</p>
+    </div>
+
+    <div class="pyodide-exercise"
+         data-expected-output="BOOK REPORT
+Title: The Python Guide
+Author: Jane Smith
+Pages: 342
+My rating: 4 out of 5 stars
+Recommendation: Great for beginners!"
+         data-answer='print("BOOK REPORT")
+print("Title: The Python Guide")
+print("Author: Jane Smith")
+print("Pages:", 342)
+print("My rating:", 4, "out of", 5, "stars")
+print("Recommendation: Great for beginners!")'>
+# TODO: Print "BOOK REPORT"
+# TODO: Print "Title: The Python Guide"
+# TODO: Print "Author: Jane Smith"
+# TODO: Print "Pages:" followed by the number 342
+# TODO: Print "My rating:" followed by 4, "out of", 5, "stars"
+# TODO: Print "Recommendation: Great for beginners!"
+    </div>
+
+    <div class="bring-together">
+        <h2>📝 What You've Learned</h2>
+        <p>Congratulations! You now know how to use Python's print function effectively:</p>
+        <ul>
+            <li><strong>Basic printing:</strong> <code>print("text")</code> and <code>print(number)</code></li>
+            <li><strong>Multiple arguments:</strong> <code>print("text", number, "more text")</code></li>
+            <li><strong>Strings vs numbers:</strong> Text needs quotes, numbers don't</li>
+            <li><strong>Automatic spacing:</strong> Commas add spaces between items</li>
+            <li><strong>Common mistakes:</strong> Missing quotes, parentheses, or mixing quote types</li>
+        </ul>
+        <p>The print function is your primary tool for getting information out of your programs. Master it, and you'll be able to see what your code is doing every step of the way!</p>
+
+        <h3>Next Steps</h3>
+        <p>Now that you can display information, the next step is learning how to store information in variables. That way, you can save data and use it in your print statements!</p>
+    </div>
+
+</body>
+</html>

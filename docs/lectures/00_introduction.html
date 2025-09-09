@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Introduction to Interactive Python Learning</title>
+    <!-- Load CSS files -->
+    <link rel="stylesheet" href="../static/reading.css">
+    <link rel="stylesheet" href="../static/pyodide-exercises.css">
+    <link rel="stylesheet" href="../static/pyodide-pdb.css">
+    <!-- Load JavaScript files -->
+    <script src="../static/shared-pyodide.js"></script>
+    <script src="../static/pyodide-pdb.js"></script>
+    <script src="../static/pyodide-exercises.js"></script>
+</head>
+<body>
+    <h1>Welcome to Interactive Python Learning</h1>
+
+    <div class="explanation">
+        <p>Welcome to our interactive Python course! This introduction will show you how to use the two main learning tools you'll encounter throughout the lessons:</p>
+        <ul>
+            <li><strong>Interactive Examples</strong> - Step through code line by line to see exactly how it works</li>
+            <li><strong>Practice Exercises</strong> - Write and test your own Python code</li>
+        </ul>
+        <p>Let's explore each tool so you know how to use them effectively.</p>
+    </div>
+
+    <h2>Interactive Examples: Step Through Code</h2>
+
+    <div class="explanation">
+        <p>Interactive examples let you step through Python code one line at a time, just like a debugger in a programming environment. You can see:</p>
+        <ul>
+            <li>Which line is about to be executed (highlighted in yellow)</li>
+            <li>The current values of all variables</li>
+            <li>The output as it's produced</li>
+        </ul>
+        <p>Try clicking "Execute highlighted line" repeatedly in the example below to see how the code runs step by step:</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code>names = ["Jose", "Boris", "Mihoko"]
+for name in names:
+    print(name, "is my friend.")</code></pre>
+    </div>
+
+    <div class="explanation">
+        <p>Notice how:</p>
+        <ul>
+            <li>The yellow highlight shows which line will execute next</li>
+            <li>The Variables section shows the current values and types of variables</li>
+            <li>The Output section displays what the program has printed so far</li>
+            <li>You can click "Reset" to start over at any time</li>
+        </ul>
+    </div>
+
+    <h2>Practice Exercises: Write Your Own Code</h2>
+
+    <div class="explanation">
+        <p>Practice exercises give you a chance to write Python code yourself. Each exercise includes:</p>
+        <ul>
+            <li>A code editor where you can type Python code</li>
+            <li>A "Run" button to execute your code</li>
+            <li>An output area that shows the results</li>
+            <li>Automatic checking to see if your answer is correct</li>
+        </ul>
+        <p>The exercise below asks you to complete a simple greeting. Don't worry if you don't know Python yet - just follow the instructions to see how the system works:</p>
+    </div>
+
+    <div class="pyodide-exercise"
+         data-expected-output="Hello, Python learner!"
+         data-answer='message = "Hello, Python learner!"
+print(message)'>message = "Hello, Python learner!"
+# TODO: Print the message variable
+</div>
+
+    <div class="explanation">
+        <p>To complete this exercise:</p>
+        <ol>
+            <li>Look at the code in the editor above</li>
+            <li>You need to add a line that prints the <code>message</code> variable</li>
+            <li>Type <code>print(message)</code> on the line after the TODO comment</li>
+            <li>Click the "Run" button</li>
+            <li>If correct, you'll see a green checkmark and the output area will turn green</li>
+            <li>If incorrect, you can click "Show Answer" to see the solution</li>
+        </ol>
+        <p>Try it now! Even if you get it wrong the first time, you can edit your code and run it again.</p>
+    </div>
+
+    <h2>Tips for Success</h2>
+
+    <div class="explanation">
+        <p>Here are some tips to get the most out of these interactive tools:</p>
+        <ul>
+            <li><strong>Take your time with examples:</strong> Don't rush through the stepping. Watch how variables change and think about why each step happens.</li>
+            <li><strong>Experiment in exercises:</strong> Try different approaches, even if they might be wrong. Learning from mistakes is valuable!</li>
+            <li><strong>Use the Reset button:</strong> In examples, you can always reset and step through again if you want to see something a second time.</li>
+            <li><strong>Read the variable information:</strong> Pay attention to the variable types and scopes - this helps you understand how Python works.</li>
+        </ul>
+    </div>
+
+    <div class="bring-together">
+        <h3>Ready to Begin!</h3>
+        <p>You're now ready to start learning Python! Throughout the course, you'll see many interactive examples that demonstrate new concepts, followed by exercises where you can practice what you've learned. Each lesson builds on the previous ones, so take your time and make sure you understand each concept before moving on.</p>
+        <p>Remember: programming is learned by doing, not just reading. Use these interactive tools to experiment, make mistakes, and discover how Python works!</p>
+    </div>
+
+</body>
+</html>

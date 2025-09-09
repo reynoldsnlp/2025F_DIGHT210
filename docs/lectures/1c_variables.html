@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 1c: Variables - Storing Information</title>
+    <!-- Load CSS files -->
+    <link rel="stylesheet" href="../static/reading.css">
+    <link rel="stylesheet" href="../static/pyodide-exercises.css">
+    <link rel="stylesheet" href="../static/pyodide-pdb.css">
+    <!-- Load JavaScript files -->
+    <script src="../static/shared-pyodide.js"></script>
+    <script src="../static/pyodide-pdb.js"></script>
+    <script src="../static/pyodide-exercises.js"></script>
+</head>
+<body>
+    <h1>Lesson 1c: Variables - Storing Information for Later Use</h1>
+
+    <div class="explanation">
+        <p>Think of variables as labeled boxes where you can store information. Once you put something in a box (assign a value), you can use that information anywhere in your program. Variables are one of the most fundamental concepts in programming!</p>
+        <p>In this lesson, you'll learn:</p>
+        <ul>
+            <li>How to create variables and assign values to them</li>
+            <li>Rules for naming variables</li>
+            <li>Different types of data you can store</li>
+            <li>How to change variable values</li>
+            <li>Common mistakes and how to avoid them</li>
+        </ul>
+    </div>
+
+    <h2>1. Creating Your First Variables</h2>
+
+    <div class="explanation">
+        <p>Creating a variable is simple: you choose a name and assign a value using the equals sign (<code>=</code>).</p>
+        <p>The pattern is: <strong>variable_name = value</strong></p>
+        <p>The equals sign doesn't mean "equal to" in math - it means "assign this value to this variable."</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Creating variables with different types of information
+name = "Alice"
+age = 25
+height = 5.6
+is_student = True
+
+# Using variables in print statements
+print("Name:", name)
+print("Age:", age)
+print("Height:", height, "feet")
+print("Is student:", is_student)</code></pre>
+    </div>
+
+    <div class="explanation">
+        <p>Notice how we can store different types of information:</p>
+        <ul>
+            <li><strong>Text (strings):</strong> "Alice" - surrounded by quotes</li>
+            <li><strong>Whole numbers (integers):</strong> 25 - no quotes</li>
+            <li><strong>Decimal numbers (floats):</strong> 5.6 - no quotes</li>
+            <li><strong>True/False values (booleans):</strong> True or False - no quotes, capital letters</li>
+        </ul>
+    </div>
+
+    <h3>Exercise: Create Personal Information Variables</h3>
+    <div class="explanation">
+        <p>Create variables to store information about yourself or a fictional character. Include a name, age, and favorite color.</p>
+    </div>
+
+    <div class="pyodide-exercise"
+         data-expected-output="Name: Bob
+Age: 30
+Favorite color: blue"
+         data-answer='name = "Bob"
+age = 30
+favorite_color = "blue"
+print("Name:", name)
+print("Age:", age)
+print("Favorite color:", favorite_color)'>
+# TODO: Create a variable called name and assign it a string value
+# TODO: Create a variable called age and assign it a number
+# TODO: Create a variable called favorite_color and assign it a string
+# TODO: Print each variable with a descriptive label
+    </div>
+
+    <h2>2. Rules for Variable Names</h2>
+
+    <div class="explanation">
+        <p>Python has specific rules for variable names. Following these rules prevents errors and makes your code easier to read:</p>
+        <ul>
+            <li><strong>Must start with a letter or underscore:</strong> <code>name</code>, <code>_private</code></li>
+            <li><strong>Can contain letters, numbers, and underscores:</strong> <code>user_name2</code>, <code>total_cost</code></li>
+            <li><strong>Cannot start with a number:</strong> <code>2names</code> is invalid</li>
+            <li><strong>Cannot contain spaces:</strong> Use underscores instead</li>
+            <li><strong>Case sensitive:</strong> <code>Name</code> and <code>name</code> are different variables</li>
+            <li><strong>Cannot use Python keywords:</strong> <code>print</code>, <code>if</code>, <code>for</code>, etc.</li>
+        </ul>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Good variable names
+first_name = "John"
+last_name = "Smith"
+user_age = 28
+total_score = 95
+is_valid = True
+
+# Demonstrating case sensitivity
+name = "lowercase"
+Name = "Capitalized"
+NAME = "UPPERCASE"
+
+print("name:", name)
+print("Name:", Name)
+print("NAME:", NAME)
+
+# Good practice: descriptive names
+student_count = 25
+average_temperature = 72.5
+book_title = "Python Programming"
+
+print("Students:", student_count)
+print("Temperature:", average_temperature)
+print("Book:", book_title)</code></pre>
+    </div>
+
+    <h3>Exercise: Practice Good Variable Names</h3>
+    <div class="explanation">
+        <p>Create variables with descriptive names for a recipe. Include the recipe name, number of servings, and cooking time in minutes.</p>
+    </div>
+
+    <div class="pyodide-exercise"
+         data-expected-output="Recipe: Chocolate Chip Cookies
+Servings: 24
+Cooking time: 12 minutes"
+         data-answer='recipe_name = "Chocolate Chip Cookies"
+number_of_servings = 24
+cooking_time_minutes = 12
+print("Recipe:", recipe_name)
+print("Servings:", number_of_servings)
+print("Cooking time:", cooking_time_minutes, "minutes")'>
+# TODO: Create a variable for recipe name (use descriptive variable name)
+# TODO: Create a variable for number of servings
+# TODO: Create a variable for cooking time in minutes
+# TODO: Print all three with appropriate labels
+    </div>
+
+    <h2>3. Changing Variable Values</h2>
+
+    <div class="explanation">
+        <p>Variables are called "variables" because their values can vary (change)! You can assign new values to existing variables at any time. The old value is forgotten and replaced with the new one.</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Starting with an initial value
+score = 10
+print("Initial score:", score)
+
+# Changing the value
+score = 15
+print("Updated score:", score)
+
+# Changing to a completely different value
+score = 100
+print("Final score:", score)
+
+# You can even change the type of data
+message = "Hello"
+print("Message as text:", message)
+
+message = 42
+print("Message as number:", message)
+
+message = True
+print("Message as boolean:", message)</code></pre>
+    </div>
+
+    <div class="explanation">
+        <p>Notice that Python doesn't complain when we change the type of data stored in a variable. This flexibility makes Python easy to use, but be careful not to accidentally change types when you don't mean to!</p>
+    </div>
+
+    <h3>Exercise: Track Changing Values</h3>
+    <div class="explanation">
+        <p>Create a variable for a player's health in a game. Start with 100, then reduce it to 75, then increase it back to 90, printing the value each time.</p>
+    </div>
+
+    <div class="pyodide-exercise"
+         data-expected-output="Starting health: 100
+After damage: 75
+After healing: 90"
+         data-answer='player_health = 100
+print("Starting health:", player_health)
+
+player_health = 75
+print("After damage:", player_health)
+
+player_health = 90
+print("After healing:", player_health)'>
+# TODO: Create a variable called player_health and set it to 100
+# TODO: Print "Starting health:" and the value
+# TODO: Change player_health to 75
+# TODO: Print "After damage:" and the value
+# TODO: Change player_health to 90
+# TODO: Print "After healing:" and the value
+    </div>
+
+    <h2>4. Using Variables in Calculations</h2>
+
+    <div class="explanation">
+        <p>One of the most powerful uses of variables is in calculations. You can use variables anywhere you would use a number, and you can create new variables based on existing ones.</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Basic calculations with variables
+length = 10
+width = 5
+area = length * width
+
+print("Length:", length)
+print("Width:", width)
+print("Area:", area)
+
+# Using variables in more complex calculations
+price = 29.99
+tax_rate = 0.08
+tax_amount = price * tax_rate
+total = price + tax_amount
+
+print("Price:", price)
+print("Tax rate:", tax_rate)
+print("Tax amount:", tax_amount)
+print("Total:", total)
+
+# Variables can use other variables
+first_number = 15
+second_number = 25
+sum_result = first_number + second_number
+average = sum_result / 2
+
+print("First number:", first_number)
+print("Second number:", second_number)
+print("Sum:", sum_result)
+print("Average:", average)</code></pre>
+    </div>
+
+    <h3>Exercise: Calculate Circle Properties</h3>
+    <div class="explanation">
+        <p>Given a circle's radius, calculate its diameter and area. Use variables to store the radius (5), diameter (radius * 2), and area (radius * radius * 3.14159).</p>
+    </div>
+
+    <div class="pyodide-exercise"
+         data-expected-output="Radius: 5
+Diameter: 10
+Area: 78.53975"
+         data-answer='radius = 5
+diameter = radius * 2
+area = radius * radius * 3.14159
+print("Radius:", radius)
+print("Diameter:", diameter)
+print("Area:", area)'>
+# TODO: Create a variable called radius and assign it the value 5
+# TODO: Create a variable called diameter that equals radius * 2
+# TODO: Create a variable called area that equals radius * radius * 3.14159
+# TODO: Print all three values with appropriate labels
+    </div>
+
+    <h2>5. String Variables and Text Operations</h2>
+
+    <div class="explanation">
+        <p>String variables (text) have special capabilities. You can combine them, repeat them, and perform other text operations.</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Combining strings
+first_name = "John"
+last_name = "Smith"
+full_name = first_name + " " + last_name
+
+print("First name:", first_name)
+print("Last name:", last_name)
+print("Full name:", full_name)
+
+# Repeating strings
+star = "*"
+line = star * 20
+greeting = "Hello! "
+repeated_greeting = greeting * 3
+
+print("Single star:", star)
+print("Line of stars:", line)
+print("Single greeting:", greeting)
+print("Repeated greeting:", repeated_greeting)
+
+# Mixing strings and other operations
+item = "apple"
+count = 5
+message = "I have " + str(count) + " " + item + "s"
+
+print("Item:", item)
+print("Count:", count)
+print("Message:", message)</code></pre>
+    </div>
+
+    <div class="explanation">
+        <p>Notice that we used <code>str(count)</code> to convert the number to text before combining it with other strings. This is necessary because Python can't directly combine numbers and text with the <code>+</code> operator.</p>
+    </div>
+
+    <h3>Exercise: Create a Personalized Message</h3>
+    <div class="explanation">
+        <p>Create variables for a person's name and their age, then create a personalized birthday message that combines them.</p>
+    </div>
+
+    <div class="pyodide-exercise"
+         data-expected-output="Happy birthday, Sarah!
+You are now 25 years old.
+Hope you have a wonderful day!"
+         data-answer='name = "Sarah"
+age = 25
+message = "Happy birthday, " + name + "!"
+age_message = "You are now " + str(age) + " years old."
+wish = "Hope you have a wonderful day!"
+
+print(message)
+print(age_message)
+print(wish)'>
+# TODO: Create a variable called name and assign it "Sarah"
+# TODO: Create a variable called age and assign it 25
+# TODO: Create a message that says "Happy birthday, " + name + "!"
+# TODO: Create an age_message that says "You are now " + age + " years old."
+# TODO: Create a wish that says "Hope you have a wonderful day!"
+# TODO: Print all three messages
+    </div>
+
+    <h2>6. Common Variable Mistakes</h2>
+
+    <div class="explanation">
+        <p>Let's look at common mistakes beginners make with variables so you can avoid them:</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Common mistakes and corrections:
+
+# 1. Using a variable before defining it
+# print(undefined_variable)  # This would cause an error
+
+# Correct: define first, then use
+my_variable = "Hello"
+print(my_variable)
+
+# 2. Forgetting quotes for text
+correct_text = "This is text"
+# incorrect_text = This is text  # This would cause an error
+
+print("Correct text:", correct_text)
+
+# 3. Using reserved words as variable names
+# print = "Hello"  # This would break the print function!
+
+# Correct: use descriptive names that aren't reserved
+message = "Hello"
+print("Message:", message)
+
+# 4. Inconsistent variable names
+user_name = "Alice"
+# Later in code, accidentally using different name:
+# print(username)  # This would cause an error (missing underscore)
+
+print("User name:", user_name)  # Correct: match the exact name
+
+# 5. Mixing up assignment (=) with comparison (==)
+value = 10  # Assignment: store 10 in value
+print("Value:", value)
+# Later we'll learn about comparison: value == 10</code></pre>
+    </div>
+
+    <h3>Exercise: Fix the Variable Errors</h3>
+    <div class="explanation">
+        <p>The code below has several variable-related errors. Fix them so the program runs correctly and prints information about a student.</p>
+    </div>
+
+    <div class="pyodide-exercise"
+         data-expected-output="Student: Emma Wilson
+Grade: A
+Points: 95"
+         data-answer='student_name = "Emma Wilson"
+student_grade = "A"
+points_earned = 95
+
+print("Student:", student_name)
+print("Grade:", student_grade)
+print("Points:", points_earned)'>
+# The code below has errors - fix them:
+
+# TODO: Fix the variable name (should be student_name)
+# studentName = "Emma Wilson"
+
+# TODO: Fix the missing quotes around the grade
+# student_grade = A
+
+# TODO: Fix the variable name to be consistent (should be points_earned)
+# pointsEarned = 95
+
+# TODO: Fix the print statements to use correct variable names
+# print("Student:", student_name)
+# print("Grade:", student_grade)
+# print("Points:", points_earned)
+    </div>
+
+    <div class="bring-together">
+        <h2>🎯 Bring It All Together: A Student Information System</h2>
+        <p>Let's create a more comprehensive example that uses multiple variables to store and display student information.</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Complete student information system
+student_id = 12345
+first_name = "Maria"
+last_name = "Garcia"
+full_name = first_name + " " + last_name
+
+# Course information
+course_name = "Introduction to Python"
+semester = "Fall 2024"
+credits = 3
+
+# Grade information
+assignments_completed = 8
+total_assignments = 10
+current_grade = 87.5
+letter_grade = "B+"
+
+# Calculate completion percentage
+completion_percentage = (assignments_completed / total_assignments) * 100
+
+# Display all information
+print("=" * 40)
+print("STUDENT INFORMATION SYSTEM")
+print("=" * 40)
+print("Student ID:", student_id)
+print("Name:", full_name)
+print()
+
+print("COURSE INFORMATION:")
+print("Course:", course_name)
+print("Semester:", semester)
+print("Credits:", credits)
+print()
+
+print("GRADE INFORMATION:")
+print("Assignments completed:", assignments_completed, "out of", total_assignments)
+print("Completion percentage:", completion_percentage, "%")
+print("Current grade:", current_grade)
+print("Letter grade:", letter_grade)
+print()
+
+print("Keep up the great work,", first_name + "!")</code></pre>
+    </div>
+
+    <h3>Final Exercise: Create a Product Inventory System</h3>
+    <div class="explanation">
+        <p>Create a simple inventory system for a store item. Include product name, price, quantity in stock, and total value (price * quantity).</p>
+    </div>
+
+    <div class="pyodide-exercise"
+         data-expected-output="PRODUCT INVENTORY
+Product: Wireless Headphones
+Price: $ 79.99
+Quantity: 25
+Total value: $ 1999.75
+Status: In Stock"
+         data-answer='product_name = "Wireless Headphones"
+price = 79.99
+quantity = 25
+total_value = price * quantity
+status = "In Stock"
+
+print("PRODUCT INVENTORY")
+print("Product:", product_name)
+print("Price: $", price)
+print("Quantity:", quantity)
+print("Total value: $", total_value)
+print("Status:", status)'>
+# TODO: Create variables for product_name, price, quantity, and status
+# TODO: Calculate total_value as price * quantity
+# TODO: Print a formatted inventory report as shown in the expected output
+    </div>
+
+    <div class="bring-together">
+        <h2>📝 What You've Learned</h2>
+        <p>Congratulations! You now understand how to work with variables in Python:</p>
+        <ul>
+            <li><strong>Creating variables:</strong> <code>variable_name = value</code></li>
+            <li><strong>Variable naming rules:</strong> Start with letter/underscore, no spaces, case-sensitive</li>
+            <li><strong>Data types:</strong> Strings (text), numbers, booleans (True/False)</li>
+            <li><strong>Changing values:</strong> Variables can be reassigned new values</li>
+            <li><strong>Using in calculations:</strong> Variables work like the values they contain</li>
+            <li><strong>String operations:</strong> Combining with <code>+</code>, repeating with <code>*</code></li>
+        </ul>
+        <p>Variables are the foundation of programming - they let you store, modify, and reuse information throughout your program. Master variables, and you're well on your way to writing powerful Python programs!</p>
+
+        <h3>Next Steps</h3>
+        <p>Now that you can store information in variables, the next step is learning how to perform calculations and operations with that data using math operators!</p>
+    </div>
+
+</body>
+</html>

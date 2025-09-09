@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 1a: Comments in Python</title>
+    <!-- Load CSS files -->
+    <link rel="stylesheet" href="../static/reading.css">
+    <link rel="stylesheet" href="../static/pyodide-exercises.css">
+    <link rel="stylesheet" href="../static/pyodide-pdb.css">
+    <!-- Load JavaScript files -->
+    <script src="../static/shared-pyodide.js"></script>
+    <script src="../static/pyodide-pdb.js"></script>
+    <script src="../static/pyodide-exercises.js"></script>
+</head>
+<body>
+    <h1>Lesson 1a: Comments - Adding Notes to Your Code</h1>
+
+    <div class="explanation">
+        <p>Welcome to your first lesson about Python comments! Think of comments as sticky notes you put on your code - they help you remember what your code does and help others understand it too.</p>
+        <p>In this lesson, you'll learn:</p>
+        <ul>
+            <li>How to write single-line comments using <code>#</code></li>
+            <li>How to write multi-line comments using triple quotes</li>
+            <li>The important difference between how Python handles each type</li>
+            <li>When and why to use comments in your code</li>
+        </ul>
+    </div>
+
+    <h2>1. Single-Line Comments with #</h2>
+
+    <div class="explanation">
+        <p>Single-line comments start with the <code>#</code> symbol (called a "hash" or "pound" sign). Everything after the <code>#</code> on that line is completely ignored by Python - it's like the computer can't even see it!</p>
+        <p>You can use single-line comments in three ways:</p>
+        <ul>
+            <li><strong>On their own line:</strong> <code># This is a comment</code></li>
+            <li><strong>At the end of a line:</strong> <code>print("Hello") # This explains the code</code></li>
+            <li><strong>To temporarily disable code:</strong> <code># print("This won't run")</code></li>
+        </ul>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># This is a comment on its own line
+print("Hello, World!")  # This comment explains what this line does
+
+# You can write anything here - Python ignores it completely
+# Even if you write nonsense: aksjdlakjsd 12345 !@#$%
+
+print("Second line")
+# print("This line won't run because it's commented out")</code></pre>
+    </div>
+
+    <div class="explanation">
+        <p>Notice how Python completely skips over the commented lines! The interpreter acts like they don't exist at all.</p>
+    </div>
+
+    <h3>Exercise: Your First Comments</h3>
+    <div class="explanation">
+        <p>Add a single-line comment above the print statement that says "Display a greeting message".</p>
+    </div>
+
+    <div class="pyodide-exercise"
+         data-expected-output="Welcome to Python!"
+         data-answer="# Display a greeting message
+print(&quot;Welcome to Python!&quot;)">
+# TODO: Add a comment here that says "Display a greeting message"
+print("Welcome to Python!")
+    </div>
+
+    <h2>2. Multi-Line Comments with Triple Quotes</h2>
+
+    <div class="explanation">
+        <p>For longer explanations, you can use triple quotes: <code>"""</code> or <code>'''</code>. These create what are technically called "multi-line strings," but when they're not assigned to a variable, they work like comments.</p>
+        <p><strong>Important difference:</strong> Unlike single-line comments with <code>#</code>, Python actually <em>does</em> read and evaluate these triple-quoted strings - but since they're not stored in a variable, they just disappear after being evaluated!</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code>"""
+This is a multi-line comment.
+You can write as much as you want here.
+Python will read this text, but since it's not
+assigned to a variable, it just disappears.
+"""
+
+print("Hello from Python!")
+
+'''
+You can also use single quotes for multi-line comments.
+This is useful when your comment contains double quotes like "hello".
+This text is also evaluated by Python but then discarded.
+'''
+
+print("Comments help make code readable!")</code></pre>
+    </div>
+
+    <div class="explanation">
+        <p>See how Python steps through the multi-line comments? It evaluates them as strings, but since they're not saved anywhere, they have no effect on your program.</p>
+    </div>
+
+    <h3>Exercise: Multi-Line Comment</h3>
+    <div class="explanation">
+        <p>Add a multi-line comment at the top that explains what this small program does. Include at least two lines in your comment.</p>
+    </div>
+
+    <div class="pyodide-exercise"
+         data-expected-output="Python
+Programming"
+         data-answer='"""
+This program demonstrates printing.
+It prints two words on separate lines.
+"""
+print("Python")
+print("Programming")'>
+# TODO: Add a multi-line comment here that explains what this program does
+# Include at least two lines in your comment
+print("Python")
+print("Programming")
+    </div>
+
+    <h2>3. The Key Difference: Ignored vs. Evaluated</h2>
+
+    <div class="explanation">
+        <p>This is a crucial concept to understand:</p>
+        <ul>
+            <li><strong>Single-line comments (#):</strong> Completely ignored by Python - never read, never evaluated</li>
+            <li><strong>Multi-line comments ("""):</strong> Read and evaluated by Python as strings, but then discarded</li>
+        </ul>
+        <p>Let's see this difference in action by looking at what happens with syntax errors:</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># This is completely ignored by Python
+# Even syntax errors here won't cause problems: print(hello world
+# Python never even looks at this line
+
+print("First line works fine!")
+
+"""
+This multi-line comment is evaluated by Python,
+so it must be valid Python syntax.
+But since it's just a string with no assignment,
+it gets discarded after evaluation.
+"""
+
+print("Second line also works!")
+
+# Uncomment the next line to see what happens with a syntax error:
+# """
+# This would cause an error: print(hello world
+# """</code></pre>
+    </div>
+
+    <div class="explanation">
+        <p>If you uncommented those last lines, you'd get a syntax error because Python tries to evaluate the multi-line string and finds invalid syntax inside it.</p>
+    </div>
+
+    <h3>Exercise: Understanding the Difference</h3>
+    <div class="explanation">
+        <p>Add both types of comments to explain what the code does. Use a single-line comment to explain the calculation and a multi-line comment to describe the overall purpose.</p>
+    </div>
+
+    <div class="pyodide-exercise"
+         data-expected-output="25"
+         data-answer='"""
+This program calculates the area of a square.
+It demonstrates basic arithmetic in Python.
+"""
+side_length = 5
+area = side_length * side_length  # Calculate area by multiplying side by itself
+print(area)'>
+# TODO: Add a multi-line comment explaining the overall purpose of this program
+side_length = 5
+# TODO: Add a single-line comment explaining the calculation below
+area = side_length * side_length
+print(area)
+    </div>
+
+    <h2>4. When and Why to Use Comments</h2>
+
+    <div class="explanation">
+        <p>Good programmers use comments to:</p>
+        <ul>
+            <li><strong>Explain complex logic:</strong> Help future you remember what you were thinking</li>
+            <li><strong>Document functions:</strong> Explain what a function does and how to use it</li>
+            <li><strong>Add TODO notes:</strong> Remind yourself what still needs to be done</li>
+            <li><strong>Temporarily disable code:</strong> Test different approaches without deleting code</li>
+            <li><strong>Provide context:</strong> Explain why the code was written a certain way</li>
+        </ul>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code>"""
+Temperature Converter
+This program converts Celsius to Fahrenheit
+Author: Python Student
+Date: Today
+"""
+
+# TODO: Add support for Fahrenheit to Celsius conversion
+# TODO: Add input validation
+
+celsius = 25  # Room temperature
+
+# Convert using the standard formula: F = (C × 9/5) + 32
+fahrenheit = (celsius * 9/5) + 32
+
+print("Temperature in Celsius:", celsius)
+print("Temperature in Fahrenheit:", fahrenheit)
+
+# Alternative formula (gives same result):
+# fahrenheit = celsius * 1.8 + 32</code></pre>
+    </div>
+
+    <h3>Exercise: Commenting Best Practices</h3>
+    <div class="explanation">
+        <p>Add appropriate comments to this code. Include a multi-line comment at the top describing what the program does, and single-line comments explaining the key calculations.</p>
+    </div>
+
+    <div class="pyodide-exercise"
+         data-expected-output="Hours worked: 40
+Hourly rate: $ 15
+Total pay: $ 600"
+         data-answer='"""
+Payroll Calculator
+This program calculates total pay
+based on hours worked and hourly rate.
+"""
+hours = 40  # Standard work week
+rate = 15  # Dollars per hour
+
+# Calculate total pay
+total_pay = hours * rate
+
+print("Hours worked:", hours)
+print("Hourly rate: $", rate)
+print("Total pay: $", total_pay)'>
+# TODO: Add a multi-line comment describing what this program does
+
+hours = 40
+rate = 15
+
+# TODO: Add a comment explaining the calculation
+total_pay = hours * rate
+
+print("Hours worked:", hours)
+print("Hourly rate: $", rate)
+print("Total pay: $", total_pay)
+    </div>
+
+    <h2>5. Common Comment Mistakes to Avoid</h2>
+
+    <div class="explanation">
+        <p>Here are some common mistakes beginners make with comments:</p>
+        <ul>
+            <li><strong>Over-commenting obvious things:</strong> Don't comment every single line</li>
+            <li><strong>Writing comments that lie:</strong> Update comments when you change code</li>
+            <li><strong>Using comments instead of clear variable names:</strong> Good names reduce need for comments</li>
+            <li><strong>Mixing comment styles unnecessarily:</strong> Be consistent in your approach</li>
+        </ul>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># BAD EXAMPLES - Don't do this:
+
+x = 5  # Set x to 5 (obvious and unnecessary)
+y = 10  # Set y to 10 (obvious and unnecessary)
+
+# This calculates the area
+area = x * y  # But this comment is wrong - this calculates area of rectangle!
+
+# GOOD EXAMPLES - Do this instead:
+
+width = 5
+height = 10
+
+# Calculate area of rectangle
+area = width * height
+
+print("Area:", area)</code></pre>
+    </div>
+
+    <h3>Exercise: Fix the Comments</h3>
+    <div class="explanation">
+        <p>The code below has some comment problems. Fix the comments to be more helpful and accurate. Remove unnecessary comments and add useful ones where needed.</p>
+    </div>
+
+    <div class="pyodide-exercise"
+         data-expected-output="Final score: 85"
+         data-answer='# Calculate student final score
+quiz_score = 78
+exam_score = 92
+
+# Final score is average of quiz and exam
+final_score = (quiz_score + exam_score) / 2
+
+print("Final score:", final_score)'>
+# TODO: Fix the comments below to be more helpful
+
+quiz_score = 78  # Set quiz_score to 78
+exam_score = 92  # Set exam_score to 92
+
+# This adds the scores together and divides by 2
+final_score = (quiz_score + exam_score) / 2  # Do math
+
+print("Final score:", final_score)  # Print the result
+    </div>
+
+    <div class="bring-together">
+        <h2>🎯 Bring It All Together: A Well-Commented Program</h2>
+        <p>Let's see a complete example that demonstrates good commenting practices with both single-line and multi-line comments.</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code>"""
+Simple Shopping Cart Calculator
+This program calculates the total cost of items in a shopping cart,
+including tax calculation and discount application.
+
+Author: Python Student
+Purpose: Demonstrate good commenting practices
+"""
+
+# Shopping cart items with prices
+item1_price = 29.99  # T-shirt
+item2_price = 45.50  # Jeans
+item3_price = 12.75  # Socks
+
+# Calculate subtotal
+subtotal = item1_price + item2_price + item3_price
+
+# Apply 10% discount for students
+discount_rate = 0.10
+discount_amount = subtotal * discount_rate
+discounted_total = subtotal - discount_amount
+
+# Calculate tax on discounted amount (8.5% sales tax)
+tax_rate = 0.085
+tax_amount = discounted_total * tax_rate
+final_total = discounted_total + tax_amount
+
+# Display receipt
+print("=== SHOPPING CART RECEIPT ===")
+print("Subtotal: $", round(subtotal, 2))
+print("Discount (10%): $", round(discount_amount, 2))
+print("Discounted total: $", round(discounted_total, 2))
+print("Tax (8.5%): $", round(tax_amount, 2))
+print("Final total: $", round(final_total, 2))
+print("Thank you for shopping with us!")
+
+# TODO: Add support for multiple quantities
+# TODO: Add item names to the receipt</code></pre>
+    </div>
+
+    <h3>Final Exercise: Create Your Own Well-Commented Program</h3>
+    <div class="explanation">
+        <p>Create a program that calculates the time needed to read a book. Include a multi-line comment describing the program and single-line comments explaining the calculations.</p>
+    </div>
+
+    <div class="pyodide-exercise"
+         data-expected-output="Book: The Python Guide
+Total pages: 250
+Reading speed: 2 pages per minute
+Time needed: 125 minutes
+That's about 2 hours and 5 minutes!"
+         data-answer='"""
+Reading Time Calculator
+This program calculates how long it will take
+to read a book based on page count and reading speed.
+"""
+
+book_title = "The Python Guide"
+total_pages = 250
+pages_per_minute = 2  # Average reading speed
+
+# Calculate total reading time in minutes
+reading_time_minutes = total_pages / pages_per_minute
+
+# Convert to hours and minutes for easier understanding
+hours = reading_time_minutes // 60  # Integer division for whole hours
+remaining_minutes = reading_time_minutes % 60  # Remainder for extra minutes
+
+print("Book:", book_title)
+print("Total pages:", total_pages)
+print("Reading speed:", pages_per_minute, "pages per minute")
+print("Time needed:", reading_time_minutes, "minutes")
+print("That\'s about", int(hours), "hours and", int(remaining_minutes), "minutes!")'>
+# TODO: Add a multi-line comment describing what this program does
+
+book_title = "The Python Guide"
+total_pages = 250
+pages_per_minute = 2
+
+# TODO: Add comment explaining the time calculation
+reading_time_minutes = total_pages / pages_per_minute
+
+# TODO: Add comments explaining the hour/minute conversion
+hours = reading_time_minutes // 60
+remaining_minutes = reading_time_minutes % 60
+
+print("Book:", book_title)
+print("Total pages:", total_pages)
+print("Reading speed:", pages_per_minute, "pages per minute")
+print("Time needed:", reading_time_minutes, "minutes")
+print("That's about", int(hours), "hours and", int(remaining_minutes), "minutes!")
+    </div>
+
+    <div class="bring-together">
+        <h2>📝 What You've Learned</h2>
+        <p>Congratulations! You now understand how to use comments effectively in Python:</p>
+        <ul>
+            <li><strong>Single-line comments (#):</strong> Completely ignored by Python interpreter</li>
+            <li><strong>Multi-line comments ("""):</strong> Evaluated as strings but then discarded</li>
+            <li><strong>When to comment:</strong> Explain complex logic, document purpose, add TODOs</li>
+            <li><strong>What not to comment:</strong> Avoid obvious statements and outdated information</li>
+            <li><strong>Good practices:</strong> Keep comments accurate, helpful, and concise</li>
+        </ul>
+        <p>Comments are like leaving breadcrumbs for your future self - they'll help you understand your code weeks or months later. Good commenting is a sign of a thoughtful programmer!</p>
+
+        <h3>Next Steps</h3>
+        <p>Now that you know how to document your code with comments, you're ready to learn about actually making your code do things with the print function!</p>
+    </div>
+
+</body>
+</html>

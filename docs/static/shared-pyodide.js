@@ -22,9 +22,33 @@ window.SharedPyodideManager = {
     _getFileProtocolPath(currentPath) {
         const pathSegments = currentPath.split('/').filter(segment => segment);
 
-        if (pathSegments.includes('materials')) {
-            return '../../static/';
+        // If we're in the static directory itself
+        if (pathSegments.includes('static')) {
+            const staticIndex = pathSegments.indexOf('static');
+            const staticPath = '/' + pathSegments.slice(0, staticIndex + 1).join('/') + '/';
+            return staticPath;
         }
+
+        // If we're in materials directory (nested under docs)
+        if (pathSegments.includes('materials')) {
+            const materialsIndex = pathSegments.findIndex(segment => segment === 'materials');
+            const depthAfterMaterials = pathSegments.length - materialsIndex - 1;
+            return '../'.repeat(depthAfterMaterials + 1) + 'static/';
+        }
+
+        // If we're in lectures directory (nested under docs)
+        if (pathSegments.includes('lectures')) {
+            const lecturesIndex = pathSegments.findIndex(segment => segment === 'lectures');
+            const depthAfterLectures = pathSegments.length - lecturesIndex - 1;
+            return '../'.repeat(depthAfterLectures + 1) + 'static/';
+        }
+
+        // If we're directly in docs
+        if (pathSegments.includes('docs') && pathSegments[pathSegments.length - 1] === 'docs') {
+            return './static/';
+        }
+
+        // Default fallback
         return './static/';
     },
 
@@ -37,20 +61,28 @@ window.SharedPyodideManager = {
             return '/' + pathSegments.slice(0, staticIndex + 1).join('/') + '/';
         }
 
-        // If in materials directory
-        const materialsIndex = pathSegments.findIndex(segment => segment === 'materials');
-        if (materialsIndex >= 0) {
+        // If in materials directory (calculate relative path)
+        if (pathSegments.includes('materials')) {
+            const materialsIndex = pathSegments.findIndex(segment => segment === 'materials');
             const depthAfterMaterials = pathSegments.length - materialsIndex - 1;
             return '../'.repeat(depthAfterMaterials + 1) + 'static/';
         }
 
-        // If in docs directory
-        const docsIndex = pathSegments.findIndex(segment => segment === 'docs');
-        if (docsIndex >= 0) {
+        // If in lectures directory (calculate relative path)
+        if (pathSegments.includes('lectures')) {
+            const lecturesIndex = pathSegments.findIndex(segment => segment === 'lectures');
+            const depthAfterLectures = pathSegments.length - lecturesIndex - 1;
+            return '../'.repeat(depthAfterLectures + 1) + 'static/';
+        }
+
+        // If in docs directory (absolute path)
+        if (pathSegments.includes('docs')) {
+            const docsIndex = pathSegments.findIndex(segment => segment === 'docs');
             const docsSegments = pathSegments.slice(0, docsIndex + 1);
             return '/' + docsSegments.join('/') + '/static/';
         }
 
+        // Default fallback
         return './static/';
     },
 

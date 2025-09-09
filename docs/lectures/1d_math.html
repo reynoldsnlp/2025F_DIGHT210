@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 1d: Math Operations - Calculating with Python</title>
+    <!-- Load CSS files -->
+    <link rel="stylesheet" href="../static/reading.css">
+    <link rel="stylesheet" href="../static/pyodide-exercises.css">
+    <link rel="stylesheet" href="../static/pyodide-pdb.css">
+    <!-- Load JavaScript files -->
+    <script src="../static/shared-pyodide.js"></script>
+    <script src="../static/pyodide-pdb.js"></script>
+    <script src="../static/pyodide-exercises.js"></script>
+</head>
+<body>
+    <h1>Lesson 1d: Math Operations - Making Python Your Calculator</h1>
+
+    <div class="explanation">
+        <p>Python is an excellent calculator! You can perform all sorts of mathematical operations, from simple addition to complex calculations. In programming, we use math constantly - calculating totals, figuring out percentages, counting items, and much more.</p>
+        <p>In this lesson, you'll learn:</p>
+        <ul>
+            <li>Basic math operators (+, -, *, /, etc.)</li>
+            <li>Order of operations (just like in math class!)</li>
+            <li>Special operators for remainders and powers</li>
+            <li>Shortcut operators for updating variables</li>
+            <li>Common mathematical patterns in programming</li>
+        </ul>
+    </div>
+
+    <h2>1. Basic Math Operators</h2>
+
+    <div class="explanation">
+        <p>Python uses symbols for mathematical operations, just like a calculator. Here are the basic operators:</p>
+        <ul>
+            <li><code>+</code> Addition: <code>5 + 3 = 8</code></li>
+            <li><code>-</code> Subtraction: <code>10 - 4 = 6</code></li>
+            <li><code>*</code> Multiplication: <code>6 * 7 = 42</code></li>
+            <li><code>/</code> Division: <code>15 / 3 = 5.0</code> (always gives decimal result)</li>
+            <li><code>//</code> Floor Division: <code>15 // 4 = 3</code> (whole number result)</li>
+            <li><code>%</code> Modulo: <code>15 % 4 = 3</code> (remainder after division)</li>
+            <li><code>**</code> Exponentiation: <code>2 ** 3 = 8</code> (2 to the power of 3)</li>
+        </ul>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Basic arithmetic operations
+a = 10
+b = 3
+
+addition = a + b
+subtraction = a - b
+multiplication = a * b
+division = a / b
+floor_division = a // b
+remainder = a % b
+power = a ** b
+
+print("a =", a, "and b =", b)
+print("Addition:", a, "+", b, "=", addition)
+print("Subtraction:", a, "-", b, "=", subtraction)
+print("Multiplication:", a, "*", b, "=", multiplication)
+print("Division:", a, "/", b, "=", division)
+print("Floor division:", a, "//", b, "=", floor_division)
+print("Remainder:", a, "%", b, "=", remainder)
+print("Power:", a, "**", b, "=", power)</code></pre>
+    </div>
+
+    <div class="explanation">
+        <p>Notice the difference between regular division (<code>/</code>) and floor division (<code>//</code>). Regular division always gives a decimal number, while floor division gives the whole number part only.</p>
+    </div>
+
+    <h3>Exercise: Basic Calculator</h3>
+    <div class="explanation">
+        <p>Create a simple calculator that performs all basic operations on two numbers: 24 and 7. Print each operation with its result.</p>
+    </div>
+
+    <div class="pyodide-exercise"
+         data-expected-output="24 + 7 = 31
+24 - 7 = 17
+24 * 7 = 168
+24 / 7 = 3.4285714285714284"
+         data-answer='num1 = 24
+num2 = 7
+print(num1, "+", num2, "=", num1 + num2)
+print(num1, "-", num2, "=", num1 - num2)
+print(num1, "*", num2, "=", num1 * num2)
+print(num1, "/", num2, "=", num1 / num2)'>
+# TODO: Create variables num1 = 24 and num2 = 7
+# TODO: Print addition: "24 + 7 = result"
+# TODO: Print subtraction: "24 - 7 = result"
+# TODO: Print multiplication: "24 * 7 = result"
+# TODO: Print division: "24 / 7 = result"
+    </div>
+
+    <h2>2. Understanding Modulo and Floor Division</h2>
+
+    <div class="explanation">
+        <p>The modulo (<code>%</code>) and floor division (<code>//</code>) operators are extremely useful in programming:</p>
+        <ul>
+            <li><strong>Modulo (%):</strong> Gives the remainder after division. Useful for checking if numbers are even/odd, or for wrapping values around.</li>
+            <li><strong>Floor Division (//):</strong> Gives the whole number part of division. Useful for counting groups or converting units.</li>
+        </ul>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Understanding modulo with examples
+print("Modulo examples (remainder after division):")
+print("10 % 3 =", 10 % 3, "(10 divided by 3 is 3 remainder 1)")
+print("15 % 4 =", 15 % 4, "(15 divided by 4 is 3 remainder 3)")
+print("20 % 5 =", 20 % 5, "(20 divided by 5 is 4 remainder 0)")
+
+# Checking if numbers are even or odd
+number = 7
+if_even_remainder = number % 2
+print("Number:", number, "Remainder when divided by 2:", if_even_remainder)
+
+number = 8
+if_even_remainder = number % 2
+print("Number:", number, "Remainder when divided by 2:", if_even_remainder)
+
+print()
+print("Floor division examples (whole number part):")
+print("17 // 5 =", 17 // 5, "(17 divided by 5 is 3.4, whole part is 3)")
+print("25 // 7 =", 25 // 7, "(25 divided by 7 is 3.57..., whole part is 3)")
+
+# Converting minutes to hours and minutes
+total_minutes = 150
+hours = total_minutes // 60
+remaining_minutes = total_minutes % 60
+print("Total minutes:", total_minutes)
+print("Hours:", hours, "Remaining minutes:", remaining_minutes)</code></pre>
+    </div>
+
+    <h3>Exercise: Time Conversion</h3>
+    <div class="explanation">
+        <p>Convert 200 seconds into minutes and seconds. Use floor division to get whole minutes and modulo to get remaining seconds.</p>
+    </div>
+
+    <div class="pyodide-exercise"
+         data-expected-output="200 seconds equals:
+3 minutes and 20 seconds"
+         data-answer='total_seconds = 200
+minutes = total_seconds // 60
+seconds = total_seconds % 60
+print(total_seconds, "seconds equals:")
+print(minutes, "minutes and", seconds, "seconds")'>
+# TODO: Create a variable total_seconds = 200
+# TODO: Calculate minutes using floor division (total_seconds // 60)
+# TODO: Calculate remaining seconds using modulo (total_seconds % 60)
+# TODO: Print the results as shown in expected output
+    </div>
+
+    <h2>3. Order of Operations</h2>
+
+    <div class="explanation">
+        <p>Python follows the same order of operations as mathematics (PEMDAS):</p>
+        <ol>
+            <li><strong>Parentheses:</strong> <code>()</code> - calculated first</li>
+            <li><strong>Exponents:</strong> <code>**</code> - calculated next</li>
+            <li><strong>Multiplication and Division:</strong> <code>*</code>, <code>/</code>, <code>//</code>, <code>%</code> - left to right</li>
+            <li><strong>Addition and Subtraction:</strong> <code>+</code>, <code>-</code> - left to right</li>
+        </ol>
+        <p>Use parentheses to make your intentions clear, even when not strictly necessary!</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Order of operations examples
+result1 = 2 + 3 * 4
+result2 = (2 + 3) * 4
+result3 = 2 ** 3 + 1
+result4 = 2 ** (3 + 1)
+
+print("2 + 3 * 4 =", result1, "(multiplication first)")
+print("(2 + 3) * 4 =", result2, "(parentheses first)")
+print("2 ** 3 + 1 =", result3, "(exponent first)")
+print("2 ** (3 + 1) =", result4, "(parentheses first)")
+
+# Complex calculation: area of a circle
+radius = 5
+pi = 3.14159
+area_wrong = pi * radius ** 2  # Correct: exponent before multiplication
+area_clear = pi * (radius ** 2)  # Even clearer with parentheses
+
+print("Circle radius:", radius)
+print("Area calculation: pi * radius ** 2 =", area_wrong)
+print("Same with parentheses: pi * (radius ** 2) =", area_clear)</code></pre>
+    </div>
+
+    <h3>Exercise: Practice Order of Operations</h3>
+    <div class="explanation">
+        <p>Calculate the result of this expression step by step: <code>3 + 4 * 2 ** 2 - 1</code>. Also calculate what it would be with different parentheses: <code>(3 + 4) * 2 ** (2 - 1)</code>.</p>
+    </div>
+
+    <div class="pyodide-exercise"
+         data-expected-output="3 + 4 * 2 ** 2 - 1 = 18
+(3 + 4) * 2 ** (2 - 1) = 14"
+         data-answer='result1 = 3 + 4 * 2 ** 2 - 1
+result2 = (3 + 4) * 2 ** (2 - 1)
+print("3 + 4 * 2 ** 2 - 1 =", result1)
+print("(3 + 4) * 2 ** (2 - 1) =", result2)'>
+# TODO: Calculate 3 + 4 * 2 ** 2 - 1 and store in result1
+# TODO: Calculate (3 + 4) * 2 ** (2 - 1) and store in result2
+# TODO: Print both expressions and their results
+    </div>
+
+    <h2>4. Assignment Operators - Shortcuts for Updating Variables</h2>
+
+    <div class="explanation">
+        <p>Very often in programming, you want to update a variable based on its current value. Instead of writing <code>x = x + 5</code>, Python provides shortcuts called <strong>assignment operators</strong>:</p>
+        <ul>
+            <li><code>+=</code> Add and assign: <code>x += 5</code> means <code>x = x + 5</code></li>
+            <li><code>-=</code> Subtract and assign: <code>x -= 3</code> means <code>x = x - 3</code></li>
+            <li><code>*=</code> Multiply and assign: <code>x *= 2</code> means <code>x = x * 2</code></li>
+            <li><code>/=</code> Divide and assign: <code>x /= 4</code> means <code>x = x / 4</code></li>
+            <li><code>**=</code> Power and assign: <code>x **= 2</code> means <code>x = x ** 2</code></li>
+        </ul>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Starting value
+score = 10
+print("Starting score:", score)
+
+# Using assignment operators
+score += 5  # Same as: score = score + 5
+print("After adding 5:", score)
+
+score -= 3  # Same as: score = score - 3
+print("After subtracting 3:", score)
+
+score *= 2  # Same as: score = score * 2
+print("After doubling:", score)
+
+score /= 4  # Same as: score = score / 4
+print("After dividing by 4:", score)
+
+score **= 2  # Same as: score = score ** 2
+print("After squaring:", score)
+
+# Common pattern: incrementing a counter
+counter = 0
+print("Counter starts at:", counter)
+
+counter += 1
+print("After increment:", counter)
+
+counter += 1
+print("After another increment:", counter)
+
+# Adding to a total
+total = 0
+total += 10
+total += 25
+total += 8
+print("Total after adding 10, 25, and 8:", total)</code></pre>
+    </div>
+
+    <h3>Exercise: Track Bank Account Balance</h3>
+    <div class="explanation">
+        <p>Start with a bank balance of $1000. Make several transactions: deposit $250, withdraw $75, add 1% interest (multiply by 1.01), then withdraw $100. Print the balance after each transaction.</p>
+    </div>
+
+    <div class="pyodide-exercise"
+         data-expected-output="Starting balance: $ 1000
+After deposit: $ 1250
+After withdrawal: $ 1175
+After interest: $ 1186.75
+Final balance: $ 1086.75"
+         data-answer='balance = 1000
+print("Starting balance: $", balance)
+
+balance += 250
+print("After deposit: $", balance)
+
+balance -= 75
+print("After withdrawal: $", balance)
+
+balance *= 1.01
+print("After interest: $", balance)
+
+balance -= 100
+print("Final balance: $", balance)'>
+# TODO: Start with balance = 1000 and print it
+# TODO: Add 250 to balance and print "After deposit: $ balance"
+# TODO: Subtract 75 from balance and print "After withdrawal: $ balance"
+# TODO: Multiply balance by 1.01 and print "After interest: $ balance"
+# TODO: Subtract 100 from balance and print "Final balance: $ balance"
+    </div>
+
+    <h2>5. Working with Different Number Types</h2>
+
+    <div class="explanation">
+        <p>Python has two main types of numbers:</p>
+        <ul>
+            <li><strong>Integers (int):</strong> Whole numbers like 5, -3, 0, 1000</li>
+            <li><strong>Floats (float):</strong> Decimal numbers like 3.14, -2.5, 0.0</li>
+        </ul>
+        <p>When you mix integers and floats in calculations, Python usually gives you a float result. Division always gives a float, even if the result is a whole number.</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Different number types
+whole_number = 10  # Integer
+decimal_number = 3.5  # Float
+
+print("Whole number:", whole_number, "Type:", type(whole_number))
+print("Decimal number:", decimal_number, "Type:", type(decimal_number))
+
+# Mixing integers and floats
+result1 = whole_number + decimal_number
+result2 = whole_number * decimal_number
+result3 = whole_number / 2  # Division always gives float
+
+print("10 + 3.5 =", result1, "Type:", type(result1))
+print("10 * 3.5 =", result2, "Type:", type(result2))
+print("10 / 2 =", result3, "Type:", type(result3))
+
+# Converting between types
+float_result = float(whole_number)  # Convert int to float
+int_result = int(decimal_number)    # Convert float to int (truncates)
+
+print("10 as float:", float_result)
+print("3.5 as int:", int_result, "(decimal part removed)")
+
+# Rounding
+import math
+rounded_up = math.ceil(3.2)    # Round up
+rounded_down = math.floor(3.8)  # Round down
+rounded_normal = round(3.7)     # Round to nearest
+
+print("3.2 rounded up:", rounded_up)
+print("3.8 rounded down:", rounded_down)
+print("3.7 rounded normally:", rounded_normal)</code></pre>
+    </div>
+
+    <h3>Exercise: Grade Calculator</h3>
+    <div class="explanation">
+        <p>Calculate a student's average grade from three test scores: 85, 92, and 78. Calculate the average and round it to the nearest whole number.</p>
+    </div>
+
+    <div class="pyodide-exercise"
+         data-expected-output="Test scores: 85 92 78
+Total points: 255
+Average: 85.0
+Rounded average: 85"
+         data-answer='test1 = 85
+test2 = 92
+test3 = 78
+total = test1 + test2 + test3
+average = total / 3
+rounded_average = round(average)
+
+print("Test scores:", test1, test2, test3)
+print("Total points:", total)
+print("Average:", average)
+print("Rounded average:", rounded_average)'>
+# TODO: Create variables for three test scores: 85, 92, 78
+# TODO: Calculate the total points
+# TODO: Calculate the average (total / 3)
+# TODO: Round the average to nearest whole number
+# TODO: Print all results as shown
+    </div>
+
+    <h2>6. Practical Math Applications</h2>
+
+    <div class="explanation">
+        <p>Let's see how math operations are used in real programming scenarios. These patterns show up everywhere in programming!</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Calculating compound interest
+principal = 1000    # Starting amount
+rate = 0.05        # 5% interest rate
+years = 3          # Time period
+
+# Simple interest: P * r * t
+simple_interest = principal * rate * years
+simple_total = principal + simple_interest
+
+print("Simple Interest Calculation:")
+print("Principal:", principal)
+print("Rate:", rate * 100, "%")
+print("Years:", years)
+print("Interest earned:", simple_interest)
+print("Total amount:", simple_total)
+
+print()
+
+# Compound interest: P * (1 + r)^t
+compound_total = principal * (1 + rate) ** years
+compound_interest = compound_total - principal
+
+print("Compound Interest Calculation:")
+print("Principal:", principal)
+print("Rate:", rate * 100, "%")
+print("Years:", years)
+print("Interest earned:", compound_interest)
+print("Total amount:", compound_total)
+
+print()
+print("Difference:", compound_interest - simple_interest)</code></pre>
+    </div>
+
+    <div class="explanation">
+        <p>This example shows how math operators let you model real-world situations like financial calculations. The ability to raise numbers to powers (<code>**</code>) is crucial for compound interest calculations!</p>
+    </div>
+
+    <h3>Exercise: Pizza Party Calculator</h3>
+    <div class="explanation">
+        <p>Calculate how much pizza to order for a party. You have 23 people, each person eats 3 slices on average, and each pizza has 8 slices. Calculate how many pizzas to order and the cost if each pizza costs $12.50.</p>
+    </div>
+
+    <div class="pyodide-exercise"
+         data-expected-output="People: 23
+Slices per person: 3
+Total slices needed: 69
+Slices per pizza: 8
+Pizzas needed: 8.625
+Pizzas to order: 9
+Cost per pizza: $ 12.5
+Total cost: $ 112.5"
+         data-answer='people = 23
+slices_per_person = 3
+total_slices = people * slices_per_person
+slices_per_pizza = 8
+pizzas_needed = total_slices / slices_per_pizza
+pizzas_to_order = round(pizzas_needed + 0.5)  # Round up
+cost_per_pizza = 12.50
+total_cost = pizzas_to_order * cost_per_pizza
+
+print("People:", people)
+print("Slices per person:", slices_per_person)
+print("Total slices needed:", total_slices)
+print("Slices per pizza:", slices_per_pizza)
+print("Pizzas needed:", pizzas_needed)
+print("Pizzas to order:", pizzas_to_order)
+print("Cost per pizza: $", cost_per_pizza)
+print("Total cost: $", total_cost)'>
+# TODO: Set people = 23, slices_per_person = 3, slices_per_pizza = 8
+# TODO: Calculate total_slices = people * slices_per_person
+# TODO: Calculate pizzas_needed = total_slices / slices_per_pizza
+# TODO: Round up to get pizzas_to_order (hint: round(pizzas_needed + 0.5))
+# TODO: Calculate total_cost with cost_per_pizza = 12.50
+# TODO: Print all the results as shown
+    </div>
+
+    <div class="bring-together">
+        <h2>🎯 Bring It All Together: Complete Financial Calculator</h2>
+        <p>Let's create a comprehensive example that uses all the math operations we've learned to build a personal finance calculator.</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Personal Finance Calculator
+print("=" * 50)
+print("PERSONAL FINANCE CALCULATOR")
+print("=" * 50)
+
+# Monthly income and expenses
+monthly_salary = 4000
+bonus = 500
+total_income = monthly_salary + bonus
+
+# Monthly expenses
+rent = 1200
+groceries = 400
+utilities = 150
+transportation = 300
+entertainment = 200
+
+total_expenses = rent + groceries + utilities + transportation + entertainment
+monthly_savings = total_income - total_expenses
+
+print("MONTHLY INCOME:")
+print("Salary: $", monthly_salary)
+print("Bonus: $", bonus)
+print("Total income: $", total_income)
+
+print("\nMONTHLY EXPENSES:")
+print("Rent: $", rent)
+print("Groceries: $", groceries)
+print("Utilities: $", utilities)
+print("Transportation: $", transportation)
+print("Entertainment: $", entertainment)
+print("Total expenses: $", total_expenses)
+
+print("\nSAVINGS ANALYSIS:")
+print("Monthly savings: $", monthly_savings)
+
+# Calculate percentage savings
+savings_percentage = (monthly_savings / total_income) * 100
+print("Savings rate:", round(savings_percentage, 1), "%")
+
+# Yearly projections
+yearly_savings = monthly_savings * 12
+print("Yearly savings: $", yearly_savings)
+
+# Emergency fund goal (6 months of expenses)
+emergency_fund_goal = total_expenses * 6
+months_to_goal = emergency_fund_goal / monthly_savings
+
+print("\nEMERGENCY FUND:")
+print("Goal (6 months expenses): $", emergency_fund_goal)
+print("Months to reach goal:", round(months_to_goal, 1))
+
+# Investment growth (assuming 7% annual return)
+investment_years = 10
+annual_return = 0.07
+future_value = yearly_savings * ((1 + annual_return) ** investment_years - 1) / annual_return
+
+print("\nINVESTMENT PROJECTION (10 years at 7%):")
+print("Future value: $", round(future_value, 2))</code></pre>
+    </div>
+
+    <h3>Final Exercise: Unit Conversion Calculator</h3>
+    <div class="explanation">
+        <p>Create a unit conversion calculator. Convert 100 kilometers to miles (1 km = 0.621371 miles), and convert 75 degrees Fahrenheit to Celsius using the formula: C = (F - 32) * 5/9.</p>
+    </div>
+
+    <div class="pyodide-exercise"
+         data-expected-output="UNIT CONVERSIONS
+Distance: 100 km = 62.1371 miles
+Temperature: 75 °F = 23.88888888888889 °C"
+         data-answer='print("UNIT CONVERSIONS")
+
+# Distance conversion
+kilometers = 100
+km_to_miles = 0.621371
+miles = kilometers * km_to_miles
+print("Distance:", kilometers, "km =", miles, "miles")
+
+# Temperature conversion
+fahrenheit = 75
+celsius = (fahrenheit - 32) * 5 / 9
+print("Temperature:", fahrenheit, "°F =", celsius, "°C")'>
+# TODO: Convert 100 kilometers to miles (1 km = 0.621371 miles)
+# TODO: Convert 75 degrees Fahrenheit to Celsius: C = (F - 32) * 5/9
+# TODO: Print results as shown in expected output
+    </div>
+
+    <div class="bring-together">
+        <h2>📝 What You've Learned</h2>
+        <p>Congratulations! You now know how to perform mathematical operations in Python:</p>
+        <ul>
+            <li><strong>Basic operators:</strong> <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>//</code>, <code>%</code>, <code>**</code></li>
+            <li><strong>Order of operations:</strong> PEMDAS rules apply, use parentheses for clarity</li>
+            <li><strong>Assignment operators:</strong> <code>+=</code>, <code>-=</code>, <code>*=</code>, <code>/=</code> for shortcuts</li>
+            <li><strong>Number types:</strong> Integers and floats, with automatic type conversion</li>
+            <li><strong>Practical applications:</strong> Financial calculations, unit conversions, real-world modeling</li>
+        </ul>
+        <p>Math operations are fundamental to programming - you'll use them for everything from simple counting to complex algorithms. With these tools, you can make Python solve numerical problems and model real-world situations!</p>
+
+        <h3>Next Steps</h3>
+        <p>Now that you can store data in variables and perform calculations, you're ready to learn about getting input from users and making your programs interactive!</p>
+    </div>
+
+</body>
+</html>
