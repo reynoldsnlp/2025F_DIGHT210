@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 2a: Functions - Creating Reusable Code</title>
+    <!-- Load CSS files -->
+    <link rel="stylesheet" href="../static/reading.css">
+    <link rel="stylesheet" href="../static/pyodide-exercises.css">
+    <link rel="stylesheet" href="../static/pyodide-pdb.css">
+    <!-- Load JavaScript files -->
+    <script src="../static/shared-pyodide.js"></script>
+    <script src="../static/pyodide-pdb.js"></script>
+    <script src="../static/pyodide-exercises.js"></script>
+</head>
+<body>
+    <h1>Lesson 2a: Functions - Creating Your Own Reusable Tools</h1>
+
+    <div class="explanation">
+        <p>Imagine you have a useful recipe that you want to use over and over again. Instead of writing out all the steps each time, you give the recipe a name and just refer to it when needed. Functions in Python work the same way - they let you package useful code with a name so you can use it repeatedly!</p>
+        <p>In this lesson, you'll learn:</p>
+        <ul>
+            <li>How to create your own functions using <code>def</code></li>
+            <li>How to pass information to functions (parameters)</li>
+            <li>How to get results back from functions (return values)</li>
+            <li>How variables work inside functions (local scope)</li>
+            <li>How to use functions to organize and simplify your code</li>
+        </ul>
+    </div>
+
+    <h2>1. Creating Your First Function</h2>
+
+    <div class="explanation">
+        <p>A function is like a mini-program inside your program. You create it once and can use it many times. The basic pattern is:</p>
+        <pre>def function_name():
+    # code to execute
+    # notice the indentation!</pre>
+        <p>The <code>def</code> keyword tells Python "I'm defining a function." The colon <code>:</code> at the end of the line introduces an <strong>indented block</strong> - all the code that belongs to the function must be indented 4 spaces.</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Define a simple function
+def greet_user():
+    print("Hello there!")
+    print("Welcome to Python functions!")
+
+# Call (use) the function
+print("Before calling function")
+greet_user()
+print("After calling function")
+
+# You can call it multiple times
+greet_user()
+greet_user()</code></pre>
+    </div>
+
+    <div class="explanation">
+        <p>Notice the indentation! Everything that belongs to the function must be indented the same amount (usually 4 spaces). Python uses this indentation to know what code is part of the function.</p>
+    </div>
+
+    <h3>Exercise: Create a Simple Function</h3>
+    <div class="explanation">
+        <p>Create a function called <code>show_info</code> that prints two lines of information about Python: <code>Python is a programming language</code> and <code>It was created by Guido van Rossum</code>. Call the function twice.</p>
+    </div>
+
+    <div class="pyodide-exercise"
+         data-expected-output="Python is a programming language
+It was created by Guido van Rossum
+Python is a programming language
+It was created by Guido van Rossum"
+         data-answer='def show_info():
+    print("Python is a programming language")
+    print("It was created by Guido van Rossum")
+
+show_info()
+show_info()'>
+# TODO: Define a function called show_info that prints two facts about Python
+# TODO: Call the function twice
+</div>
+
+    <h2>2. Functions with Parameters - Passing Information</h2>
+
+    <div class="explanation">
+        <p>Functions become much more useful when you can pass information to them. These pieces of information are called <strong>parameters</strong> (when defining the function) or <strong>arguments</strong> (when calling the function).</p>
+        <p>Think of parameters as empty boxes that get filled with values when you call the function.</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Function with one parameter
+def greet_person(name):
+    print("Hello,", name)
+    print("Nice to meet you!")
+
+# Call with different arguments
+greet_person("Alice")
+greet_person("Bob")
+greet_person("Maria")
+
+# Function with multiple parameters
+def introduce_person(name, age, city):
+    print("This is", name)
+    print("They are", age, "years old")
+    print("They live in", city)
+
+# Call with multiple arguments
+introduce_person("Sarah", 25, "Denver")
+introduce_person("Miguel", 30, "Austin")</code></pre>
+    </div>
+
+    <h3>Exercise: Function with Parameters</h3>
+    <div class="explanation">
+        <p>Create a function called <code>describe_book</code> that takes a title and page count as parameters, then prints information about the book.</p>
+    </div>
+
+    <div class="pyodide-exercise"
+         data-expected-output="Book title: The Python Guide
+Number of pages: 300"
+         data-answer='def describe_book(title, pages):
+    print("Book title:", title)
+    print("Number of pages:", pages)
+
+describe_book("The Python Guide", 300)'>
+# TODO: Define describe_book function that takes title and pages parameters
+# TODO: Print the book title and number of pages
+# TODO: Call the function with "The Python Guide" and 300
+</div>
+
+    <h2>3. Returning Values from Functions</h2>
+
+    <div class="explanation">
+        <p>So far our functions have only printed things. But functions can also <strong>return</strong> values - they can calculate something and give the result back to whoever called them. This makes functions much more powerful!</p>
+        <p>Use the <code>return</code> keyword to send a value back from the function.</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Function that returns a value
+def add_numbers(num1, num2):
+    result = num1 + num2
+    return result
+
+# Save the returned value in a variable
+sum1 = add_numbers(5, 3)
+sum2 = add_numbers(10, 7)
+
+print("First sum:", sum1)
+print("Second sum:", sum2)
+
+# You can use the return value directly
+print("Double sum:", add_numbers(2, 4) * 2)
+
+# Function that processes text
+def make_title(text):
+    title = "*** " + text + " ***"
+    return title
+
+# Use the text processing function
+book_title = make_title("Python Programming")
+chapter_title = make_title("Functions")
+
+print(book_title)
+print(chapter_title)</code></pre>
+    </div>
+
+    <div class="explanation">
+        <p>When a function doesn't have a <code>return</code> statement, it automatically returns <code>None</code>. Functions that return values are often more useful because you can save the result and use it elsewhere in your program.</p>
+    </div>
+
+    <h3>Exercise: Function that Returns a Value</h3>
+    <div class="explanation">
+        <p>Create a function called <code>calculate_area</code> that takes length and width parameters, calculates the area, and returns the result.</p>
+    </div>
+
+    <div class="pyodide-exercise"
+         data-expected-output="Area: 50"
+         data-answer='def calculate_area(length, width):
+    area = length * width
+    return area
+
+result = calculate_area(10, 5)
+print("Area:", result)'>
+# TODO: Define calculate_area function that takes length and width
+# TODO: Calculate area and return the result
+# TODO: Call the function with 10 and 5, store result in a variable
+# TODO: Print "Area:" and the result
+</div>
+
+    <h2>4. Local Variables - What Happens Inside Functions</h2>
+
+    <div class="explanation">
+        <p>Variables created inside a function are called <strong>local variables</strong>. They only exist inside that function and disappear when the function finishes. This is like having a separate workspace for each function.</p>
+        <p>This prevents functions from accidentally interfering with each other!</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Variables outside functions (global)
+message = "Global message"
+number = 100
+
+def process_data():
+    # Local variables - only exist inside this function
+    local_message = "Local message"
+    local_number = 42
+
+    print("Inside function:")
+    print("Local message:", local_message)
+    print("Local number:", local_number)
+    print("Global message:", message)  # Can access global variables
+    print("Global number:", number)
+
+# Call the function
+process_data()
+
+print("Outside function:")
+print("Global message:", message)
+print("Global number:", number)
+# print(local_message)  # This would cause an error!</code></pre>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code>def calculate_average(score1, score2, score3):
+    # Parameters are also local variables
+    total = score1 + score2 + score3  # total is local
+    average = total / 3  # average is local
+    return average
+
+result = calculate_average(85, 92, 78)
+print("Average:", result)
+# print(total)  # This would cause an error - total doesn't exist here</code></pre>
+    </div>
+
+    <h3>Exercise: Understanding Local Variables</h3>
+    <div class="explanation">
+        <p>Create a function called <code>format_name</code> that takes first and last name parameters, creates a full name locally, and returns it.</p>
+    </div>
+
+    <div class="pyodide-exercise"
+         data-expected-output="Full name: John Smith"
+         data-answer='def format_name(first, last):
+    full_name = first + " " + last
+    return full_name
+
+result = format_name("John", "Smith")
+print("Full name:", result)'>
+# TODO: Define format_name function that takes first and last parameters
+# TODO: Create a local variable full_name by combining first and last with a space
+# TODO: Return the full_name
+# TODO: Call the function with "John" and "Smith", print the result
+</div>
+
+    <h2>5. Using Functions to Organize Code</h2>
+
+    <div class="explanation">
+        <p>Functions help organize your code by breaking complex tasks into smaller, manageable pieces. Each function should do one specific job well.</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Functions for text processing
+def count_words(text):
+    words = text.split()
+    return len(words)
+
+def count_characters(text):
+    return len(text)
+
+def make_summary(text):
+    word_count = count_words(text)
+    char_count = count_characters(text)
+
+    summary = "Text has " + str(word_count) + " words and " + str(char_count) + " characters."
+    return summary
+
+# Use the functions
+sample_text = "Python is a powerful programming language"
+
+# Use functions individually
+words = count_words(sample_text)
+characters = count_characters(sample_text)
+
+print("Sample text:", sample_text)
+print("Words:", words)
+print("Characters:", characters)
+
+# Use the summary function (which uses the other functions)
+summary = make_summary(sample_text)
+print("Summary:", summary)</code></pre>
+    </div>
+
+    <h3>Exercise: Text Analysis Functions</h3>
+    <div class="explanation">
+        <p>Create a function called <code>analyze_sentence</code> that takes a sentence, counts the exclamation marks, and returns the count.</p>
+    </div>
+
+    <div class="pyodide-exercise"
+         data-expected-output="Exclamation marks: 2"
+         data-answer='def analyze_sentence(sentence):
+    count = sentence.count("!")
+    return count
+
+sentence = "Hello! How are you today! Great to see you."
+result = analyze_sentence(sentence)
+print("Exclamation marks:", result)'>
+# TODO: Define analyze_sentence function that takes a sentence parameter
+# TODO: Count how many exclamation marks (!) are in the sentence
+# TODO: Return the count
+# TODO: Test with "Hello! How are you today! Great to see you."
+</div>
+
+    <h2>6. Keyword Arguments - Calling Functions by Name</h2>
+
+    <div class="explanation">
+        <p>When calling functions, you can specify which argument goes with which parameter by using the parameter name. This makes your code clearer and lets you put arguments in any order!</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Function with multiple parameters
+def create_profile(name, age, city, hobby):
+    profile = name + " is " + str(age) + " years old, lives in " + city + ", and enjoys " + hobby + "."
+    return profile
+
+# Positional arguments (order matters)
+profile1 = create_profile("Alice", 25, "Boston", "reading")
+print("Profile 1:", profile1)
+
+# Keyword arguments (order doesn't matter)
+profile2 = create_profile(hobby="painting", city="Seattle", name="Bob", age=30)
+print("Profile 2:", profile2)
+
+# Mix positional and keyword (positional must come first)
+profile3 = create_profile("Carol", 28, city="Denver", hobby="hiking")
+print("Profile 3:", profile3)
+
+# Using keyword arguments makes code more readable
+def calculate_tip(bill_amount, tip_percentage, split_ways):
+    tip = bill_amount * (tip_percentage / 100)
+    total = bill_amount + tip
+    per_person = total / split_ways
+    return per_person
+
+# Clear which number means what
+cost_per_person = calculate_tip(bill_amount=60.00, tip_percentage=18, split_ways=3)
+print("Cost per person:", cost_per_person)</code></pre>
+    </div>
+
+    <h3>Exercise: Using Keyword Arguments</h3>
+    <div class="explanation">
+        <p>Create a function called <code>book_info</code> that takes title, author, and year parameters. Call it using keyword arguments in a different order.</p>
+    </div>
+
+    <div class="pyodide-exercise"
+         data-expected-output="1984 by George Orwell (1949)"
+         data-answer='def book_info(title, author, year):
+    info = title + " by " + author + " (" + str(year) + ")"
+    return info
+
+result = book_info(year=1949, author="George Orwell", title="1984")
+print(result)'>
+# TODO: Define book_info function with title, author, year parameters
+# TODO: Return a formatted string: "title by author (year)"
+# TODO: Call using keyword arguments in this order: year, author, title
+# TODO: Use values: "1984", "George Orwell", 1949
+</div>
+
+    <div class="bring-together">
+        <h2>🎯 Bring It All Together: Text Processing Toolkit</h2>
+        <p>Let's create a comprehensive example that uses functions to build a text processing toolkit, combining all the concepts we've learned.</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Text Processing Toolkit using Functions
+
+def word_count(text):
+    """Count the number of words in the text."""
+    words = text.split()
+    return len(words)
+
+def character_count(text, include_spaces=True):
+    """Count characters, optionally excluding spaces."""
+    if include_spaces:
+        return len(text)
+    else:
+        return len(text.replace(" ", ""))
+
+def sentence_count(text):
+    """Count sentences by counting periods, exclamation marks, and question marks."""
+    periods = text.count(".")
+    exclamations = text.count("!")
+    questions = text.count("?")
+    return periods + exclamations + questions
+
+def average_word_length(text):
+    """Calculate the average length of words in the text."""
+    words = text.split()
+    if len(words) == 0:
+        return 0
+
+    total_length = 0
+    for word in words:
+        # Remove punctuation for more accurate measurement
+        clean_word = word.replace(".", "").replace(",", "").replace("!", "").replace("?", "")
+        total_length += len(clean_word)
+
+    return total_length / len(words)
+
+def create_text_report(text, title="Text Analysis"):
+    """Generate a comprehensive report about the text."""
+    words = word_count(text)
+    chars_with_spaces = character_count(text, include_spaces=True)
+    chars_without_spaces = character_count(text, include_spaces=False)
+    sentences = sentence_count(text)
+    avg_word_len = average_word_length(text)
+
+    # Build the report
+    report = "=" * 40 + "\n"
+    report += title + "\n"
+    report += "=" * 40 + "\n"
+    report += "Text: " + text + "\n\n"
+    report += "STATISTICS:\n"
+    report += "Words: " + str(words) + "\n"
+    report += "Characters (with spaces): " + str(chars_with_spaces) + "\n"
+    report += "Characters (without spaces): " + str(chars_without_spaces) + "\n"
+    report += "Sentences: " + str(sentences) + "\n"
+    report += "Average word length: " + str(round(avg_word_len, 2)) + " characters\n"
+
+    return report
+
+# Test the toolkit
+sample_text = "Python is amazing! It makes programming fun and accessible. Everyone should try it."
+
+# Use individual functions
+print("Word count:", word_count(sample_text))
+print("Character count:", character_count(sample_text))
+print("Sentence count:", sentence_count(sample_text))
+print("Average word length:", round(average_word_length(sample_text), 2))
+
+print()
+
+# Use the comprehensive report function
+full_report = create_text_report(sample_text, title="Python Text Analysis")
+print(full_report)</code></pre>
+    </div>
+
+    <h3>Final Exercise: Build Your Own Text Function</h3>
+    <div class="explanation">
+        <p>Create a function called <code>text_summary</code> that takes text as a parameter and returns a one-line summary with word count and character count.</p>
+    </div>
+
+    <div class="pyodide-exercise"
+         data-expected-output="Summary: 8 words, 47 characters"
+         data-answer='def text_summary(text):
+    words = len(text.split())
+    characters = len(text)
+    summary = "Summary: " + str(words) + " words, " + str(characters) + " characters"
+    return summary
+
+text = "Python functions make code reusable and organized"
+result = text_summary(text)
+print(result)'>
+# TODO: Define text_summary function that takes text parameter
+# TODO: Count words using split() and len()
+# TODO: Count characters using len()
+# TODO: Return formatted string: "Summary: X words, Y characters"
+# TODO: Test with "Python functions make code reusable and organized"
+</div>
+
+    <div class="bring-together">
+        <h2>📝 What You've Learned</h2>
+        <p>Congratulations! You now know how to create and use functions in Python:</p>
+        <ul>
+            <li><strong>Function definition:</strong> <code>def function_name():</code> with indented code block</li>
+            <li><strong>Parameters:</strong> Pass information to functions for flexibility</li>
+            <li><strong>Return values:</strong> Use <code>return</code> to send results back</li>
+            <li><strong>Local variables:</strong> Variables inside functions don't interfere with outside code</li>
+            <li><strong>Keyword arguments:</strong> Call functions by parameter name for clarity</li>
+            <li><strong>Code organization:</strong> Break complex tasks into smaller, focused functions</li>
+        </ul>
+        <p>Functions are one of the most important concepts in programming - they let you write code once and use it many times, making your programs more organized, readable, and maintainable!</p>
+
+        <h3>Next Steps</h3>
+        <p>Now that you can create reusable code with functions, you're ready to learn about making decisions in your code with conditional logic (if/elif/else statements)!</p>
+    </div>
+
+</body>
+</html>

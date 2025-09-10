@@ -73,28 +73,22 @@ class InteractiveExample {
   }
 
   _initializeSidebar() {
-    // Inject sidebar if missing
-    this.sidebar = this.container.querySelector('.sidebar');
-    if (!this.sidebar) {
-      this.sidebar = document.createElement('div');
-      this.sidebar.className = 'sidebar';
-
-      // Create variables section
+    // Create variables section as direct child if missing
+    this.variablesDiv = this.container.querySelector('.variables-section');
+    if (!this.variablesDiv) {
       this.variablesDiv = document.createElement('div');
       this.variablesDiv.className = 'variables-section';
       this.variablesDiv.innerHTML = '<strong>Variables</strong><p><em>Loading...</em></p>';
+      this.container.appendChild(this.variablesDiv);
+    }
 
-      // Create output section
+    // Create output section as direct child if missing
+    this.outputDiv = this.container.querySelector('.output-section');
+    if (!this.outputDiv) {
       this.outputDiv = document.createElement('div');
       this.outputDiv.className = 'output-section';
       this.outputDiv.innerHTML = '<strong>Output</strong><div class="output-content"></div>';
-
-      this.sidebar.appendChild(this.variablesDiv);
-      this.sidebar.appendChild(this.outputDiv);
-      this.container.appendChild(this.sidebar);
-    } else {
-      this.variablesDiv = this.sidebar.querySelector('.variables-section');
-      this.outputDiv = this.sidebar.querySelector('.output-section');
+      this.container.appendChild(this.outputDiv);
     }
   }
 

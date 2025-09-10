@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 2b: Conditional Logic - Making Decisions in Code</title>
+    <!-- Load CSS files -->
+    <link rel="stylesheet" href="../static/reading.css">
+    <link rel="stylesheet" href="../static/pyodide-exercises.css">
+    <link rel="stylesheet" href="../static/pyodide-pdb.css">
+    <!-- Load JavaScript files -->
+    <script src="../static/shared-pyodide.js"></script>
+    <script src="../static/pyodide-pdb.js"></script>
+    <script src="../static/pyodide-exercises.js"></script>
+</head>
+<body>
+    <h1>Lesson 2b: Conditional Logic - Teaching Your Program to Make Decisions</h1>
+
+    <div class="explanation">
+        <p>So far, your programs have followed a straight path - executing every line of code in order. But real programs need to make decisions! Should I send this email? Is the user old enough? Does this text contain a specific word? Conditional logic lets your program choose different paths based on the data it's working with.</p>
+        <p>In this lesson, you'll learn:</p>
+        <ul>
+            <li>How to work with True and False values</li>
+            <li>What makes values "truthy" or "falsy"</li>
+            <li>How to make decisions with if statements</li>
+            <li>How to handle multiple conditions with elif and else</li>
+            <li>How indentation creates code blocks for conditional logic</li>
+        </ul>
+    </div>
+
+    <h2>1. True and False - The Foundation of Decisions</h2>
+
+    <div class="explanation">
+        <p>Python has two special values for representing truth: <code>True</code> and <code>False</code>. These are called <strong>boolean values</strong> (named after mathematician George Boole). Interestingly, <code>True</code> and <code>False</code> are special instances of 1 and 0!</p>
+        <p>Every condition in programming ultimately comes down to: "Is this true or false?"</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Boolean values
+is_sunny = True
+is_raining = False
+
+print("Is sunny:", is_sunny)
+print("Is raining:", is_raining)
+print("Type of True:", type(True))
+print("Type of False:", type(False))
+
+# True and False are special cases of 1 and 0
+print("True as number:", True + 0)
+print("False as number:", False + 0)
+print("True + True =", True + True)
+print("True + False =", True + False)
+
+# Comparison operations create boolean values
+age = 25
+print("Age:", age)
+print("Age > 18:", age > 18)
+print("Age == 25:", age == 25)
+print("Age < 20:", age < 20)</code></pre>
+    </div>
+
+    <h3>Exercise: Boolean Values and Comparisons</h3>
+    <div class="explanation">
+        <p>Create variables for a student's test score (85) and the passing grade (70). Use comparison operators to check if they passed.</p>
+    </div>
+
+    <div class="pyodide-exercise"
+         data-expected-output="Test score: 85
+Passing grade: 70
+Passed the test: True
+Got perfect score: False"
+         data-answer='test_score = 85
+passing_grade = 70
+passed = test_score >= passing_grade
+perfect = test_score == 100
+
+print("Test score:", test_score)
+print("Passing grade:", passing_grade)
+print("Passed the test:", passed)
+print("Got perfect score:", perfect)'>
+# TODO: Create variables test_score (85) and passing_grade (70)
+# TODO: Create a variable 'passed' that checks if test_score >= passing_grade
+# TODO: Create a variable 'perfect' that checks if test_score == 100
+# TODO: Print all the information as shown in expected output
+</div>
+
+    <h2>2. Truthy and Falsy Values - What Counts as True or False</h2>
+
+    <div class="explanation">
+        <p>In Python, many values can be treated as True or False even if they're not actually the boolean values <code>True</code> and <code>False</code>. This is called being "truthy" or "falsy".</p>
+        <p>You can use the <code>bool()</code> function to see what any value counts as in a boolean context:</p>
+        <ul>
+            <li><strong>Falsy values:</strong> <code>False</code>, <code>0</code>, <code>""</code> (empty string), empty collections</li>
+            <li><strong>Truthy values:</strong> Everything else - non-zero numbers, non-empty strings, etc.</li>
+        </ul>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Testing what values are truthy or falsy
+print("=== FALSY VALUES ===")
+print("bool(False):", bool(False))
+print("bool(0):", bool(0))
+print("bool(''):", bool(""))  # Empty string
+print("bool(None):", bool(None))
+
+print()
+print("=== TRUTHY VALUES ===")
+print("bool(True):", bool(True))
+print("bool(1):", bool(1))
+print("bool(-1):", bool(-1))
+print("bool('hello'):", bool("hello"))
+print("bool('0'):", bool("0"))  # String "0" is truthy!
+print("bool(' '):", bool(" "))  # Space is truthy!
+
+# Testing with variables
+name = ""
+message = "Hello"
+score = 0
+age = 25
+
+print()
+print("=== VARIABLE TESTS ===")
+print("Empty name (''):", bool(name))
+print("Message ('Hello'):", bool(message))
+print("Score (0):", bool(score))
+print("Age (25):", bool(age))</code></pre>
+    </div>
+
+    <h3>Exercise: Understanding Truthy and Falsy</h3>
+    <div class="explanation">
+        <p>Test different values to see if they're truthy or falsy. Check an empty string, a string with just a space, the number 0, and a negative number.</p>
+    </div>
+
+    <div class="pyodide-exercise"
+         data-expected-output="Empty string: False
+Space string: True
+Zero: False
+Negative five: True"
+         data-answer='empty_text = ""
+space_text = " "
+zero_num = 0
+negative_num = -5
+
+print("Empty string:", bool(empty_text))
+print("Space string:", bool(space_text))
+print("Zero:", bool(zero_num))
+print("Negative five:", bool(negative_num))'>
+# TODO: Create variables: empty_text (""), space_text (" "), zero_num (0), negative_num (-5)
+# TODO: Use bool() to test each variable and print the results as shown
+</div>
+
+    <h2>3. Making Decisions with if Statements</h2>
+
+    <div class="explanation">
+        <p>The <code>if</code> statement is how you make your program choose different paths. Like function definitions, <code>if</code> statements end with a colon <code>:</code> and use indentation to show which code belongs to the condition.</p>
+        <p>Pattern: <code>if condition:</code> followed by indented code block.</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Basic if statement
+temperature = 75
+
+if temperature > 70:
+    print("It's warm outside!")
+    print("Good weather for a walk.")
+
+print("Weather check complete.")
+
+# if statement with different conditions
+age = 17
+
+if age >= 18:
+    print("You are eligible to vote.")
+
+if age < 18:
+    print("You are not yet eligible to vote.")
+
+# Using truthy/falsy values
+user_name = "Alice"
+
+if user_name:  # Non-empty string is truthy
+    print("Welcome,", user_name)
+
+empty_name = ""
+
+if empty_name:  # Empty string is falsy
+    print("This won't print")
+
+print("Program continues...")</code></pre>
+    </div>
+
+    <h3>Exercise: Simple if Statements</h3>
+    <div class="explanation">
+        <p>Create a program that checks if a word is long (more than 10 characters). If it is, print that it's a long word.</p>
+    </div>
+
+    <div class="pyodide-exercise"
+         data-expected-output="Programming is a long word!"
+         data-answer='word = "Programming"
+
+if len(word) > 10:
+    print(word, "is a long word!")'>
+# TODO: Create a variable called word with the value "Programming"
+# TODO: Use an if statement to check if the length of word is greater than 10
+# TODO: If it is, print the word followed by "is a long word!"
+</div>
+
+    <h2>4. Handling Multiple Conditions with elif and else</h2>
+
+    <div class="explanation">
+        <p>Often you need to check multiple conditions or have a backup plan. Python provides <code>elif</code> (else if) for additional conditions and <code>else</code> for when none of the conditions are true.</p>
+        <p>Python checks conditions in order and stops at the first one that's true.</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># if/elif/else chain
+score = 85
+
+if score >= 90:
+    grade = "A"
+elif score >= 80:
+    grade = "B"
+elif score >= 70:
+    grade = "C"
+elif score >= 60:
+    grade = "D"
+else:
+    grade = "F"
+
+print("Score:", score)
+print("Grade:", grade)
+
+# Text analysis with conditions
+text = "Hello world"
+length = len(text)
+
+if length == 0:
+    print("The text is empty")
+elif length < 5:
+    print("Short text:", text)
+elif length < 15:
+    print("Medium text:", text)
+else:
+    print("Long text:", text)
+
+print("Text length:", length)</code></pre>
+    </div>
+
+    <h3>Exercise: Temperature Classification</h3>
+    <div class="explanation">
+        <p>Create a temperature classifier. If temp >= 80: "Hot", if temp >= 60: "Warm", if temp >= 40: "Cool", otherwise: "Cold".</p>
+    </div>
+
+    <div class="pyodide-exercise"
+         data-expected-output="Temperature: 72 degrees
+Category: Warm"
+         data-answer='temperature = 72
+
+if temperature >= 80:
+    category = "Hot"
+elif temperature >= 60:
+    category = "Warm"
+elif temperature >= 40:
+    category = "Cool"
+else:
+    category = "Cold"
+
+print("Temperature:", temperature, "degrees")
+print("Category:", category)'>
+# TODO: Create a variable temperature with value 72
+# TODO: Use if/elif/else to classify: Hot (>=80), Warm (>=60), Cool (>=40), Cold (else)
+# TODO: Print the temperature and category as shown
+</div>
+
+    <h2>5. Complex Conditions with and, or, not</h2>
+
+    <div class="explanation">
+        <p>You can combine conditions using logical operators:</p>
+        <ul>
+            <li><code>and</code> - Both conditions must be true</li>
+            <li><code>or</code> - At least one condition must be true</li>
+            <li><code>not</code> - Reverses the truth value</li>
+        </ul>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Using 'and' operator
+age = 25
+has_license = True
+
+if age >= 16 and has_license:
+    print("Can drive legally")
+else:
+    print("Cannot drive legally")
+
+# Using 'or' operator
+day = "Saturday"
+hour = 14
+
+if day == "Saturday" or day == "Sunday":
+    print("It's the weekend!")
+
+if hour < 9 or hour > 17:
+    print("Outside business hours")
+
+# Using 'not' operator
+is_raining = False
+
+if not is_raining:
+    print("Good day for outdoor activities")
+
+# Combining multiple operators
+text = "Python programming"
+word_count = len(text.split())
+
+if len(text) > 10 and word_count >= 2:
+    print("This is a substantial phrase")
+elif len(text) > 5 or word_count > 1:
+    print("This is a short phrase")
+else:
+    print("This is very short text")</code></pre>
+    </div>
+
+    <h3>Exercise: User Access Control</h3>
+    <div class="explanation">
+        <p>Create a simple access control system. A user can access if they have a valid username (not empty) AND either they are an admin OR their age is 18 or over.</p>
+    </div>
+
+    <div class="pyodide-exercise"
+         data-expected-output="Access granted: Welcome, Alice!"
+         data-answer='username = "Alice"
+age = 17
+is_admin = True
+
+if username and (is_admin or age >= 18):
+    print("Access granted: Welcome,", username + "!")
+else:
+    print("Access denied")'>
+# TODO: Create variables: username="Alice", age=17, is_admin=True
+# TODO: Grant access if username exists AND (is_admin OR age >= 18)
+# TODO: Print "Access granted: Welcome, [username]!" or "Access denied"
+</div>
+
+    <h2>6. Conditional Logic in Functions</h2>
+
+    <div class="explanation">
+        <p>Combining functions with conditional logic creates powerful, flexible code. Functions can make different decisions based on their parameters.</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Function with conditional logic
+def categorize_text(text):
+    length = len(text)
+    word_count = len(text.split())
+
+    if length == 0:
+        return "empty"
+    elif word_count == 1:
+        return "single word"
+    elif length < 20:
+        return "short phrase"
+    elif length < 50:
+        return "medium text"
+    else:
+        return "long text"
+
+# Test the function
+test_texts = ["", "Hello", "Python programming", "This is a longer sentence with more words"]
+
+for text in test_texts:
+    category = categorize_text(text)
+    print("Text:", repr(text))
+    print("Category:", category)
+    print()
+
+# Function that returns different values based on conditions
+def calculate_shipping(weight, is_express):
+    base_cost = 5.00
+
+    if weight <= 1:
+        weight_cost = 0
+    elif weight <= 5:
+        weight_cost = 2.00
+    else:
+        weight_cost = weight * 0.50
+
+    total = base_cost + weight_cost
+
+    if is_express:
+        total = total * 2
+
+    return total
+
+# Test shipping calculation
+standard_shipping = calculate_shipping(3, False)
+express_shipping = calculate_shipping(3, True)
+
+print("Standard shipping (3 lbs):", standard_shipping)
+print("Express shipping (3 lbs):", express_shipping)</code></pre>
+    </div>
+
+    <h3>Exercise: Grade Calculator Function</h3>
+    <div class="explanation">
+        <p>Create a function called <code>get_letter_grade</code> that takes a numeric score and returns the appropriate letter grade (A, B, C, D, or F).</p>
+    </div>
+
+    <div class="pyodide-exercise"
+         data-expected-output="Score 95: A
+Score 82: B
+Score 67: D"
+         data-answer='def get_letter_grade(score):
+    if score >= 90:
+        return "A"
+    elif score >= 80:
+        return "B"
+    elif score >= 70:
+        return "C"
+    elif score >= 60:
+        return "D"
+    else:
+        return "F"
+
+print("Score 95:", get_letter_grade(95))
+print("Score 82:", get_letter_grade(82))
+print("Score 67:", get_letter_grade(67))'>
+# TODO: Define get_letter_grade function that takes a score parameter
+# TODO: Return "A" for 90+, "B" for 80+, "C" for 70+, "D" for 60+, "F" for below 60
+# TODO: Test with scores 95, 82, and 67
+</div>
+
+    <div class="bring-together">
+        <h2>🎯 Bring It All Together: Text Analysis with Decisions</h2>
+        <p>Let's create a comprehensive text analyzer that uses conditional logic to provide intelligent feedback about text quality and characteristics.</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Comprehensive Text Analyzer with Conditional Logic
+
+def analyze_text_quality(text):
+    """Analyze text and provide quality feedback."""
+    if not text or not text.strip():
+        return "Error: No text provided"
+
+    # Basic statistics
+    length = len(text)
+    words = text.split()
+    word_count = len(words)
+    sentence_count = text.count(".") + text.count("!") + text.count("?")
+
+    # Calculate averages (avoid division by zero)
+    if word_count > 0:
+        avg_word_length = sum(len(word.strip(",.!?")) for word in words) / word_count
+    else:
+        avg_word_length = 0
+
+    if sentence_count > 0:
+        avg_words_per_sentence = word_count / sentence_count
+    else:
+        avg_words_per_sentence = word_count  # All words in one sentence
+
+    # Quality assessment
+    quality_score = 0
+    feedback = []
+
+    # Length assessment
+    if length < 10:
+        feedback.append("Very short text")
+    elif length < 50:
+        feedback.append("Short text")
+        quality_score += 1
+    elif length < 200:
+        feedback.append("Good length")
+        quality_score += 2
+    else:
+        feedback.append("Long text")
+        quality_score += 1
+
+    # Word length assessment
+    if avg_word_length < 3:
+        feedback.append("Words are quite short")
+    elif avg_word_length < 5:
+        feedback.append("Average word length")
+        quality_score += 1
+    else:
+        feedback.append("Good use of longer words")
+        quality_score += 2
+
+    # Sentence structure assessment
+    if sentence_count == 0:
+        feedback.append("No sentence punctuation found")
+    elif avg_words_per_sentence < 5:
+        feedback.append("Very short sentences")
+    elif avg_words_per_sentence < 15:
+        feedback.append("Good sentence length")
+        quality_score += 2
+    else:
+        feedback.append("Long sentences - consider breaking them up")
+        quality_score += 1
+
+    # Overall quality determination
+    if quality_score >= 5:
+        overall_quality = "Excellent"
+    elif quality_score >= 3:
+        overall_quality = "Good"
+    elif quality_score >= 1:
+        overall_quality = "Fair"
+    else:
+        overall_quality = "Needs improvement"
+
+    # Format the analysis report
+    report = "=== TEXT ANALYSIS ===\n"
+    report += "Text: " + text + "\n\n"
+    report += "STATISTICS:\n"
+    report += "Length: " + str(length) + " characters\n"
+    report += "Words: " + str(word_count) + "\n"
+    report += "Sentences: " + str(sentence_count) + "\n"
+    report += "Average word length: " + str(round(avg_word_length, 1)) + " characters\n"
+    report += "Average words per sentence: " + str(round(avg_words_per_sentence, 1)) + "\n\n"
+    report += "ASSESSMENT:\n"
+
+    for comment in feedback:
+        report += "- " + comment + "\n"
+
+    report += "\nOVERALL QUALITY: " + overall_quality + " (" + str(quality_score) + "/6 points)"
+
+    return report
+
+# Test the analyzer with different types of text
+test_texts = [
+    "",
+    "Hi",
+    "Python is great!",
+    "Python is a powerful programming language. It's easy to learn and versatile.",
+    "The quick brown fox jumps over the lazy dog in the meadow while the sun shines brightly overhead and birds sing melodiously in the distant trees."
+]
+
+for i, text in enumerate(test_texts, 1):
+    print("TEST", i)
+    print(analyze_text_quality(text))
+    print("\n" + "="*50 + "\n")</code></pre>
+    </div>
+
+    <h3>Final Exercise: Password Strength Checker</h3>
+    <div class="explanation">
+        <p>Create a function called <code>check_password_strength</code> that evaluates password strength based on length and character types. Return "Strong", "Medium", or "Weak".</p>
+    </div>
+
+    <div class="pyodide-exercise"
+         data-expected-output="Password: abc123
+Strength: Weak"
+         data-answer='def check_password_strength(password):
+    if len(password) < 6:
+        return "Weak"
+    elif len(password) < 10:
+        return "Medium"
+    else:
+        return "Strong"
+
+password = "abc123"
+strength = check_password_strength(password)
+print("Password:", password)
+print("Strength:", strength)'>
+# TODO: Define check_password_strength function that takes password parameter
+# TODO: Return "Weak" if length < 6, "Medium" if length < 10, "Strong" otherwise
+# TODO: Test with password "abc123"
+</div>
+
+    <div class="bring-together">
+        <h2>📝 What You've Learned</h2>
+        <p>Congratulations! You now understand how to make decisions in your Python programs:</p>
+        <ul>
+            <li><strong>Boolean values:</strong> <code>True</code> and <code>False</code> are special cases of 1 and 0</li>
+            <li><strong>Truthy/Falsy:</strong> Empty values (0, "", None) are falsy; everything else is truthy</li>
+            <li><strong>if statements:</strong> Execute code only when conditions are met</li>
+            <li><strong>elif/else:</strong> Handle multiple conditions and provide fallbacks</li>
+            <li><strong>Logical operators:</strong> Combine conditions with <code>and</code>, <code>or</code>, <code>not</code></li>
+            <li><strong>Indentation:</strong> Colon + indented blocks define conditional code</li>
+        </ul>
+        <p>Conditional logic is what makes programs truly intelligent - they can adapt their behavior based on the data they receive. This is the foundation of creating responsive, interactive software!</p>
+
+        <h3>Next Steps</h3>
+        <p>Now that you can make decisions and create reusable functions, you're ready to dive deeper into working with text data using Python's powerful string methods!</p>
+    </div>
+
+</body>
+</html>

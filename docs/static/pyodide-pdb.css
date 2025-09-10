@@ -1,7 +1,6 @@
 :root {
   --pdb-border-color: #ddd;
   --pdb-background: #f9f9ff;
-  --pdb-sidebar-width: 400px;
   --pdb-sidebar-bg: #fff;
   --pdb-font-mono: 'Fira Mono', 'Consolas', monospace;
   --pdb-active-line-bg: #49483e;
@@ -28,7 +27,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
-  gap: var(--pdb-gap-lg);
+  gap: var(--pdb-gap-std);
   margin-bottom: var(--pdb-gap-lg);
   border: 1px solid var(--pdb-border-color);
   padding: var(--pdb-padding-std);
@@ -45,9 +44,9 @@
   font-family: var(--pdb-font-mono);
   font-size: 1em;
   min-width: 300px;
-  min-height: 80px; /* Reduced from 120px */
+  min-height: 80px;
   overflow-x: auto;
-  flex: 1;
+  flex: 1 1 300px;
   white-space: pre-wrap;
   overflow-wrap: break-word;
   position: relative;
@@ -160,28 +159,17 @@
   display: block;
 }
 
-.pyodide-pdb .sidebar {
-  width: var(--pdb-sidebar-width);
+.pyodide-pdb .variables-section {
+  flex: 1 1 300px;
+  min-width: 250px;
   font-family: Arial, sans-serif;
   font-size: var(--pdb-font-size-std);
   background: var(--pdb-sidebar-bg);
   border: 1px solid var(--pdb-border-color);
   border-radius: var(--pdb-border-radius);
   padding: var(--pdb-padding-sm) var(--pdb-padding-std);
-  margin-left: var(--pdb-padding-std);
-  min-height: auto; /* Changed from 120px to auto */
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: var(--pdb-gap-std);
-  flex: 1;
-  min-width: 0;
   box-sizing: border-box;
-}
-
-.pyodide-pdb .variables-section {
-  flex: 1 1 250px;
-  min-width: 250px;
+  overflow: hidden;
 }
 
 .pyodide-pdb .variables-section table {
@@ -189,11 +177,12 @@
   border-collapse: collapse;
   margin-top: var(--pdb-padding-sm);
   font-size: var(--pdb-font-size-sm);
+  table-layout: fixed;
 }
 
 .pyodide-pdb .variables-section th,
 .pyodide-pdb .variables-section td {
-  padding: 0.2em 0.3em; /* Reduced padding */
+  padding: 0.2em 0.3em;
   text-align: left;
   border-bottom: 1px solid var(--pdb-light-border);
   overflow: hidden;
@@ -238,12 +227,16 @@
 }
 
 .pyodide-pdb .output-section {
-  flex: 1 1 200px;
-  min-width: 200px;
-  padding-left: var(--pdb-padding-sm);
-  border-left: 1px solid var(--pdb-light-border);
-  border-top: none;
-  padding-top: 0;
+  flex: 1 1 300px;
+  min-width: 250px;
+  font-family: Arial, sans-serif;
+  font-size: var(--pdb-font-size-std);
+  background: var(--pdb-sidebar-bg);
+  border: 1px solid var(--pdb-border-color);
+  border-radius: var(--pdb-border-radius);
+  padding: var(--pdb-padding-sm) var(--pdb-padding-std);
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .pyodide-pdb .output-content {
@@ -255,10 +248,10 @@
   font-family: var(--pdb-font-mono);
   font-size: var(--pdb-font-size-xs);
   min-height: 40px;
-  max-height: 120px;
   overflow-y: auto;
   color: var(--pdb-text-dark);
   white-space: pre-wrap;
+  box-sizing: border-box;
 }
 
 .pyodide-pdb .output-content em {
@@ -268,6 +261,8 @@
 
 .pyodide-pdb .controls {
   margin-top: var(--pdb-padding-std);
+  flex: 1 1 100%;
+  width: 100%;
 }
 
 .pyodide-pdb .button-container {
@@ -301,78 +296,49 @@
 @media (max-width: 768px) {
   .pyodide-pdb {
     flex-direction: column;
-    align-items: flex-start; /* Maintain flex-start on mobile */
-    width: 100%;
-    gap: var(--pdb-padding-std); /* Reduced gap on mobile */
+    align-items: stretch;
+    gap: var(--pdb-padding-std);
   }
 
   .pyodide-pdb pre {
     min-width: 0;
-    min-height: 60px; /* Further reduced for mobile */
-  }
-
-  .pyodide-pdb .sidebar {
-    width: 100%;
-    margin-left: 0;
-    flex-direction: column;
-    min-height: auto;
+    min-height: 60px;
+    flex: none;
   }
 
   .pyodide-pdb .variables-section {
-    min-width: 0; /* Remove minimum width constraint */
-    width: 100%;
-    flex: none; /* Don't allow flex growth on mobile */
+    min-width: 0;
+    flex: none;
   }
 
   .pyodide-pdb .variables-section th,
   .pyodide-pdb .variables-section td {
-    padding: 0.15em 0.25em; /* Even smaller padding on mobile */
+    padding: 0.15em 0.25em;
   }
 
   .pyodide-pdb .output-section {
     min-width: 0;
-    width: 100%;
-    border-left: none;
-    border-top: 1px solid var(--pdb-light-border);
-    padding-left: 0;
-    padding-top: var(--pdb-padding-sm);
-    flex: none; /* Don't allow flex growth on mobile */
+    flex: none;
   }
 
   .pyodide-pdb .output-content {
-    min-height: 30px; /* Minimal height on mobile */
-    max-height: 100px; /* Reduced max height on mobile */
+    min-height: 30px;
   }
 }
 
-/* Medium screen adjustments for sidebar wrapping */
+/* Medium screen adjustments */
 @media (max-width: 1200px) and (min-width: 769px) {
   .pyodide-pdb {
-    align-items: flex-start; /* Explicitly maintain flex-start for medium screens */
+    align-items: stretch;
   }
 
-  .pyodide-pdb .sidebar {
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .pyodide-pdb .variables-section {
-    min-width: 0;
-    width: 100%;
-    flex: none; /* Don't allow flex growth on medium screens */
-  }
-
+  .pyodide-pdb .variables-section,
   .pyodide-pdb .output-section {
-    min-width: 0;
-    width: 100%;
-    border-left: none;
-    border-top: 1px solid var(--pdb-light-border);
-    padding-left: 0;
-    padding-top: var(--pdb-padding-sm);
-    flex: none; /* Don't allow flex growth on medium screens */
+    min-width: 200px;
+    flex: 1 1 200px;
   }
 
   .pyodide-pdb .output-content {
-    min-height: 35px; /* Reduced for medium screens */
+    min-height: 35px;
   }
 }

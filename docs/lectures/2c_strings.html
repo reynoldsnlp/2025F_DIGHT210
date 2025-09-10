@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 2c: Strings - Working with Text in Python</title>
+    <!-- Load CSS files -->
+    <link rel="stylesheet" href="../static/reading.css">
+    <link rel="stylesheet" href="../static/pyodide-exercises.css">
+    <link rel="stylesheet" href="../static/pyodide-pdb.css">
+    <!-- Load JavaScript files -->
+    <script src="../static/shared-pyodide.js"></script>
+    <script src="../static/pyodide-pdb.js"></script>
+    <script src="../static/pyodide-exercises.js"></script>
+</head>
+<body>
+    <h1>Lesson 2c: Strings - Your Toolkit for Working with Text</h1>
+
+    <div class="explanation">
+        <p>Strings are everywhere in programming! They represent text - from user names and email addresses to entire documents. Python provides powerful built-in methods (functions attached to strings) that make working with text easy and intuitive.</p>
+        <p>In this lesson, you'll learn:</p>
+        <ul>
+            <li>Essential string methods for text processing</li>
+            <li>How to change case (upper, lower, title)</li>
+            <li>How to clean up whitespace (strip, split)</li>
+            <li>How to search and replace text</li>
+            <li>Method chaining - connecting multiple operations</li>
+            <li>Real-world text processing examples</li>
+        </ul>
+    </div>
+
+    <h2>1. Basic String Methods - Changing Case</h2>
+
+    <div class="explanation">
+        <p>String methods are functions that belong to strings. You call them using dot notation: <code>string.method()</code>. Case conversion methods are some of the most commonly used - they help standardize text for comparison and display.</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Starting with mixed case text
+text = "Python Programming"
+
+# Convert to different cases
+uppercase = text.upper()
+lowercase = text.lower()
+titlecase = text.title()
+swapcase = text.swapcase()
+
+print("Original:", text)
+print("Uppercase:", uppercase)
+print("Lowercase:", lowercase)
+print("Title case:", titlecase)
+print("Swapped case:", swapcase)
+
+# Checking case
+name = "ALICE"
+print("Is name uppercase?", name.isupper())
+print("Is name lowercase?", name.islower())
+print("Is name title case?", name.istitle())</code></pre>
+    </div>
+
+    <h3>Exercise: Text Standardization</h3>
+    <div class="explanation">
+        <p>Clean up a user's name input. Convert "jOhN SmItH" to proper title case for display.</p>
+    </div>
+
+    <div class="pyodide-exercise"
+         data-expected-output="Original: jOhN SmItH
+Cleaned: John Smith"
+         data-answer='user_input = "jOhN SmItH"
+cleaned_name = user_input.title()
+
+print("Original:", user_input)
+print("Cleaned:", cleaned_name)'>
+user_input = "jOhN SmItH"
+# TODO: Use a string method to convert user_input to proper title case
+# TODO: Store the result in cleaned_name
+# TODO: Print both the original and cleaned versions
+</div>
+
+    <h2>2. Whitespace Methods - Cleaning Up Text</h2>
+
+    <div class="explanation">
+        <p>Real-world text often has extra spaces, tabs, or newlines that need to be cleaned up. Python's whitespace methods help you handle these situations gracefully.</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Text with extra whitespace
+messy_text = "   Hello World   "
+multiline_text = "\n\n  Python is awesome!  \n\n"
+
+# Clean up whitespace
+stripped = messy_text.strip()
+left_stripped = messy_text.lstrip()
+right_stripped = messy_text.rstrip()
+
+print("Original:", repr(messy_text))
+print("Stripped:", repr(stripped))
+print("Left stripped:", repr(left_stripped))
+print("Right stripped:", repr(right_stripped))
+
+print()
+print("Multiline original:", repr(multiline_text))
+print("Multiline stripped:", repr(multiline_text.strip()))
+
+# Check if text has only whitespace
+empty_looking = "   \n\t   "
+print("Is empty-looking text actually empty?", len(empty_looking.strip()) == 0)</code></pre>
+    </div>
+
+    <h3>Exercise: Clean User Input</h3>
+    <div class="explanation">
+        <p>Process a user's email input that has extra spaces. Clean it up and convert to lowercase for storage.</p>
+    </div>
+
+    <div class="pyodide-exercise"
+         data-expected-output="Raw input: '  User@Example.COM  '
+Cleaned email: user@example.com"
+         data-answer='email_input = "  User@Example.COM  "
+cleaned_email = email_input.strip().lower()
+
+print("Raw input:", repr(email_input))
+print("Cleaned email:", cleaned_email)'>
+email_input = "  User@Example.COM  "
+# TODO: Remove whitespace and convert to lowercase
+# TODO: Store the result in cleaned_email
+# TODO: Print both the raw input (using repr) and cleaned email
+</div>
+
+    <h2>3. Finding and Checking Text Content</h2>
+
+    <div class="explanation">
+        <p>Often you need to search for specific text or check what kind of content a string contains. Python provides several methods for these tasks.</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Text searching methods
+sentence = "Python programming is fun and educational"
+
+# Check if text contains specific words
+has_python = "python" in sentence.lower()
+has_java = "java" in sentence.lower()
+
+print("Sentence:", sentence)
+print("Contains 'python':", has_python)
+print("Contains 'java':", has_java)
+
+# Find position of text
+python_position = sentence.lower().find("python")
+fun_position = sentence.find("fun")
+missing_position = sentence.find("difficult")
+
+print("Position of 'python':", python_position)
+print("Position of 'fun':", fun_position)
+print("Position of 'difficult':", missing_position)
+
+# Check string content type
+number_text = "12345"
+mixed_text = "abc123"
+alpha_text = "hello"
+
+print("'12345' is all digits:", number_text.isdigit())
+print("'abc123' is all alphanumeric:", mixed_text.isalnum())
+print("'hello' is all alphabetic:", alpha_text.isalpha())</code></pre>
+    </div>
+
+    <h3>Exercise: Email Validation Check</h3>
+    <div class="explanation">
+        <p>Create a simple email check. Verify that an email contains "@" and ends with ".com".</p>
+    </div>
+
+    <div class="pyodide-exercise"
+         data-expected-output="Email: user@example.com
+Has @ symbol: True
+Ends with .com: True
+Basic check passed: True"
+         data-answer='email = "user@example.com"
+has_at = "@" in email
+ends_with_com = email.endswith(".com")
+basic_valid = has_at and ends_with_com
+
+print("Email:", email)
+print("Has @ symbol:", has_at)
+print("Ends with .com:", ends_with_com)
+print("Basic check passed:", basic_valid)'>
+email = "user@example.com"
+# TODO: Check if email contains "@" symbol
+# TODO: Check if email ends with ".com"
+# TODO: Create basic_valid that is True only if both checks pass
+# TODO: Print all the results as shown
+</div>
+
+    <h2>4. Splitting and Joining Text</h2>
+
+    <div class="explanation">
+        <p>Breaking text into pieces (splitting) and combining pieces into text (joining) are fundamental text processing operations. These methods are essential for parsing data and formatting output.</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Splitting text into pieces
+sentence = "apple,banana,cherry,date"
+fruits = sentence.split(",")
+
+print("Original:", sentence)
+print("Split by comma:", fruits)
+print("Number of fruits:", len(fruits))
+
+# Splitting by spaces (default)
+text = "The quick brown fox"
+words = text.split()
+
+print("Text:", text)
+print("Words:", words)
+
+# Joining pieces into text
+word_list = ["Python", "is", "awesome"]
+joined_sentence = " ".join(word_list)
+joined_with_dashes = "-".join(word_list)
+
+print("Word list:", word_list)
+print("Joined with spaces:", joined_sentence)
+print("Joined with dashes:", joined_with_dashes)
+
+# Real example: processing a CSV line
+csv_line = "John,25,Engineer,New York"
+fields = csv_line.split(",")
+name = fields[0]
+age = fields[1]
+job = fields[2]
+city = fields[3]
+
+print("CSV data:", csv_line)
+print("Name:", name, "Age:", age, "Job:", job, "City:", city)</code></pre>
+    </div>
+
+    <h3>Exercise: Process Name List</h3>
+    <div class="explanation">
+        <p>Take a semicolon-separated list of names and create a formatted sentence listing them.</p>
+    </div>
+
+    <div class="pyodide-exercise"
+         data-expected-output="Name list: Alice;Bob;Charlie;Diana
+Individual names: ['Alice', 'Bob', 'Charlie', 'Diana']
+Formatted: The participants are: Alice, Bob, Charlie, Diana"
+         data-answer='name_string = "Alice;Bob;Charlie;Diana"
+name_list = name_string.split(";")
+formatted_names = ", ".join(name_list)
+
+print("Name list:", name_string)
+print("Individual names:", name_list)
+print("Formatted: The participants are:", formatted_names)'>
+name_string = "Alice;Bob;Charlie;Diana"
+# TODO: Split the string by semicolons into a list
+# TODO: Join the list with commas and spaces
+# TODO: Print the results as shown
+</div>
+
+    <h2>5. Replacing and Modifying Text</h2>
+
+    <div class="explanation">
+        <p>The replace method lets you substitute text, which is useful for cleaning data, correcting typos, or transforming content.</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Basic text replacement
+original = "I love Java programming"
+updated = original.replace("Java", "Python")
+
+print("Original:", original)
+print("Updated:", updated)
+
+# Multiple replacements
+messy_text = "Hello!!!World???How***are***you???"
+step1 = messy_text.replace("!!!", " ")
+step2 = step1.replace("???", " ")
+step3 = step2.replace("***", " ")
+
+print("Messy text:", messy_text)
+print("After step 1:", step1)
+print("After step 2:", step2)
+print("After step 3:", step3)
+
+# Removing unwanted characters
+phone = "(555) 123-4567"
+digits_only = phone.replace("(", "").replace(")", "").replace(" ", "").replace("-", "")
+
+print("Phone with formatting:", phone)
+print("Digits only:", digits_only)
+
+# Replace with limit
+text_with_many = "banana banana banana"
+replace_first_two = text_with_many.replace("banana", "apple", 2)
+
+print("Original:", text_with_many)
+print("Replace first 2:", replace_first_two)</code></pre>
+    </div>
+
+    <h3>Exercise: Clean Text Data</h3>
+    <div class="explanation">
+        <p>Clean up a sentence by replacing multiple spaces with single spaces and removing unwanted punctuation.</p>
+    </div>
+
+    <div class="pyodide-exercise"
+         data-expected-output="Original: This    text  has   weird    spacing!!!
+Cleaned: This text has weird spacing"
+         data-answer='messy_sentence = "This    text  has   weird    spacing!!!"
+no_exclamation = messy_sentence.replace("!!!", "")
+cleaned_sentence = no_exclamation.replace("    ", " ").replace("   ", " ").replace("  ", " ")
+
+print("Original:", messy_sentence)
+print("Cleaned:", cleaned_sentence)'>
+messy_sentence = "This    text  has   weird    spacing!!!"
+# TODO: Remove the "!!!" from the end
+# TODO: Replace multiple spaces with single spaces (try replacing "    ", "   ", "  " with " ")
+# TODO: Print both original and cleaned versions
+</div>
+
+    <h2>6. Method Chaining - Connecting Operations</h2>
+
+    <div class="explanation">
+        <p>Method chaining lets you apply multiple string methods in sequence. This creates cleaner, more readable code. Let's see how to do this step by step, then as a chain.</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Step by step approach
+user_input = "  HELLO@EXAMPLE.COM  "
+
+# Each step stored in a variable
+step1 = user_input.strip()
+step2 = step1.lower()
+step3 = step2.replace("@", " at ")
+final_result = step3.title()
+
+print("Original:", repr(user_input))
+print("After strip():", repr(step1))
+print("After lower():", repr(step2))
+print("After replace():", repr(step3))
+print("After title():", repr(final_result))
+
+print()
+
+# Same operations using method chaining
+chained_result = user_input.strip().lower().replace("@", " at ").title()
+
+print("Chained result:", repr(chained_result))
+print("Results match:", final_result == chained_result)</code></pre>
+    </div>
+
+    <div class="explanation">
+        <p>Method chaining works because each string method returns a new string, which then has its own methods available. You can break long chains across multiple lines for readability:</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Long method chain broken across lines for readability
+raw_data = "   Python,Java,JavaScript,C++   "
+
+# Single line (harder to read)
+processed_single = raw_data.strip().lower().replace(",", " | ").title()
+
+# Multiple lines (easier to read)
+processed_multi = (raw_data.strip()
+                            .lower()
+                            .replace(",", " | ")
+                            .title())
+
+print("Raw data:", repr(raw_data))
+print("Single line:", processed_single)
+print("Multi-line:", processed_multi)
+print("Results match:", processed_single == processed_multi)
+
+# Complex text processing example
+text = "  JOHN DOE;JANE SMITH;BOB JONES  "
+formatted_names = (text.strip()
+                      .lower()
+                      .replace(";", ", ")
+                      .title())
+
+print("Original names:", repr(text))
+print("Formatted names:", formatted_names)</code></pre>
+    </div>
+
+    <h3>Exercise: Chain Text Processing</h3>
+    <div class="explanation">
+        <p>Process a messy product name using method chaining. Clean up "  awesome-PYTHON-book  " to get "Awesome Python Book".</p>
+    </div>
+
+    <div class="pyodide-exercise"
+         data-expected-output="Original: '  awesome-PYTHON-book  '
+Step by step: 'Awesome Python Book'
+Method chained: 'Awesome Python Book'"
+         data-answer='messy_product = "  awesome-PYTHON-book  "
+
+# Step by step
+step1 = messy_product.strip()
+step2 = step1.lower()
+step3 = step2.replace("-", " ")
+step_by_step = step3.title()
+
+# Method chaining
+method_chained = messy_product.strip().lower().replace("-", " ").title()
+
+print("Original:", repr(messy_product))
+print("Step by step:", repr(step_by_step))
+print("Method chained:", repr(method_chained))'>
+messy_product = "  awesome-PYTHON-book  "
+
+# TODO: Process step by step: strip, lower, replace "-" with " ", title
+# TODO: Also do it with method chaining in one line
+# TODO: Print original, step-by-step result, and chained result
+</div>
+
+    <h2>7. Advanced String Methods</h2>
+
+    <div class="explanation">
+        <p>Python has many more string methods for specific tasks. Here are some additional useful ones for text processing:</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Text formatting and padding
+text = "Python"
+
+# Centering and padding
+centered = text.center(20, "*")
+left_justified = text.ljust(15, "-")
+right_justified = text.rjust(15, "=")
+zero_padded = "42".zfill(8)
+
+print("Original:", text)
+print("Centered:", centered)
+print("Left justified:", left_justified)
+print("Right justified:", right_justified)
+print("Zero padded:", zero_padded)
+
+# Counting occurrences
+sentence = "The cat sat on the mat"
+count_the = sentence.count("the")
+count_at = sentence.count("at")
+
+print("Sentence:", sentence)
+print("Count of 'the':", count_the)
+print("Count of 'at':", count_at)
+
+# Starting and ending checks
+filename = "document.pdf"
+url = "https://www.example.com"
+
+print("Filename:", filename)
+print("Starts with 'doc':", filename.startswith("doc"))
+print("Ends with '.pdf':", filename.endswith(".pdf"))
+print("Ends with '.txt':", filename.endswith(".txt"))
+
+print("URL:", url)
+print("Starts with 'https':", url.startswith("https"))
+print("Starts with 'http':", url.startswith("http"))</code></pre>
+    </div>
+
+    <h3>Exercise: File Type Checker</h3>
+    <div class="explanation">
+        <p>Create a file type checker that categorizes files as "Image", "Document", or "Other" based on their extensions.</p>
+    </div>
+
+    <div class="pyodide-exercise"
+         data-expected-output="File: photo.jpg
+Is image: True
+Is document: False
+Type: Image"
+         data-answer='filename = "photo.jpg"
+is_image = filename.endswith(".jpg") or filename.endswith(".png") or filename.endswith(".gif")
+is_document = filename.endswith(".pdf") or filename.endswith(".doc") or filename.endswith(".txt")
+
+if is_image:
+    file_type = "Image"
+elif is_document:
+    file_type = "Document"
+else:
+    file_type = "Other"
+
+print("File:", filename)
+print("Is image:", is_image)
+print("Is document:", is_document)
+print("Type:", file_type)'>
+filename = "photo.jpg"
+# TODO: Check if filename ends with image extensions (.jpg, .png, .gif)
+# TODO: Check if filename ends with document extensions (.pdf, .doc, .txt)
+# TODO: Determine file_type: "Image", "Document", or "Other"
+# TODO: Print the results as shown
+</div>
+
+    <div class="bring-together">
+        <h2>🎯 Bring It All Together: Text Data Processor</h2>
+        <p>Let's create a comprehensive text processor that combines all the string methods we've learned to clean and analyze real-world data.</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Comprehensive Text Data Processor
+
+def clean_and_analyze_text(raw_text):
+    """Process raw text data and return cleaned text with analysis."""
+    print("=== TEXT PROCESSOR ===")
+    print("Raw input:", repr(raw_text))
+    
+    # Step 1: Basic cleaning
+    cleaned = raw_text.strip()
+    print("After strip():", repr(cleaned))
+    
+    # Step 2: Normalize case for analysis
+    normalized = cleaned.lower()
+    print("Normalized:", repr(normalized))
+    
+    # Step 3: Count words and characters
+    word_count = len(normalized.split())
+    char_count = len(normalized)
+    char_count_no_spaces = len(normalized.replace(" ", ""))
+    
+    print("\n=== ANALYSIS ===")
+    print("Total characters:", char_count)
+    print("Characters (no spaces):", char_count_no_spaces)
+    print("Word count:", word_count)
+    
+    # Step 4: Content analysis
+    has_numbers = any(char.isdigit() for char in normalized)
+    has_punctuation = any(char in ".,!?;:" for char in normalized)
+    
+    print("Contains numbers:", has_numbers)
+    print("Contains punctuation:", has_punctuation)
+    
+    # Step 5: Create display version using method chaining
+    display_text = (raw_text.strip()
+                            .replace("  ", " ")
+                            .replace("\t", " ")
+                            .title())
+    
+    print("\n=== FINAL RESULT ===")
+    print("Display version:", display_text)
+    
+    return display_text
+
+# Test with various text samples
+test_texts = [
+    "  hello world  ",
+    "PYTHON programming IS awesome!!!",
+    "user@example.com needs  cleaning   ",
+    "Title:   Introduction\tto\tPython  \n\n",
+    "Mixed123Content with VARIOUS formatting"
+]
+
+for i, text in enumerate(test_texts, 1):
+    print(f"\nTEST {i}:")
+    result = clean_and_analyze_text(text)
+    print("-" * 50)</code></pre>
+    </div>
+
+    <h3>Exercise: Email List Processor</h3>
+    <div class="explanation">
+        <p>Create an email list processor that takes a messy string of emails and produces a clean, standardized list.</p>
+    </div>
+
+    <div class="pyodide-exercise"
+         data-expected-output="Raw emails: '  John@EXAMPLE.com ; mary@test.COM;  bob@work.net  '
+Email count: 3
+Cleaned emails: ['john@example.com', 'mary@test.com', 'bob@work.net']
+Formatted list: john@example.com, mary@test.com, bob@work.net"
+         data-answer='email_string = "  John@EXAMPLE.com ; mary@test.COM;  bob@work.net  "
+
+# Clean and process
+cleaned_emails = []
+email_list = email_string.strip().split(";")
+
+for email in email_list:
+    clean_email = email.strip().lower()
+    cleaned_emails.append(clean_email)
+
+formatted_list = ", ".join(cleaned_emails)
+
+print("Raw emails:", repr(email_string))
+print("Email count:", len(cleaned_emails))
+print("Cleaned emails:", cleaned_emails)
+print("Formatted list:", formatted_list)'>
+email_string = "  John@EXAMPLE.com ; mary@test.COM;  bob@work.net  "
+
+# TODO: Split the string by semicolons
+# TODO: For each email: strip whitespace and convert to lowercase
+# TODO: Create a cleaned_emails list with the processed emails
+# TODO: Join the cleaned emails with ", " for display
+# TODO: Print the results as shown
+</div>
+
+    <h3>Final Exercise: Social Media Username Generator</h3>
+    <div class="explanation">
+        <p>Create a username generator that takes a full name and creates a social media username by removing spaces, converting to lowercase, and adding a number.</p>
+    </div>
+
+    <div class="pyodide-exercise"
+         data-expected-output="Full name: John Paul Smith
+Step 1 - No spaces: johnpaulsmith
+Step 2 - First 10 chars: johnpaulsm
+Step 3 - Add number: johnpaulsm2024
+Final username: @johnpaulsm2024"
+         data-answer='full_name = "John Paul Smith"
+step1 = full_name.lower().replace(" ", "")
+step2 = step1[:10]
+step3 = step2 + "2024"
+final_username = "@" + step3
+
+print("Full name:", full_name)
+print("Step 1 - No spaces:", step1)
+print("Step 2 - First 10 chars:", step2)
+print("Step 3 - Add number:", step3)
+print("Final username:", final_username)'>
+full_name = "John Paul Smith"
+# TODO: Convert to lowercase and remove spaces
+# TODO: Take only the first 10 characters
+# TODO: Add "2024" to the end
+# TODO: Add "@" to the beginning for final username
+# TODO: Print each step as shown
+</div>
+
+    <div class="bring-together">
+        <h2>📝 What You've Learned</h2>
+        <p>Congratulations! You now have a comprehensive toolkit for working with strings in Python:</p>
+        <ul>
+            <li><strong>Case methods:</strong> <code>upper()</code>, <code>lower()</code>, <code>title()</code>, <code>swapcase()</code></li>
+            <li><strong>Whitespace methods:</strong> <code>strip()</code>, <code>lstrip()</code>, <code>rstrip()</code></li>
+            <li><strong>Search methods:</strong> <code>find()</code>, <code>startswith()</code>, <code>endswith()</code>, <code>count()</code></li>
+            <li><strong>Content checks:</strong> <code>isdigit()</code>, <code>isalpha()</code>, <code>isalnum()</code></li>
+            <li><strong>Transformation methods:</strong> <code>replace()</code>, <code>split()</code>, <code>join()</code></li>
+            <li><strong>Method chaining:</strong> Combining multiple operations for cleaner code</li>
+        </ul>
+        <p>String methods are essential for text processing - they help you clean data, format output, and extract information. Master these methods, and you'll be able to handle almost any text processing task!</p>
+
+        <h3>Next Steps</h3>
+        <p>Now that you can work with text data effectively, you're ready to learn about more complex data structures like lists, which will let you handle multiple pieces of information together!</p>
+    </div>
+
+</body>
+</html>
