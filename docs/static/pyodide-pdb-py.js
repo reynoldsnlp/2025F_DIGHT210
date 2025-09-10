@@ -1,3 +1,7 @@
+// Python PDB module as JavaScript string for Pyodide
+// Github Pages will not serve .py files directly, so we embed it here
+
+export const PYODIDE_PDB_PYTHON_CODE = `
 import ast
 import copy
 from io import StringIO
@@ -582,7 +586,7 @@ class StepDebugger:
                 if 'zip(' in assignment:
                     # Extract the arguments from the zip call
                     import re
-                    match = re.search(r'zip\((.*?)\)', assignment)
+                    match = re.search(r'zip\\((.*?)\\)', assignment)
                     if match:
                         args_str = match.group(1)
                         try:
@@ -625,7 +629,7 @@ class StepDebugger:
             for var_name, assignment in self.variable_assignments.items():
                 if 'enumerate(' in assignment:
                     import re
-                    match = re.search(r'enumerate\((.*?)\)', assignment)
+                    match = re.search(r'enumerate\\((.*?)\\)', assignment)
                     if match:
                         arg_str = match.group(1)
                         return f"enumerate({arg_str})"
@@ -711,3 +715,4 @@ def extract_assigned_variables(code_str):
         return list(assigned_vars)
     except SyntaxError:
         return []
+`;

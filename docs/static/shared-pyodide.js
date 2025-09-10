@@ -362,34 +362,14 @@ except (ImportError, NameError):
 
         if (isLoaded) return pyodide;
 
-        const staticPath = this.getStaticPath();
-
-        // Try multiple paths for the PDB module
-        const pdbPaths = [
-            staticPath + 'pyodide_pdb.py',
-            './pyodide_pdb.py',
-            '../pyodide_pdb.py',
-            '../../pyodide_pdb.py'
-        ];
-
-        let pythonCode = null;
-        for (const path of pdbPaths) {
-            try {
-                const response = await fetch(path);
-                if (response.ok) {
-                    pythonCode = await response.text();
-                    break;
-                }
-            } catch (error) {
-                console.warn(`Failed to fetch pyodide_pdb.py from ${path}`);
-            }
+        // Load Python code from JavaScript module
+        try {
+            const { PYODIDE_PDB_PYTHON_CODE } = await import('./pyodide-pdb-py.js');
+            await pyodide.runPythonAsync(PYODIDE_PDB_PYTHON_CODE);
+        } catch (error) {
+            console.error('Failed to load PDB module:', error);
+            throw new Error('Failed to load pyodide_pdb module');
         }
-
-        if (!pythonCode) {
-            throw new Error('Failed to fetch pyodide_pdb.py from any path');
-        }
-
-        await pyodide.runPythonAsync(pythonCode);
 
         // Create a module namespace to access the classes and functions
         await pyodide.runPythonAsync(`
