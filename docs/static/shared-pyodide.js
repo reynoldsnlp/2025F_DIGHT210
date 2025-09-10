@@ -29,13 +29,6 @@ window.SharedPyodideManager = {
             return staticPath;
         }
 
-        // If we're in materials directory (nested under docs)
-        if (pathSegments.includes('materials')) {
-            const materialsIndex = pathSegments.findIndex(segment => segment === 'materials');
-            const depthAfterMaterials = pathSegments.length - materialsIndex - 1;
-            return '../'.repeat(depthAfterMaterials + 1) + 'static/';
-        }
-
         // If we're in lectures directory (nested under docs)
         if (pathSegments.includes('lectures')) {
             const lecturesIndex = pathSegments.findIndex(segment => segment === 'lectures');
@@ -87,10 +80,11 @@ window.SharedPyodideManager = {
     },
 
     // Load CSS dependencies
-    async loadCSS(href) {
+    async loadCSS(href, vendorPath = null) {
         return new Promise((resolve, reject) => {
             // Check if CSS is already loaded
-            const existingLink = document.querySelector(`link[href="${href}"]`);
+            const existingLink = document.querySelector(`link[href="${href}"]`) ||
+                                 (vendorPath && document.querySelector(`link[href="${vendorPath}"]`));
             if (existingLink) {
                 resolve();
                 return;
@@ -101,11 +95,46 @@ window.SharedPyodideManager = {
             link.href = href;
             link.onload = () => resolve();
             link.onerror = () => {
-                console.warn(`Failed to load CSS: ${href}`);
-                resolve(); // Don't reject, just warn and continue
+                console.warn(`Failed to load CSS from CDN: ${href}`);
+                if (vendorPath) {
+                    // Try vendor fallback
+                    const vendorLink = document.createElement('link');
+                    vendorLink.rel = 'stylesheet';
+                    vendorLink.href = vendorPath;
+                    vendorLink.onload = () => {
+                        console.log(`Successfully loaded CSS from vendor: ${vendorPath}`);
+                        resolve();
+                    };
+                    vendorLink.onerror = () => {
+                        console.warn(`Failed to load CSS from vendor: ${vendorPath}`);
+                        resolve(); // Don't reject, just warn and continue
+                    };
+                    document.head.appendChild(vendorLink);
+                } else {
+                    resolve(); // Don't reject, just warn and continue
+                }
             };
             document.head.appendChild(link);
         });
+    },
+
+    // Load JavaScript dependencies with CDN-first approach
+    async loadScriptWithFallback(cdnUrl, vendorPath) {
+        try {
+            console.log(`Attempting to load from CDN: ${cdnUrl}`);
+            await this.loadScript(cdnUrl);
+            console.log(`Successfully loaded from CDN: ${cdnUrl}`);
+            return;
+        } catch (cdnError) {
+            console.warn(`Failed to load from CDN: ${cdnUrl}, trying vendor: ${vendorPath}`);
+            try {
+                await this.loadScript(vendorPath);
+                console.log(`Successfully loaded from vendor: ${vendorPath}`);
+            } catch (vendorError) {
+                console.warn(`Failed to load from vendor: ${vendorPath}`);
+                throw new Error(`Failed to load from both CDN (${cdnUrl}) and vendor (${vendorPath})`);
+            }
+        }
     },
 
     // Load JavaScript dependencies
@@ -134,14 +163,24 @@ window.SharedPyodideManager = {
         if (this.uiDependenciesLoaded) return;
 
         const staticPath = this.getStaticPath();
-        const dependencies = [
-            this.loadCSS(staticPath + 'vendor/prism/themes/a11y-light-on-light-dark-on-dark.css'),
-            this._loadPrismIfNeeded(staticPath),
-            this._loadCodeJar(staticPath)
-        ];
+
+        // Load a11y CSS for better accessibility
+        const a11yCssPromise = this.loadCSS(
+            'https://cdn.jsdelivr.net/npm/a11y-syntax-highlighting@1.1.0/dist/prism/a11y-light-on-light-dark-on-dark.css',
+            null
+        );
 
         try {
-            await Promise.allSettled(dependencies);
+            // Wait for CSS to load first
+            await Promise.allSettled([a11yCssPromise]);
+
+            // Then load JavaScript dependencies
+            const jsLoadPromises = [
+                this._loadPrismIfNeeded(staticPath),
+                this._loadCodeJar(staticPath)
+            ];
+
+            await Promise.allSettled(jsLoadPromises);
             this._waitForPrism();
         } catch (error) {
             console.warn('Some UI dependencies failed to load:', error);
@@ -154,20 +193,48 @@ window.SharedPyodideManager = {
         if (window.Prism) return Promise.resolve();
 
         try {
-            return await this.loadScript(staticPath + 'vendor/prism/prism.js');
+            // Load core Prism first
+            await this.loadScriptWithFallback(
+                'https://cdn.jsdelivr.net/npm/prismjs@1.30.0/prism.min.js',
+                staticPath + 'vendor/prism/prism.js'
+            );
+
+            // Then load Python component
+            try {
+                await this.loadScriptWithFallback(
+                    'https://cdn.jsdelivr.net/npm/prismjs@1.30.0/components/prism-python.min.js',
+                    staticPath + 'vendor/prism/components/prism-python.min.js'
+                );
+            } catch (error) {
+                console.warn('Python component for Prism not available, using core only');
+            }
+
+            return Promise.resolve();
         } catch (error) {
-            console.warn('Prism not available');
+            console.warn('Prism not available from CDN or vendor');
             return Promise.resolve();
         }
     },
 
     async _loadCodeJar(staticPath) {
         try {
-            const codejarPath = staticPath + 'vendor/codejar/codejar.js';
-            const module = await import(codejarPath);
-            window.CodeJar = module.default || module.CodeJar;
+            // Try CDN first
+            try {
+                console.log('Attempting to load CodeJar from CDN...');
+                const module = await import('https://cdn.skypack.dev/codejar@3.7.0');
+                window.CodeJar = module.default || module.CodeJar;
+                console.log('Successfully loaded CodeJar from CDN');
+                return;
+            } catch (cdnError) {
+                console.warn('Failed to load CodeJar from CDN, trying vendor copy:', cdnError);
+                // Fallback to vendor
+                const codejarPath = staticPath + 'vendor/codejar/codejar.js';
+                const module = await import(codejarPath);
+                window.CodeJar = module.default || module.CodeJar;
+                console.log('Successfully loaded CodeJar from vendor');
+            }
         } catch (error) {
-            console.warn('CodeJar failed to load:', error);
+            console.warn('CodeJar failed to load from both CDN and vendor:', error);
         }
     },
 
