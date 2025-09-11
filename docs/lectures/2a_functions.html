@@ -254,55 +254,63 @@ print("Full name:", result)'>
     </div>
 
     <div class="pyodide-pdb">
-        <pre><code># Functions for text processing
-def count_words(text):
-    words = text.split()
-    return len(words)
+        <pre><code># Functions for mathematical calculations
+def add_numbers(num1, num2):
+    return num1 + num2
 
-def count_characters(text):
-    return len(text)
+def multiply_numbers(num1, num2):
+    return num1 * num2
 
-def make_summary(text):
-    word_count = count_words(text)
-    char_count = count_characters(text)
+def calculate_area(length, width):
+    area = length * width
+    return area
 
-    summary = "Text has " + str(word_count) + " words and " + str(char_count) + " characters."
-    return summary
+def calculate_total_cost(price, quantity, tax_rate):
+    subtotal = price * quantity
+    tax = subtotal * tax_rate
+    total = subtotal + tax
+    return total
 
 # Use the functions
-sample_text = "Python is a powerful programming language"
+print("Simple calculations:")
+sum_result = add_numbers(15, 25)
+product_result = multiply_numbers(7, 8)
 
-# Use functions individually
-words = count_words(sample_text)
-characters = count_characters(sample_text)
+print("15 + 25 =", sum_result)
+print("7 × 8 =", product_result)
 
-print("Sample text:", sample_text)
-print("Words:", words)
-print("Characters:", characters)
+# Calculate room area
+room_area = calculate_area(12, 10)
+print("Room area (12 × 10):", room_area, "square feet")
 
-# Use the summary function (which uses the other functions)
-summary = make_summary(sample_text)
-print("Summary:", summary)</code></pre>
+# Calculate shopping total
+item_price = 29.99
+item_quantity = 3
+sales_tax = 0.08  # 8% tax
+
+total_cost = calculate_total_cost(item_price, item_quantity, sales_tax)
+print("Total cost for", item_quantity, "items at $", item_price, "each:", total_cost)</code></pre>
     </div>
 
-    <h3>Exercise: Text Analysis Functions</h3>
+    <h3>Exercise: Mathematical Functions</h3>
     <div class="explanation">
-        <p>Create a function called <code>analyze_sentence</code> that takes a sentence, counts the exclamation marks, and returns the count.</p>
+        <p>Create a function called <code>calculate_average</code> that takes three numbers, adds them together, divides by 3, and returns the average.</p>
     </div>
 
     <div class="pyodide-exercise"
-         data-expected-output="Exclamation marks: 2"
-         data-answer='def analyze_sentence(sentence):
-    count = sentence.count("!")
-    return count
+         data-expected-output="Average: 85.0"
+         data-answer='def calculate_average(num1, num2, num3):
+    total = num1 + num2 + num3
+    average = total / 3
+    return average
 
-sentence = "Hello! How are you today! Great to see you."
-result = analyze_sentence(sentence)
-print("Exclamation marks:", result)'>
-# TODO: Define analyze_sentence function that takes a sentence parameter
-# TODO: Count how many exclamation marks (!) are in the sentence
-# TODO: Return the count
-# TODO: Test with "Hello! How are you today! Great to see you."
+result = calculate_average(80, 85, 90)
+print("Average:", result)'>
+# TODO: Define calculate_average function that takes three number parameters
+# TODO: Add the three numbers together
+# TODO: Divide the total by 3 to get the average
+# TODO: Return the average
+# TODO: Test with numbers 80, 85, and 90
 </div>
 
     <h2>6. Keyword Arguments - Calling Functions by Name</h2>
