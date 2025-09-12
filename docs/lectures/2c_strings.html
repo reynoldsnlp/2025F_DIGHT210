@@ -49,9 +49,15 @@ print("Original:", text)
 print("Uppercase:", uppercase)
 print("Lowercase:", lowercase)
 print("Title case:", titlecase)
-print("Swapped case:", swapcase)
+print("Swapped case:", swapcase)</code></pre>
+    </div>
 
-# Checking case
+    <div class="explanation">
+        <p>You can also check what case a string is in:</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Checking case
 name = "ALICE"
 print("Is name uppercase?", name.isupper())
 print("Is name lowercase?", name.islower())
@@ -96,13 +102,26 @@ right_stripped = messy_text.rstrip()
 print("Original:", repr(messy_text))
 print("Stripped:", repr(stripped))
 print("Left stripped:", repr(left_stripped))
-print("Right stripped:", repr(right_stripped))
+print("Right stripped:", repr(right_stripped))</code></pre>
+    </div>
 
-print()
+    <div class="explanation">
+        <p>Strip works with multiline text too:</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code>multiline_text = "\n\n  Python is awesome!  \n\n"
+
 print("Multiline original:", repr(multiline_text))
-print("Multiline stripped:", repr(multiline_text.strip()))
+print("Multiline stripped:", repr(multiline_text.strip()))</code></pre>
+    </div>
 
-# Check if text has only whitespace
+    <div class="explanation">
+        <p>You can check if text is only whitespace:</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Check if text has only whitespace
 empty_looking = "   \n\t   "
 print("Is empty-looking text actually empty?", len(empty_looking.strip()) == 0)</code></pre>
     </div>
@@ -142,7 +161,15 @@ has_java = "java" in sentence.lower()
 
 print("Sentence:", sentence)
 print("Contains 'python':", has_python)
-print("Contains 'java':", has_java)
+print("Contains 'java':", has_java)</code></pre>
+    </div>
+
+    <div class="explanation">
+        <p>You can find the position of text:</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code>sentence = "Python programming is fun and educational"
 
 # Find position of text
 python_position = sentence.lower().find("python")
@@ -151,9 +178,15 @@ missing_position = sentence.find("difficult")
 
 print("Position of 'python':", python_position)
 print("Position of 'fun':", fun_position)
-print("Position of 'difficult':", missing_position)
+print("Position of 'difficult':", missing_position)</code></pre>
+    </div>
 
-# Check string content type
+    <div class="explanation">
+        <p>You can check what type of content a string contains:</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Check string content type
 number_text = "12345"
 mixed_text = "abc123"
 alpha_text = "hello"
@@ -202,25 +235,43 @@ fruits = sentence.split(",")
 
 print("Original:", sentence)
 print("Split by comma:", fruits)
-print("Number of fruits:", len(fruits))
+print("Number of fruits:", len(fruits))</code></pre>
+    </div>
 
-# Splitting by spaces (default)
+    <div class="explanation">
+        <p>Splitting by spaces (the default):</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Splitting by spaces (default)
 text = "The quick brown fox"
 words = text.split()
 
 print("Text:", text)
-print("Words:", words)
+print("Words:", words)</code></pre>
+    </div>
 
-# Joining pieces into text
+    <div class="explanation">
+        <p>Joining pieces back into text:</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Joining pieces into text
 word_list = ["Python", "is", "awesome"]
 joined_sentence = " ".join(word_list)
 joined_with_dashes = "-".join(word_list)
 
 print("Word list:", word_list)
 print("Joined with spaces:", joined_sentence)
-print("Joined with dashes:", joined_with_dashes)
+print("Joined with dashes:", joined_with_dashes)</code></pre>
+    </div>
 
-# Real example: processing a CSV line
+    <div class="explanation">
+        <p>Real example: processing a CSV line:</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Real example: processing a CSV line
 csv_line = "John,25,Engineer,New York"
 fields = csv_line.split(",")
 name = fields[0]
@@ -266,9 +317,15 @@ original = "I love Java programming"
 updated = original.replace("Java", "Python")
 
 print("Original:", original)
-print("Updated:", updated)
+print("Updated:", updated)</code></pre>
+    </div>
 
-# Multiple replacements
+    <div class="explanation">
+        <p>You can chain multiple replacements:</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Multiple replacements
 messy_text = "Hello!!!World???How***are***you???"
 step1 = messy_text.replace("!!!", " ")
 step2 = step1.replace("???", " ")
@@ -277,16 +334,28 @@ step3 = step2.replace("***", " ")
 print("Messy text:", messy_text)
 print("After step 1:", step1)
 print("After step 2:", step2)
-print("After step 3:", step3)
+print("After step 3:", step3)</code></pre>
+    </div>
 
-# Removing unwanted characters
+    <div class="explanation">
+        <p>A practical example: cleaning phone numbers:</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Removing unwanted characters
 phone = "(555) 123-4567"
 digits_only = phone.replace("(", "").replace(")", "").replace(" ", "").replace("-", "")
 
 print("Phone with formatting:", phone)
-print("Digits only:", digits_only)
+print("Digits only:", digits_only)</code></pre>
+    </div>
 
-# Replace with limit
+    <div class="explanation">
+        <p>You can limit how many replacements are made:</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Replace with limit
 text_with_many = "banana banana banana"
 replace_first_two = text_with_many.replace("banana", "apple", 2)
 
@@ -334,15 +403,21 @@ print("Original:", repr(user_input))
 print("After strip():", repr(step1))
 print("After lower():", repr(step2))
 print("After replace():", repr(step3))
-print("After title():", repr(final_result))
+print("After title():", repr(final_result))</code></pre>
+    </div>
 
-print()
+    <div class="explanation">
+        <p>The same operations using method chaining:</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code>user_input = "  HELLO@EXAMPLE.COM  "
 
 # Same operations using method chaining
 chained_result = user_input.strip().lower().replace("@", " at ").title()
 
 print("Chained result:", repr(chained_result))
-print("Results match:", final_result == chained_result)</code></pre>
+print("Results match:", chained_result == "Hello At Example.Com")</code></pre>
     </div>
 
     <div class="explanation">
@@ -365,9 +440,15 @@ processed_multi = (raw_data.strip()
 print("Raw data:", repr(raw_data))
 print("Single line:", processed_single)
 print("Multi-line:", processed_multi)
-print("Results match:", processed_single == processed_multi)
+print("Results match:", processed_single == processed_multi)</code></pre>
+    </div>
 
-# Complex text processing example
+    <div class="explanation">
+        <p>Complex text processing example:</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Complex text processing example
 text = "  JOHN DOE;JANE SMITH;BOB JONES  "
 formatted_names = (text.strip()
                       .lower()
@@ -428,18 +509,30 @@ print("Original:", text)
 print("Centered:", centered)
 print("Left justified:", left_justified)
 print("Right justified:", right_justified)
-print("Zero padded:", zero_padded)
+print("Zero padded:", zero_padded)</code></pre>
+    </div>
 
-# Counting occurrences
+    <div class="explanation">
+        <p>Counting occurrences of text:</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Counting occurrences
 sentence = "The cat sat on the mat"
 count_the = sentence.count("the")
 count_at = sentence.count("at")
 
 print("Sentence:", sentence)
 print("Count of 'the':", count_the)
-print("Count of 'at':", count_at)
+print("Count of 'at':", count_at)</code></pre>
+    </div>
 
-# Starting and ending checks
+    <div class="explanation">
+        <p>Checking how text starts and ends:</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Starting and ending checks
 filename = "document.pdf"
 url = "https://www.example.com"
 
@@ -497,41 +590,41 @@ def clean_and_analyze_text(raw_text):
     """Process raw text data and return cleaned text with analysis."""
     print("=== TEXT PROCESSOR ===")
     print("Raw input:", repr(raw_text))
-    
+
     # Step 1: Basic cleaning
     cleaned = raw_text.strip()
     print("After strip():", repr(cleaned))
-    
+
     # Step 2: Normalize case for analysis
     normalized = cleaned.lower()
     print("Normalized:", repr(normalized))
-    
+
     # Step 3: Count words and characters
     word_count = len(normalized.split())
     char_count = len(normalized)
     char_count_no_spaces = len(normalized.replace(" ", ""))
-    
+
     print("\n=== ANALYSIS ===")
     print("Total characters:", char_count)
     print("Characters (no spaces):", char_count_no_spaces)
     print("Word count:", word_count)
-    
+
     # Step 4: Content analysis
     has_numbers = any(char.isdigit() for char in normalized)
     has_punctuation = any(char in ".,!?;:" for char in normalized)
-    
+
     print("Contains numbers:", has_numbers)
     print("Contains punctuation:", has_punctuation)
-    
+
     # Step 5: Create display version using method chaining
     display_text = (raw_text.strip()
                             .replace("  ", " ")
                             .replace("\t", " ")
                             .title())
-    
+
     print("\n=== FINAL RESULT ===")
     print("Display version:", display_text)
-    
+
     return display_text
 
 # Test with various text samples

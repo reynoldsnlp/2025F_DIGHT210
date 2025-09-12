@@ -103,16 +103,33 @@ user_age = 28
 total_score = 95
 is_valid = True
 
-# Demonstrating case sensitivity
+print("Name:", first_name, last_name)
+print("Age:", user_age)
+print("Score:", total_score)
+print("Valid:", is_valid)</code></pre>
+    </div>
+
+    <div class="explanation">
+        <p>Python is case sensitive - these are all different variables:</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Demonstrating case sensitivity
 name = "lowercase"
 Name = "Capitalized"
 NAME = "UPPERCASE"
 
 print("name:", name)
 print("Name:", Name)
-print("NAME:", NAME)
+print("NAME:", NAME)</code></pre>
+    </div>
 
-# Good practice: descriptive names
+    <div class="explanation">
+        <p>Always use descriptive names that explain what the variable contains:</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Good practice: descriptive names
 student_count = 25
 average_temperature = 72.5
 book_title = "Python Programming"
@@ -216,9 +233,15 @@ area = length * width
 
 print("Length:", length)
 print("Width:", width)
-print("Area:", area)
+print("Area:", area)</code></pre>
+    </div>
 
-# Using variables in more complex calculations
+    <div class="explanation">
+        <p>Variables make complex calculations easier to understand:</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Using variables in more complex calculations
 price = 29.99
 tax_rate = 0.08
 tax_amount = price * tax_rate
@@ -227,9 +250,15 @@ total = price + tax_amount
 print("Price:", price)
 print("Tax rate:", tax_rate)
 print("Tax amount:", tax_amount)
-print("Total:", total)
+print("Total:", total)</code></pre>
+    </div>
 
-# Variables can use other variables
+    <div class="explanation">
+        <p>You can build variables from other variables:</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Variables can use other variables
 first_number = 15
 second_number = 25
 sum_result = first_number + second_number
@@ -276,9 +305,15 @@ full_name = first_name + " " + last_name
 
 print("First name:", first_name)
 print("Last name:", last_name)
-print("Full name:", full_name)
+print("Full name:", full_name)</code></pre>
+    </div>
 
-# Repeating strings
+    <div class="explanation">
+        <p>You can repeat strings using the multiplication operator:</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Repeating strings
 star = "*"
 line = star * 20
 greeting = "Hello! "
@@ -287,9 +322,15 @@ repeated_greeting = greeting * 3
 print("Single star:", star)
 print("Line of stars:", line)
 print("Single greeting:", greeting)
-print("Repeated greeting:", repeated_greeting)
+print("Repeated greeting:", repeated_greeting)</code></pre>
+    </div>
 
-# Mixing strings and other operations
+    <div class="explanation">
+        <p>When combining strings with numbers, convert numbers to text first:</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Mixing strings and other operations
 item = "apple"
 count = 5
 message = "I have " + str(count) + " " + item + "s"

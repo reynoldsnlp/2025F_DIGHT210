@@ -174,9 +174,15 @@ result4 = 2 ** (3 + 1)
 print("2 + 3 * 4 =", result1, "(multiplication first)")
 print("(2 + 3) * 4 =", result2, "(parentheses first)")
 print("2 ** 3 + 1 =", result3, "(exponent first)")
-print("2 ** (3 + 1) =", result4, "(parentheses first)")
+print("2 ** (3 + 1) =", result4, "(parentheses first)")</code></pre>
+    </div>
 
-# Complex calculation: area of a circle
+    <div class="explanation">
+        <p>Here's a practical example with the area of a circle:</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Complex calculation: area of a circle
 radius = 5
 pi = 3.14159
 area_wrong = pi * radius ** 2  # Correct: exponent before multiplication
@@ -236,9 +242,15 @@ score /= 4  # Same as: score = score / 4
 print("After dividing by 4:", score)
 
 score **= 2  # Same as: score = score ** 2
-print("After squaring:", score)
+print("After squaring:", score)</code></pre>
+    </div>
 
-# Common pattern: incrementing a counter
+    <div class="explanation">
+        <p>A common pattern is incrementing a counter:</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Common pattern: incrementing a counter
 counter = 0
 print("Counter starts at:", counter)
 
@@ -246,9 +258,15 @@ counter += 1
 print("After increment:", counter)
 
 counter += 1
-print("After another increment:", counter)
+print("After another increment:", counter)</code></pre>
+    </div>
 
-# Adding to a total
+    <div class="explanation">
+        <p>Another common pattern is accumulating a total:</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Adding to a total
 total = 0
 total += 10
 total += 25
@@ -314,16 +332,31 @@ result3 = whole_number / 2  # Division always gives float
 
 print("10 + 3.5 =", result1, "Type:", type(result1))
 print("10 * 3.5 =", result2, "Type:", type(result2))
-print("10 / 2 =", result3, "Type:", type(result3))
+print("10 / 2 =", result3, "Type:", type(result3))</code></pre>
+    </div>
 
-# Converting between types
+    <div class="explanation">
+        <p>You can convert between number types:</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Converting between types
+whole_number = 10
+decimal_number = 3.5
+
 float_result = float(whole_number)  # Convert int to float
 int_result = int(decimal_number)    # Convert float to int (truncates)
 
 print("10 as float:", float_result)
-print("3.5 as int:", int_result, "(decimal part removed)")
+print("3.5 as int:", int_result, "(decimal part removed)")</code></pre>
+    </div>
 
-# Rounding
+    <div class="explanation">
+        <p>Python provides several ways to round numbers:</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Rounding
 import math
 rounded_up = math.ceil(3.2)    # Round up
 rounded_down = math.floor(3.8)  # Round down

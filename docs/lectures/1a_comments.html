@@ -41,9 +41,15 @@
 
     <div class="pyodide-pdb">
         <pre><code># This is a comment on its own line
-print("Hello, World!")  # This comment explains what this line does
+print("Hello, World!")  # This comment explains what this line does</code></pre>
+    </div>
 
-# You can write anything here - Python ignores it completely
+    <div class="explanation">
+        <p>You can write anything in comments - Python completely ignores them:</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># You can write anything here - Python ignores it completely
 # Even if you write nonsense: aksjdlakjsd 12345 !@#$%
 
 print("Second line")
@@ -82,9 +88,15 @@ Python will read this text, but since it's not
 assigned to a variable, it just disappears.
 """
 
-print("Hello from Python!")
+print("Hello from Python!")</code></pre>
+    </div>
 
-'''
+    <div class="explanation">
+        <p>You can also use single quotes for multi-line comments:</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code>'''
 You can also use single quotes for multi-line comments.
 This is useful when your comment contains double quotes like "hello".
 This text is also evaluated by Python but then discarded.
@@ -133,9 +145,15 @@ print("Programming")
 # Even syntax errors here won't cause problems: print(hello world
 # Python never even looks at this line
 
-print("First line works fine!")
+print("First line works fine!")</code></pre>
+    </div>
 
-"""
+    <div class="explanation">
+        <p>Multi-line comments are evaluated as strings, so they must have valid syntax:</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code>"""
 This multi-line comment is evaluated by Python,
 so it must be valid Python syntax.
 But since it's just a string with no assignment,
@@ -268,7 +286,15 @@ y = 10  # Set y to 10 (obvious and unnecessary)
 # This calculates the area
 area = x * y  # But this comment is wrong - this calculates area of rectangle!
 
-# GOOD EXAMPLES - Do this instead:
+print("Area:", area)</code></pre>
+    </div>
+
+    <div class="explanation">
+        <p>Here's how to improve those comments:</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># GOOD EXAMPLES - Do this instead:
 
 width = 5
 height = 10

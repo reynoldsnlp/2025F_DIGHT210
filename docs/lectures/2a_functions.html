@@ -94,9 +94,15 @@ def greet_person(name):
 # Call with different arguments
 greet_person("Alice")
 greet_person("Bob")
-greet_person("Maria")
+greet_person("Maria")</code></pre>
+    </div>
 
-# Function with multiple parameters
+    <div class="explanation">
+        <p>Functions can have multiple parameters:</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Function with multiple parameters
 def introduce_person(name, age, city):
     print("This is", name)
     print("They are", age, "years old")
@@ -146,9 +152,15 @@ print("First sum:", sum1)
 print("Second sum:", sum2)
 
 # You can use the return value directly
-print("Double sum:", add_numbers(2, 4) * 2)
+print("Double sum:", add_numbers(2, 4) * 2)</code></pre>
+    </div>
 
-# Function that processes text
+    <div class="explanation">
+        <p>Functions can process and return text too:</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Function that processes text
 def make_title(text):
     title = "*** " + text + " ***"
     return title
@@ -216,6 +228,10 @@ print("Global number:", number)
 # print(local_message)  # This would cause an error!</code></pre>
     </div>
 
+    <div class="explanation">
+        <p>Parameters are also local variables that exist only inside the function:</p>
+    </div>
+
     <div class="pyodide-pdb">
         <pre><code>def calculate_average(score1, score2, score3):
     # Parameters are also local variables
@@ -277,13 +293,35 @@ sum_result = add_numbers(15, 25)
 product_result = multiply_numbers(7, 8)
 
 print("15 + 25 =", sum_result)
-print("7 × 8 =", product_result)
+print("7 × 8 =", product_result)</code></pre>
+    </div>
 
-# Calculate room area
+    <div class="explanation">
+        <p>Here are some practical examples:</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Calculate room area
+def calculate_area(length, width):
+    area = length * width
+    return area
+
 room_area = calculate_area(12, 10)
-print("Room area (12 × 10):", room_area, "square feet")
+print("Room area (12 × 10):", room_area, "square feet")</code></pre>
+    </div>
 
-# Calculate shopping total
+    <div class="explanation">
+        <p>More complex calculations:</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Calculate shopping total
+def calculate_total_cost(price, quantity, tax_rate):
+    subtotal = price * quantity
+    tax = subtotal * tax_rate
+    total = subtotal + tax
+    return total
+
 item_price = 29.99
 item_quantity = 3
 sales_tax = 0.08  # 8% tax

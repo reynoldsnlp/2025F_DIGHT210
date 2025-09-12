@@ -43,15 +43,27 @@ is_raining = False
 print("Is sunny:", is_sunny)
 print("Is raining:", is_raining)
 print("Type of True:", type(True))
-print("Type of False:", type(False))
+print("Type of False:", type(False))</code></pre>
+    </div>
 
-# True and False are special cases of 1 and 0
+    <div class="explanation">
+        <p>True and False are special cases of 1 and 0:</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># True and False are special cases of 1 and 0
 print("True as number:", True + 0)
 print("False as number:", False + 0)
 print("True + True =", True + True)
-print("True + False =", True + False)
+print("True + False =", True + False)</code></pre>
+    </div>
 
-# Comparison operations create boolean values
+    <div class="explanation">
+        <p>Comparison operations create boolean values:</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Comparison operations create boolean values
 age = 25
 print("Age:", age)
 print("Age > 18:", age > 18)
@@ -101,24 +113,34 @@ print("=== FALSY VALUES ===")
 print("bool(False):", bool(False))
 print("bool(0):", bool(0))
 print("bool(''):", bool(""))  # Empty string
-print("bool(None):", bool(None))
+print("bool(None):", bool(None))</code></pre>
+    </div>
 
-print()
-print("=== TRUTHY VALUES ===")
+    <div class="explanation">
+        <p>Most values are truthy:</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code>print("=== TRUTHY VALUES ===")
 print("bool(True):", bool(True))
 print("bool(1):", bool(1))
 print("bool(-1):", bool(-1))
 print("bool('hello'):", bool("hello"))
 print("bool('0'):", bool("0"))  # String "0" is truthy!
-print("bool(' '):", bool(" "))  # Space is truthy!
+print("bool(' '):", bool(" "))  # Space is truthy!</code></pre>
+    </div>
 
-# Testing with variables
+    <div class="explanation">
+        <p>Testing with real variables:</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Testing with variables
 name = ""
 message = "Hello"
 score = 0
 age = 25
 
-print()
 print("=== VARIABLE TESTS ===")
 print("Empty name (''):", bool(name))
 print("Message ('Hello'):", bool(message))
@@ -164,18 +186,30 @@ if temperature > 70:
     print("It's warm outside!")
     print("Good weather for a walk.")
 
-print("Weather check complete.")
+print("Weather check complete.")</code></pre>
+    </div>
 
-# if statement with different conditions
+    <div class="explanation">
+        <p>You can have multiple separate if statements:</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># if statement with different conditions
 age = 17
 
 if age >= 18:
     print("You are eligible to vote.")
 
 if age < 18:
-    print("You are not yet eligible to vote.")
+    print("You are not yet eligible to vote.")</code></pre>
+    </div>
 
-# Using truthy/falsy values
+    <div class="explanation">
+        <p>If statements work with truthy/falsy values:</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Using truthy/falsy values
 user_name = "Alice"
 
 if user_name:  # Non-empty string is truthy
@@ -228,9 +262,15 @@ else:
     grade = "F"
 
 print("Score:", score)
-print("Grade:", grade)
+print("Grade:", grade)</code></pre>
+    </div>
 
-# Text analysis with conditions
+    <div class="explanation">
+        <p>Conditions can be based on any type of data:</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Text analysis with conditions
 text = "Hello world"
 length = len(text)
 
@@ -291,9 +331,15 @@ has_license = True
 if age >= 16 and has_license:
     print("Can drive legally")
 else:
-    print("Cannot drive legally")
+    print("Cannot drive legally")</code></pre>
+    </div>
 
-# Using 'or' operator
+    <div class="explanation">
+        <p>The 'or' operator checks if at least one condition is true:</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Using 'or' operator
 day = "Saturday"
 hour = 14
 
@@ -301,15 +347,27 @@ if day == "Saturday" or day == "Sunday":
     print("It's the weekend!")
 
 if hour < 9 or hour > 17:
-    print("Outside business hours")
+    print("Outside business hours")</code></pre>
+    </div>
 
-# Using 'not' operator
+    <div class="explanation">
+        <p>The 'not' operator reverses the truth value:</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Using 'not' operator
 is_raining = False
 
 if not is_raining:
-    print("Good day for outdoor activities")
+    print("Good day for outdoor activities")</code></pre>
+    </div>
 
-# Combining multiple operators
+    <div class="explanation">
+        <p>You can combine multiple operators:</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Combining multiple operators
 text = "Python programming"
 word_count = len(text.split())
 
@@ -371,9 +429,15 @@ for text in test_texts:
     category = categorize_text(text)
     print("Text:", repr(text))
     print("Category:", category)
-    print()
+    print()</code></pre>
+    </div>
 
-# Function that returns different values based on conditions
+    <div class="explanation">
+        <p>Here's another function example with different return values based on conditions:</p>
+    </div>
+
+    <div class="pyodide-pdb">
+        <pre><code># Function that returns different values based on conditions
 def calculate_shipping(weight, is_express):
     base_cost = 5.00
 
