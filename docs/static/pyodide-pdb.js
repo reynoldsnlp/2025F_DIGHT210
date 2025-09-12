@@ -8,7 +8,6 @@ const PyodidePDB = {
     const result = await pyodide.runPythonAsync(`
 pyodide_pdb.extract_assigned_variables("""${code.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}""")
 `);
-
     return result.toJs();
   }
 };
@@ -443,7 +442,11 @@ ${this.instanceId}.reset()
 
     // Filter to only variables that have values and sort them
     const definedVars = this.varNames
-      .filter(varName => this.state.locals.hasOwnProperty(varName))
+      .filter(varName => {
+        // Check for both original name and _py_ prefixed version
+        return this.state.locals.hasOwnProperty(varName) ||
+               this.state.locals.hasOwnProperty(`_py_${varName}`);
+      })
       .sort();
 
     if (definedVars.length === 0) {
@@ -467,9 +470,13 @@ ${this.instanceId}.reset()
     `;
 
     for (const varName of definedVars) {
-      const value = this.state.locals[varName];
-      const scope = this.state.scope_info[varName] || 'unknown';
-      const type = this.state.type_info && this.state.type_info[varName] || 'unknown';
+      // Check for _py_ prefixed version
+      const actualKey = this.state.locals.hasOwnProperty(`_py_${varName}`) ?
+                        `_py_${varName}` : varName;
+
+      const value = this.state.locals[actualKey];
+      const scope = this.state.scope_info[actualKey] || 'unknown';
+      const type = this.state.type_info && this.state.type_info[actualKey] || 'unknown';
 
       // Use the value directly since Python backend now formats it properly
       const displayValue = typeof value === 'string'
@@ -477,6 +484,7 @@ ${this.instanceId}.reset()
         : SharedPyodideManager.escapeHtml(String(value));
 
       // Apply smart wrapping to variable name and type
+      // Always display the original variable name (without _py_ prefix)
       const wrappedVarName = this._addSmartHyphens(SharedPyodideManager.escapeHtml(varName));
       const wrappedType = this._addSmartHyphens(SharedPyodideManager.escapeHtml(type));
 

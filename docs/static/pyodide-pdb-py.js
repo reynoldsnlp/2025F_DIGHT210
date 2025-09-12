@@ -527,11 +527,30 @@ class StepDebugger:
         self._prepare_execution_trace()
 
     def get_state(self):
+        # List of JavaScript special property names that could cause conflicts
+        js_special_names = ['length', 'constructor', 'prototype', '__proto__',
+                           'toString', 'valueOf', 'hasOwnProperty', 'name']
+
+        # Make deep copies of the dictionaries to ensure complete independence
+        locals_copy = copy.deepcopy(self.locals_dict)
+        scope_info_copy = copy.deepcopy(self.scope_info)
+        type_info_copy = copy.deepcopy(getattr(self, 'type_info', {}))
+
+        # Handle all potentially problematic variable names
+        for js_name in js_special_names:
+            if js_name in locals_copy:
+                # Use a prefix to avoid conflicts
+                locals_copy[f'_py_{js_name}'] = locals_copy.pop(js_name)
+                if js_name in scope_info_copy:
+                    scope_info_copy[f'_py_{js_name}'] = scope_info_copy.pop(js_name)
+                if js_name in type_info_copy:
+                    type_info_copy[f'_py_{js_name}'] = type_info_copy.pop(js_name)
+
         state = {
             "current_line": self.current_line,
-            "locals": self.locals_dict,
-            "scope_info": self.scope_info,
-            "type_info": self.type_info,
+            "locals": locals_copy,
+            "scope_info": scope_info_copy,
+            "type_info": type_info_copy,
             "output_lines": self.output_lines,
             "lines": self.lines,
             "finished": self.finished
