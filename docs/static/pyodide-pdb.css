@@ -52,6 +52,7 @@
   position: relative;
   box-sizing: border-box;
   max-width: 100%;
+  padding-bottom: calc(var(--pdb-padding-std) + 3em); /* Add padding-bottom to make room for controls */
 }
 
 /* Container for overlapping code layers */
@@ -177,7 +178,7 @@
   border-collapse: collapse;
   margin-top: var(--pdb-padding-sm);
   font-size: var(--pdb-font-size-sm);
-  table-layout: fixed;
+  table-layout: auto; /* Change from fixed to auto for flexible sizing */
 }
 
 .pyodide-pdb .variables-section th,
@@ -187,7 +188,6 @@
   border-bottom: 1px solid var(--pdb-light-border);
   word-wrap: break-word;
   overflow-wrap: break-word;
-  hyphens: auto;
   vertical-align: top;
 }
 
@@ -200,35 +200,56 @@
 
 .pyodide-pdb .variables-section th:first-child,
 .pyodide-pdb .variables-section td:first-child {
-  width: 15%;
-  min-width: 60px;
+  white-space: nowrap;
+  min-width: max-content;
   font-weight: bold;
+  /* Smart wrapping on underscores and capital letters */
+  word-break: break-all;
+  overflow-wrap: anywhere;
+  hyphens: manual;
 }
 
 .pyodide-pdb .variables-section th:nth-child(2),
 .pyodide-pdb .variables-section td:nth-child(2) {
-  width: 45%;
-  min-width: 80px;
+  width: 33.33%; /* Ensure Value column is at least 1/3 */
+  min-width: 33.33%;
   font-family: var(--pdb-font-mono);
   color: var(--pdb-text-secondary);
   font-size: var(--pdb-font-size-xs);
+  word-break: break-all;
+  overflow-wrap: anywhere;
 }
 
 .pyodide-pdb .variables-section th:nth-child(3),
 .pyodide-pdb .variables-section td:nth-child(3) {
-  width: 15%;
-  min-width: 50px;
+  white-space: nowrap;
+  min-width: max-content;
   font-size: var(--pdb-font-size-xs);
   color: var(--pdb-text-secondary);
   font-style: italic;
+  text-align: center; /* Center-align Type column */
+  /* Smart wrapping for type names */
+  word-break: break-all;
+  overflow-wrap: anywhere;
 }
 
 .pyodide-pdb .variables-section th:last-child,
 .pyodide-pdb .variables-section td:last-child {
-  width: 25%;
-  min-width: 70px;
+  white-space: nowrap;
+  min-width: max-content;
   font-size: 0.75em;
   color: var(--pdb-text-muted);
+  text-align: center; /* Center-align Scope column */
+  /* Smart wrapping for scope names */
+  word-break: break-all;
+  overflow-wrap: anywhere;
+}
+
+/* Add soft hyphens for better wrapping */
+.pyodide-pdb .variables-section .smart-wrap {
+  word-break: break-all;
+  overflow-wrap: anywhere;
+  hyphens: manual;
 }
 
 .pyodide-pdb .output-section {
@@ -265,35 +286,93 @@
 }
 
 .pyodide-pdb .controls {
-  margin-top: var(--pdb-padding-std);
-  flex: 1 1 100%;
-  width: 100%;
+  position: absolute;
+  bottom: var(--pdb-padding-std);
+  right: var(--pdb-padding-std);
+  left: var(--pdb-padding-std);
+  transition: opacity 0.3s ease;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  display: flex;
+  justify-content: flex-end; /* Right-align controls */
+  opacity: 1;
+  min-height: 2.5em; /* Reserve minimum space for controls */
+  box-sizing: border-box;
+  margin: 0; /* Remove margin when inside pre */
+}
+
+.pyodide-pdb .controls.invisible {
+  opacity: 0;
+  pointer-events: none;
+  /* Keep the space reserved even when invisible */
+}
+
+/* Floating controls when pre extends below viewport */
+.pyodide-pdb .controls.floating {
+  position: fixed;
+  bottom: 8px; /* Much closer to bottom */
+  left: auto;
+  right: auto; /* Remove fixed right positioning */
+  transform: none;
+  z-index: 1000;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none !important;
+  width: auto;
+  min-width: auto;
+  max-width: 90vw;
+  min-height: auto; /* Remove min-height when floating */
+}
+
+.pyodide-pdb .controls.floating::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2.5em; /* Match the reserved space */
+  pointer-events: none;
+  /* This creates invisible space where controls would normally be */
+}
+
+.pyodide-pdb .controls.floating .button-container {
+  margin-bottom: 0;
+  justify-content: flex-end;
+  background: transparent;
+  padding: var(--pdb-padding-sm);
 }
 
 .pyodide-pdb .button-container {
   display: flex;
-  gap: var(--pdb-padding-sm);
-  margin-bottom: var(--pdb-padding-sm);
-  align-items: center;
+  gap: 0.5em;
+  justify-content: flex-end; /* Right-align buttons */
+  min-height: 2.5em; /* Ensure consistent height */
+  align-items: center; /* Center buttons vertically */
+  background: transparent;
 }
 
 .pyodide-pdb button {
   padding: 0.4em 0.8em;
-  border: 1px solid #ccc;
+  border: 1px solid rgba(204, 204, 204, 0.8);
   border-radius: var(--pdb-border-radius-sm);
-  background: var(--pdb-sidebar-bg);
+  background: rgba(249, 249, 255, 0.9); /* Semi-transparent */
   cursor: pointer;
   font-size: var(--pdb-font-size-sm);
   min-width: 60px;
+  transition: all 0.2s ease;
 }
 
 .pyodide-pdb button:hover:not(:disabled) {
-  background: #f0f0f0;
+  background: rgba(240, 240, 240, 0.95);
+  border-color: rgba(170, 170, 170, 0.9);
 }
 
 .pyodide-pdb button:disabled {
-  background: #e0e0e0;
-  color: #999;
+  background: rgba(224, 224, 224, 0.7);
+  color: rgba(153, 153, 153, 0.8);
   cursor: not-allowed;
 }
 
@@ -309,6 +388,25 @@
     min-width: 0;
     min-height: 60px;
     flex: none;
+    /* Reduce bottom padding on mobile */
+    padding-bottom: calc(var(--pdb-padding-std) + 2.5em);
+  }
+
+  .pyodide-pdb .controls {
+    min-height: 2em; /* Slightly smaller on mobile */
+  }
+
+  .pyodide-pdb .button-container {
+    min-height: 2em;
+  }
+
+  .pyodide-pdb .controls.floating {
+    right: 10px;
+    bottom: 8px;
+  }
+
+  .pyodide-pdb .controls.floating::before {
+    height: 2em; /* Match mobile height */
   }
 
   .pyodide-pdb .variables-section {
@@ -333,9 +431,6 @@
 
 /* Medium screen adjustments */
 @media (max-width: 1200px) and (min-width: 769px) {
-  .pyodide-pdb {
-    align-items: stretch;
-  }
 
   .pyodide-pdb .variables-section,
   .pyodide-pdb .output-section {

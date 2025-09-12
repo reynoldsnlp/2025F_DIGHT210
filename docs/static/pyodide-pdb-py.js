@@ -461,7 +461,7 @@ class StepDebugger:
         """Format scope name for display"""
         if scope.scope_type == 'module':
             return 'global'
-        return f'local ({scope.name})'
+        return f'local\\n({scope.name})'
 
     def _format_parent_scope_name(self, scope):
         """Format parent scope name for display"""
@@ -483,7 +483,7 @@ class StepDebugger:
 
         if var_name in frame.f_locals:
             context = context_map.get(code_name, code_name)
-            return f'local ({context})'
+            return f'local\\n({context})'
 
         return 'global'
 

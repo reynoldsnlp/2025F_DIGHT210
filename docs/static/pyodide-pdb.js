@@ -21,6 +21,7 @@ class InteractiveExample {
     this.originalCode = this.code;
     this.initialized = false;
     this.instanceId = `debugger_${Math.random().toString(36).substr(2, 9)}`;
+    this.scrollListener = null;
 
     this._initializeUI();
     this._applySyntaxHighlighting();
@@ -116,7 +117,10 @@ class InteractiveExample {
       buttonContainer.appendChild(this.resetBtn);
 
       this.controlsDiv.appendChild(buttonContainer);
-      this.codeBlock.parentNode.appendChild(this.controlsDiv);
+
+      // Insert controls div inside the pre element
+      const preElement = this.codeBlock.parentNode;
+      preElement.appendChild(this.controlsDiv);
     } else {
       this.stepBtn = this.controlsDiv.querySelector('.step-btn');
       this.resetBtn = this.controlsDiv.querySelector('.reset-btn');
@@ -125,6 +129,84 @@ class InteractiveExample {
       if (this.stepBtn) this.stepBtn.disabled = true;
       if (this.resetBtn) this.resetBtn.disabled = true;
     }
+
+    // Setup floating controls behavior
+    this._setupFloatingControls();
+  }
+
+  _setupFloatingControls() {
+    // Create throttled scroll handler
+    let ticking = false;
+    this.scrollListener = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          this._updateControlsVisibilityAndPosition();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    // Add scroll listener
+    window.addEventListener('scroll', this.scrollListener, { passive: true });
+    window.addEventListener('resize', this.scrollListener, { passive: true });
+
+    // Initial position check
+    setTimeout(() => this._updateControlsVisibilityAndPosition(), 100);
+  }
+
+  _updateControlsVisibilityAndPosition() {
+    if (!this.controlsDiv || !this.codeBlock) return;
+
+    const preElement = this.codeBlock.parentNode; // The <pre> element
+    const preRect = preElement.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
+
+    // Check if pre is in viewport
+    const preInViewport = preRect.bottom > 0 && preRect.top < viewportHeight;
+
+    // Always show controls when pre is visible
+    if (preInViewport) {
+      this.controlsDiv.classList.remove('invisible');
+    } else {
+      this.controlsDiv.classList.add('invisible');
+      return; // Don't update floating state if invisible
+    }
+
+    // Determine if controls should float
+    const preBottomBelowViewport = preRect.bottom > viewportHeight;
+    const preTallerThanHalfViewport = preRect.height > viewportHeight * 0.5;
+
+    const shouldFloat = preBottomBelowViewport &&
+                       preTallerThanHalfViewport &&
+                       preInViewport;
+
+    if (shouldFloat && !this.controlsDiv.classList.contains('floating')) {
+      this.controlsDiv.classList.add('floating');
+      this._positionFloatingControls(preRect);
+    } else if (!shouldFloat && this.controlsDiv.classList.contains('floating')) {
+      this.controlsDiv.classList.remove('floating');
+      this._clearFloatingPosition();
+    } else if (shouldFloat && this.controlsDiv.classList.contains('floating')) {
+      // Update position if already floating (handles window resize/scroll)
+      this._positionFloatingControls(preRect);
+    }
+  }
+
+  _positionFloatingControls(preRect) {
+    // Position controls to align with the right edge of the pre element
+    // Skip positioning on mobile (let CSS handle it)
+    if (window.innerWidth <= 768) {
+      return;
+    }
+
+    const rightPosition = window.innerWidth - preRect.right;
+    this.controlsDiv.style.right = `${rightPosition}px`;
+  }
+
+  _clearFloatingPosition() {
+    // Clear any inline positioning when not floating
+    this.controlsDiv.style.right = '';
   }
 
   async init() {
@@ -136,6 +218,9 @@ class InteractiveExample {
 
       this._enableControls();
       this._attachEventListeners();
+
+      // Update controls position after initialization
+      this._updateControlsVisibilityAndPosition();
     } catch (error) {
       console.warn('Initialization failed:', error);
     }
@@ -193,6 +278,9 @@ ${this.instanceId}.reset()
       this._applySyntaxHighlighting();
 
       this.render();
+
+      // Update controls visibility and position after reset
+      setTimeout(() => this._updateControlsVisibilityAndPosition(), 100);
     } catch (error) {
       throw error;
     }
@@ -388,18 +476,44 @@ ${this.instanceId}.reset()
         ? SharedPyodideManager.escapeHtml(value)
         : SharedPyodideManager.escapeHtml(String(value));
 
+      // Apply smart wrapping to variable name and type
+      const wrappedVarName = this._addSmartHyphens(SharedPyodideManager.escapeHtml(varName));
+      const wrappedType = this._addSmartHyphens(SharedPyodideManager.escapeHtml(type));
+
+      // Handle scope with newlines - escape HTML first, then convert newlines to <br>
+      const escapedScope = SharedPyodideManager.escapeHtml(scope);
+      const scopeWithBreaks = escapedScope.replace(/\n/g, '<br>');
+      const wrappedScope = this._addSmartHyphens(scopeWithBreaks);
+
       html += `
         <tr>
-          <td><strong>${SharedPyodideManager.escapeHtml(varName)}</strong></td>
+          <td class="smart-wrap"><strong>${wrappedVarName}</strong></td>
           <td>${displayValue}</td>
-          <td>${SharedPyodideManager.escapeHtml(type)}</td>
-          <td>${SharedPyodideManager.escapeHtml(scope)}</td>
+          <td class="smart-wrap">${wrappedType}</td>
+          <td class="smart-wrap">${wrappedScope}</td>
         </tr>
       `;
     }
 
     html += '</tbody></table>';
     this.variablesDiv.innerHTML = html;
+  }
+
+  _addSmartHyphens(text) {
+    /**
+     * Add soft hyphens (&shy;) at strategic points for better wrapping:
+     * - Before underscores: avg_word_len becomes avg&shy;_word&shy;_len
+     * - Before capital letters in camelCase: MyClass becomes My&shy;Class
+     */
+    return text
+      // Add soft hyphen before underscores
+      .replace(/_/g, '&shy;_')
+      // Add soft hyphen before capital letters (but not at the start)
+      .replace(/([a-z])([A-Z])/g, '$1&shy;$2')
+      // Add soft hyphen before numbers after letters
+      .replace(/([a-zA-Z])(\d)/g, '$1&shy;$2')
+      // Add soft hyphen after numbers before letters
+      .replace(/(\d)([a-zA-Z])/g, '$1&shy;$2');
   }
 
   _renderOutput() {
